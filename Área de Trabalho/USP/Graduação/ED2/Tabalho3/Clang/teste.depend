@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1715526554 source:/home/leftlu/ED2/teste/teste/main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+

@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1711509144 source:/home/leftlu/ED2/Quick/main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+
