@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 void readline(char *string);
 
 /**
@@ -15,4 +16,5 @@ void readline(char *string);
  */
 void binarioNaTela(char *nomeArquivoBinario);
 
+void RegistrodeEspecies(char *nomedoarquivo, int n);
 #endif // __FUNCOES_FORNECIDAS__
