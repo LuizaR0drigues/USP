@@ -1,5 +1,5 @@
-#ifndef __FUNC_BASC__
-#define __FUNC_BASC__
+#ifndef __FUNC_BASC_H
+#define __FUNC_BASC_H
 
 #include <stdio.h>
 #include <stdlib.h>

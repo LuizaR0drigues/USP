@@ -1,6 +1,4 @@
-#include "./func_basc.h"
-
-
+#include "func_basc.h"
 
 typedef struct{
     int especieID;
@@ -8,7 +6,7 @@ typedef struct{
     char nome_cientificio[61];
     int populacao;
     char status[9];
-    float localizacao[2] //coordeanadas em x e y cada com 4 bytes
+    float localizacao[2]; //coordeanadas em x e y cada com 4 bytes
     int impacto_humano;
 
 } Registro;
