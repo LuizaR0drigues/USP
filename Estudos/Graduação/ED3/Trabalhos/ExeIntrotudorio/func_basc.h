@@ -34,7 +34,7 @@ Registro ArquivodeRegistro(FILE* file);
 void Arquivobin(FILE* file, Registro especie);
 Registro BuscaIndividuo(char *nomearquivo, int value);
 void PrintRegistros(Registro especie);
-void atualizarInformacoes(const char *nomearquivo, int id, int numInfo);
+void atualizarInformacoes(char *nomearquivo, int id, int numInfo);
 void freememoria();
 #endif 
 

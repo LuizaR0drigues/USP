@@ -181,56 +181,71 @@ Registro BuscaIndividuo(char *nomearquivo, int rrn) {
     freememoria(&especie);
 }
 
-void atualizarInformacoes(const char *nomearquivo, int id, int numInfo) {
-    FILE *file = fopen(nomearquivo, "r+b"); 
-    if (file == NULL) {  //se nao deu problema algum (por enquanto)
+void atualizarInformacoes(char *nomearquivo, int idb, int numInfob) {
+    FILE *file = fopen(nomearquivo, "rb+");
+    if (!file) {
         printf("Falha no processamento do arquivo\n");
         return;
     }
 
-    Registro especie;  // nossa sctruct 
-    int encontrado = 0; //flag para saber se encontrou ou nao
-    size_t tamanho_registro = sizeof(Registro);   
+    Registro especie = RegistrodeIndividuo();
+    int encontrado = 0;
+    int tamanho_registro = 4 + 41 + 61 + 4 + 9 + 2 * 4 + 4;
+    int aux = 0;
+    char tipo[50], info[50];
 
-    while (fread(&especie, tamanho_registro, 1, file)) { //enquanto tiver conteudo para ler
-        if (especie.especieID == id) { 
+    while (fread(&especie.especieID, sizeof(int), 1, file)) {
+        if (especie.especieID == idb) {
             encontrado = 1;
-            fseek(file, -tamanho_registro, SEEK_CUR); //volta para o inicio do registro
-
-            for (int i = 0; i < numInfo; i++) { //enqauanto tiver informação para atualizar
-                char tipo[20];
-                char dado[20];
-                
-                // Ler o tipo e o dado a ser atualizado
-                readline(tipo); 
-                
-               //se o tipo for igual a status, ele vai atualizar o status  
-                readline(dado);
-
-                if (strcmp(tipo, "STATUS") == 0) {
-                    strncpy(especie.status, dado, sizeof(especie.status) - 1);
-                    especie.status[sizeof(especie.status) - 1] = '\0';  // Garantir terminação
-                } else if (strcmp(tipo, "HUMAN IMPACT") == 0) {
-                    especie.impacto_humano = atoi(dado);
-                } else if (strcmp(tipo, "POPULATION") == 0) {
-                    especie.populacao = atoi(dado);
-                } else {
-                    printf("Tipo de informação inválido\n");
-                    continue;
-                }
-
-                fwrite(&especie, sizeof(Registro), 1, file);
-            }
             break;
+        }
+        aux++;
+        fseek(file, aux * tamanho_registro, SEEK_SET);
+    }
+
+    if (feof(file)) {
+        printf("Espécie não encontrada\n");
+        binarioNaTela(nomearquivo);
+        fclose(file);
+        freememoria(&especie);
+        return;
+    }
+
+    fseek(file, aux * tamanho_registro, SEEK_SET);
+    especie = ArquivodeRegistro(file);
+
+    for (int i = 0; i < numInfob; i++) {
+        readline(tipo);
+        readline(info);
+
+        if (strcmp(tipo, "STATUS") == 0) {
+            if (strcmp(especie.status, "NULO") == 0) {
+                strcpy(especie.status, info);
+            } else {
+                printf("Informação já inserida no arquivo\n");
+            }
+        } else if (strcmp(tipo, "HUMAN IMPACT") == 0) {
+            if (especie.impacto_humano == 0) {
+                especie.impacto_humano = atoi(info);
+            } else {
+                printf("Informação já inserida no arquivo\n");
+            }
+        } else if (strcmp(tipo, "POPULATION") == 0) {
+            if (especie.populacao == 0) {
+                especie.populacao = atoi(info);
+            } else {
+                printf("Informação já inserida no arquivo\n");
+            }
         }
     }
 
-    if (!encontrado) {
-        printf("Espécie não encontrada\n");
-    }
-
+    fseek(file, aux * tamanho_registro, SEEK_SET);
+    Arquivobin(file, especie);
     fclose(file);
+    freememoria(&especie);
+    binarioNaTela(nomearquivo);
 }
+
 void freememoria(Registro *especie)
 {
     if (especie != NULL) {

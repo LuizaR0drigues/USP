@@ -107,7 +107,9 @@ int main()
         case 4:
             scanf("%d", &Idbusca);
             scanf("%d", &qtdinfo);
+            
             atualizarInformacoes(nomearq, Idbusca, qtdinfo);
+            
             break;
         
         default:
