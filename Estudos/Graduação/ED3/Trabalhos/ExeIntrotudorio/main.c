@@ -7,7 +7,7 @@ int main()
 {
     int  quant, comando, rrn, qtdinfo, Idbusca, *idunico;
     char lininicial[50], frase[100];
-    char *token, nomearq[20];
+    char *token, nomearq[100];
     int quantinsert = 0; // Inicializa a variável quantinsert
 
     // Função readline a strtok para capturar o comando
@@ -31,6 +31,11 @@ int main()
             int flag = 1;
 
             idunico = malloc(quant * sizeof(int));
+            if(idunico == NULL)
+            {
+                printf("Falha de alocação de memoria\n");
+                return 0;
+            }
 
             FILE *file = fopen(nomearq, "wb");
             if (file == NULL) {
@@ -41,8 +46,8 @@ int main()
 
             for (int i = 0; i < quant; i++)
             {
-                Registro animais = RegistrodeEspecies(nomearq, quant);
-
+                Registro animais = RegistrodeEspecies();
+                
                 flag = 1; // Reinicia a flag para cada novo registro
                 for (int j = 0; j < quantinsert; j++)
                 {
@@ -60,18 +65,40 @@ int main()
 
                     Arquivobin(file, animais);
                 }
+                freememoria(&animais);
             }
+            
             free(idunico);
             fclose(file); // Corrigido para fechar o arquivo corretamente
             binarioNaTela(nomearq);
             break;
         
         case 2:
-            break;
+            FILE* arq; // Abre o arquivo para leitura binária
+            if (arq == NULL || !(arq=fopen(nomearq, "rb"))) {
+                printf("Falha ao abrir o arquivo\n");
+                return 0;
+            }
+
+            Registro especie;
+            while (1) {
+                especie = ArquivodeRegistro(arq);
+
+                // Verifica se o ID indica fim de arquivo ou erro
+                if (especie.especieID == -1) {
+                    break; // Sai do loop se não houver mais registros
+                }
+
+                PrintRegistros(especie); // Função para imprimir os registros
+            }
+
+            fclose(arq); // Fecha o arquivo após a leitura
+        break;
+
         
         case 3:
             scanf("%d", &rrn);
-            BuscaIndividuo(nomearq, rrn);
+            
             break;
         
         case 4:
