@@ -137,39 +137,48 @@ void PrintRegistros(Registro especie)
         printf("ID: %d\n", especie.especieID);
         printf("Nome: %s\n", especie.nome);
         printf("Nome Científico: %s\n", especie.nome_cientifico);
-        printf("População: %d\n", especie.populacao == 0 ? 0 : especie.populacao);
+        if(especie.populacao == 0)
+            printf("População: NULO\n");
+        else{
+            printf("População: %d\n",  especie.populacao);
+        }
         printf("Status: %s\n", especie.status);
-        printf("Localização:(%.2f %.2f)\n", especie.localizacao[0], especie.localizacao[1]);
-        printf("Impacto Humano: %d\n\n", especie.impacto_humano == 0 ? 0 : especie.impacto_humano);
+        printf("Localização: (%.2f, %.2f)\n", especie.localizacao[0], especie.localizacao[1]);
+        if(especie.impacto_humano == 0)
+            printf("Impacto Humano: NULO\n\n");
+        else{
+            printf("Impacto Humano: %d\n\n",  especie.impacto_humano);
+        }
+        
         
     
 
 }
 
 
-void BuscaIndividuo(char *nomearquivo, int rrn) {
-    FILE *file = fopen(nomearquivo, "rb");
-    if (file == NULL) { //se nao deu problema algum (por enquanto)
+Registro BuscaIndividuo(char *nomearquivo, int rrn) {
+    int tamregistro = 4+41+61+4+9+ 2 *4 +4 ; //tam = somatoria dos tamanhos dos campos das variaveis
+
+    FILE *file; 
+    if (nomearquivo == NULL || !(file =fopen(nomearquivo, "rb"))) { //se nao deu problema algum (por enquanto)
         printf("Falha no processamento do arquivo\n");
-        return;
     }
 
+   
+    //printf("%d\n", rrn * tamregistro);
+    fseek(file, rrn * tamregistro, SEEK_SET); //vai para o RRN desejado
     Registro especie;
-    fseek(file, rrn * sizeof(Registro), SEEK_SET); //vai para o RRN desejado
-    size_t tamanho_registro = sizeof(Registro); //tamanho do registro   
-    if (fread(&especie, tamanho_registro, 1, file) != 1) {  //caso o arquivo nao tenha o que ler
+    especie = ArquivodeRegistro(file);
+
+    if (especie.especieID == -1) {  //caso o arquivo nao tenha o que ler
         printf("Espécie não encontrada\n");
-    } else { // caso bem sucedido deve printar as informações seguintes
-        printf("ID: %d\n", especie.especieID);
-        printf("Nome: %s\n", strcmp(especie.nome, "") == 0 ? "NULO" : especie.nome);
-        printf("Nome Científico: %s\n", strcmp(especie.nome_cientifico, "") == 0 ? "NULO" : especie.nome_cientifico);
-        printf("População: %d\n", especie.populacao == 0 ? 0 : especie.populacao);
-        printf("Status: %s\n", strcmp(especie.status, "") == 0 ? "NULO" : especie.status);
-        printf("Localização:  (%.2f , %.2f)\n", especie.localizacao[0], especie.localizacao[1]);
-        printf("Impacto Humano: %d\n", especie.impacto_humano);
+    } 
+    else { // caso bem sucedido deve printar as informações seguintes
+        PrintRegistros(especie);
     }
 
     fclose(file);
+    freememoria(&especie);
 }
 
 void atualizarInformacoes(const char *nomearquivo, int id, int numInfo) {

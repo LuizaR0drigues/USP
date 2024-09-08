@@ -10,7 +10,7 @@ int main()
     char *token, nomearq[100];
     int quantinsert = 0; // Inicializa a variável quantinsert
 
-    // Função readline a strtok para capturar o comando
+    /*/ Função readline a strtok para capturar o comando
     readline(lininicial);
 
     // Captura o primeiro token que contém o comando
@@ -22,7 +22,9 @@ int main()
     if (token != NULL) {
         strcpy(nomearq, token);
     }
-
+    */
+    scanf("%d ", &comando);
+    scanf("%s", nomearq);
     switch (comando)
     {
         case 1:
@@ -74,9 +76,10 @@ int main()
             break;
         
         case 2:
+            //printf("%s\n", nomearq);
             FILE* arq; // Abre o arquivo para leitura binária
-            if (arq == NULL || !(arq=fopen(nomearq, "rb"))) {
-                printf("Falha ao abrir o arquivo\n");
+            if (nomearq == NULL || !(arq=fopen(nomearq, "rb"))) {
+                printf("Falha no processamento do arquivo\n");
                 return 0;
             }
 
@@ -98,7 +101,7 @@ int main()
         
         case 3:
             scanf("%d", &rrn);
-            
+            BuscaIndividuo(nomearq, rrn);
             break;
         
         case 4:
