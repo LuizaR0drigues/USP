@@ -3,7 +3,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+
+typedef struct especie {
+    int especieID;
+    char nome[41];
+    char nome_cientifico[61];
+    int populacao;
+    char status[9];
+    float localizacao[2]; //coordeanadas em x e y cada com 4 bytes
+    int impacto_humano;
+
+}Registro;
 
 void readline(char *string);
 
@@ -16,5 +28,12 @@ void readline(char *string);
  */
 void binarioNaTela(char *nomeArquivoBinario);
 
-void RegistrodeEspecies(char *nomedoarquivo, int n);
-#endif // __FUNCOES_FORNECIDAS__
+Registro RegistrodeEspecies(char *nomedoarquivo, int n);
+Registro RegistrodeIndividuo();
+Registro ArquivodeRegistro(char *nomearquivo, int qtd);
+void Arquivobin(FILE* file, Registro especie);
+void BuscaIndividuo(char *nomearquivo, int value);
+void PrintRegistros(int qtd);
+void atualizarInformacoes(const char *nomearquivo, int id, int numInfo);
+#endif 
+
