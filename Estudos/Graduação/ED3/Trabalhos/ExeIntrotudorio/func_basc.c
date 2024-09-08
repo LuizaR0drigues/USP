@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
-
 void readline(char* string) {
     char c = 0;
 
@@ -53,25 +50,26 @@ Registro RegistrodeIndividuo() //criação da struct padrão
     Registro individuo;
     individuo.especieID = 0; //valor neutro
 
-    individuo.nome = malloc(41 * sizeof(char));
+    
     for(int i =0; i< 41; i++) //41 é o tamnaho do campo nome
     {
         individuo.nome[i] = '$';
     }
-    individuo.nome_cientifico =malloc(61 * sizeof(char));
+    
     for(int i=0; i< 61; i++) //61 é onome cientifico o tamanho do campo 
     {
         individuo.nome_cientifico[i] = '$';
     }
 
     individuo.populacao = 0;
-    individuo.status =malloc(9 * sizeof(char));
+    
     for(int i=0; i<9; i++)
     {
         individuo.status[i] ='$';
     }
     
-    memccpy(individuo.localizacao, (int[]){0, 0}, sizeof(float), 2);
+    individuo.localizacao[0] = 0.0;
+    individuo.localizacao[1] = 0.0;
     individuo.impacto_humano = 0;
     return individuo;
 }
@@ -115,47 +113,6 @@ Registro ArquivodeRegistro(FILE* file){
     return especie;
 }
 
-
-void Arquivobin(FILE* file, Registro especie){    
-    
-    fwrite(&especie.especieID, sizeof(int), 1, file);
-    fwrite(especie.nome, sizeof(char), 41, file);
-    fwrite(especie.nome_cientifico, sizeof(char), 61, file);
-    fwrite(&especie.populacao, sizeof(int), 1, file);
-    fwrite(especie.status, sizeof(char), 9, file);
-    fwrite(&especie.localizacao[0], sizeof(float), 1, file);
-    fwrite(&especie.localizacao[1], sizeof(float), 1, file);
-    fwrite(&especie.impacto_humano, sizeof(int), 1, file);
-
-
-    
-}
-void PrintRegistros(Registro especie)
-{
-    
-    // Lendo e imprimindo cada registro
-        printf("ID: %d\n", especie.especieID);
-        printf("Nome: %s\n", especie.nome);
-        printf("Nome Científico: %s\n", especie.nome_cientifico);
-        if(especie.populacao == 0)
-            printf("População: NULO\n");
-        else{
-            printf("População: %d\n",  especie.populacao);
-        }
-        printf("Status: %s\n", especie.status);
-        printf("Localização: (%.2f, %.2f)\n", especie.localizacao[0], especie.localizacao[1]);
-        if(especie.impacto_humano == 0)
-            printf("Impacto Humano: NULO\n\n");
-        else{
-            printf("Impacto Humano: %d\n\n",  especie.impacto_humano);
-        }
-        
-        
-    
-
-}
-
-
 Registro BuscaIndividuo(char *nomearquivo, int rrn) {
     int tamregistro = 4+41+61+4+9+ 2 *4 +4 ; //tam = somatoria dos tamanhos dos campos das variaveis
 
@@ -178,7 +135,41 @@ Registro BuscaIndividuo(char *nomearquivo, int rrn) {
     }
 
     fclose(file);
-    freememoria(&especie);
+    
+}
+void Arquivobin(FILE* file, Registro especie){    
+    
+    fwrite(&especie.especieID, sizeof(int), 1, file);
+    fwrite(especie.nome, sizeof(char), 41, file);
+    fwrite(especie.nome_cientifico, sizeof(char), 61, file);
+    fwrite(&especie.populacao, sizeof(int), 1, file);
+    fwrite(especie.status, sizeof(char), 9, file);
+    fwrite(&especie.localizacao[0], sizeof(float), 1, file);
+    fwrite(&especie.localizacao[1], sizeof(float), 1, file);
+    fwrite(&especie.impacto_humano, sizeof(int), 1, file);
+
+
+    
+}
+void PrintRegistros(Registro especie)
+{
+    // Lendo e imprimindo cada registro
+        printf("ID: %d\n", especie.especieID);
+        printf("Nome: %s\n", especie.nome);
+        printf("Nome Científico: %s\n", especie.nome_cientifico);
+        if(especie.populacao == 0)
+            printf("População: NULO\n");
+        else{
+            printf("População: %d\n",  especie.populacao);
+        }
+        printf("Status: %s\n", especie.status);
+        printf("Localização: (%.2f, %.2f)\n", especie.localizacao[0], especie.localizacao[1]);
+        if(especie.impacto_humano == 0)
+            printf("Impacto Humano: NULO\n\n");
+        else{
+            printf("Impacto Humano: %d\n\n",  especie.impacto_humano);
+        }
+
 }
 
 void atualizarInformacoes(char *nomearquivo, int idb, int numInfob) {
@@ -207,7 +198,7 @@ void atualizarInformacoes(char *nomearquivo, int idb, int numInfob) {
         printf("Espécie não encontrada\n");
         binarioNaTela(nomearquivo);
         fclose(file);
-        freememoria(&especie);
+        
         return;
     }
 
@@ -238,19 +229,9 @@ void atualizarInformacoes(char *nomearquivo, int idb, int numInfob) {
             }
         }
     }
-
     fseek(file, aux * tamanho_registro, SEEK_SET);
     Arquivobin(file, especie);
     fclose(file);
-    freememoria(&especie);
     binarioNaTela(nomearquivo);
 }
 
-void freememoria(Registro *especie)
-{
-    if (especie != NULL) {
-        free(especie->nome);
-        free(especie->nome_cientifico);
-        free(especie->status);
-    }
-}

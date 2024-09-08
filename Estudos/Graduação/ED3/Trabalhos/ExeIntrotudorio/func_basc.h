@@ -8,10 +8,10 @@
 
 typedef struct especie {
     int especieID;
-    char* nome;
-    char* nome_cientifico;
+    char nome[41];
+    char nome_cientifico[61];
     int populacao;
-    char* status;
+    char status[9];
     float localizacao[2]; //coordeanadas em x e y cada com 4 bytes
     int impacto_humano;
 
@@ -31,10 +31,10 @@ void binarioNaTela(char *nomeArquivoBinario);
 Registro RegistrodeEspecies();
 Registro RegistrodeIndividuo();
 Registro ArquivodeRegistro(FILE* file);
-void Arquivobin(FILE* file, Registro especie);
 Registro BuscaIndividuo(char *nomearquivo, int value);
+void Arquivobin(FILE* file, Registro especie);
 void PrintRegistros(Registro especie);
 void atualizarInformacoes(char *nomearquivo, int id, int numInfo);
-void freememoria();
+
 #endif 
 

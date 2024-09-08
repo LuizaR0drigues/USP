@@ -6,25 +6,13 @@
 int main()
 {
     int  quant, comando, rrn, qtdinfo, Idbusca, *idunico;
-    char lininicial[50], frase[100];
-    char *token, nomearq[100];
-    int quantinsert = 0; // Inicializa a variável quantinsert
+    char nomearq[100];
+    int quantinsert = 0; 
 
-    /*/ Função readline a strtok para capturar o comando
-    readline(lininicial);
-
-    // Captura o primeiro token que contém o comando
-    token = strtok(lininicial, " "); // Divide a string em tokens a partir do espaço
-    comando = atoi(token);           // token (comando) de char para int
-
-    // Captura o próximo token que é o nome do arquivo
-    token = strtok(NULL, " ");
-    if (token != NULL) {
-        strcpy(nomearq, token);
-    }
-    */
-    scanf("%d ", &comando);
+    scanf("%d", &comando);
     scanf("%s", nomearq);
+    
+    
     switch (comando)
     {
         case 1:
@@ -67,16 +55,16 @@ int main()
 
                     Arquivobin(file, animais);
                 }
-                freememoria(&animais);
+                
             }
             
             free(idunico);
-            fclose(file); // Corrigido para fechar o arquivo corretamente
+            fclose(file);
             binarioNaTela(nomearq);
             break;
         
         case 2:
-            //printf("%s\n", nomearq);
+            
             FILE* arq; // Abre o arquivo para leitura binária
             if (nomearq == NULL || !(arq=fopen(nomearq, "rb"))) {
                 printf("Falha no processamento do arquivo\n");
@@ -89,13 +77,13 @@ int main()
 
                 // Verifica se o ID indica fim de arquivo ou erro
                 if (especie.especieID == -1) {
-                    break; // Sai do loop se não houver mais registros
+                    break; 
                 }
 
-                PrintRegistros(especie); // Função para imprimir os registros
+                PrintRegistros(especie); 
             }
 
-            fclose(arq); // Fecha o arquivo após a leitura
+            fclose(arq);
         break;
 
         
@@ -119,3 +107,16 @@ int main()
 
     return 0;
 }
+
+/*/ Função readline a strtok para capturar o comando
+    readline(lininicial);
+
+    // Captura o primeiro token que contém o comando
+    token = strtok(lininicial, " "); // Divide a string em tokens a partir do espaço
+    comando = atoi(token);           // token (comando) de char para int
+
+    // Captura o próximo token que é o nome do arquivo
+    token = strtok(NULL, " ");
+    if (token != NULL) {
+        strcpy(nomearq, token);
+    }*/
