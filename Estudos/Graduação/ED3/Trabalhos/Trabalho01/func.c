@@ -23,10 +23,11 @@ void inicializa_cabecalho(Cabecalho *c) {
 }
 
 
-void lendo_csv(char *nomeCSV,  Cabecalho *cabecalho) {
+void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho) {
     Registro registro;
     char nome[10], dieta[10], habitat[20], tipo[20], uniMedida[1], nespecie[30], alimento[30], nEspecie[50];
     int velocidade, populacao, tamanho;
+
     FILE *arquivo_csv = fopen(nomeCSV, "r");
     if (arquivo_csv == NULL) {
         printf("Falha ao abrir o arquivo CSV\n");
@@ -43,11 +44,25 @@ void lendo_csv(char *nomeCSV,  Cabecalho *cabecalho) {
        registro.nome, registro.dieta, registro.habitat, registro.populacao,
        registro.tipo, registro.velocidade, registro.uniMedida,
        registro.tamanho, registro.nEspecie, registro.alimento);*/
+       arquivobin(nomeBin, registro);
 
         }
       
-    
-    
-
     fclose(arquivo_csv);
+}
+
+
+void arquivobin(FILE *nomebin, Registro registro)
+{
+     // Escrevendo os dados no arquivo com a função fwrite
+    fwrite(registro.nome, sizeof(char), 100, nomebin);
+    fwrite(registro.dieta, sizeof(char), 30, nomebin);
+    fwrite(registro.habitat, sizeof(char), 100, nomebin);
+    fwrite(&registro.populacao, sizeof(int), 1, nomebin);
+    fwrite(registro.tipo, sizeof(char), 100, nomebin);
+    fwrite(&registro.velocidade, sizeof(int), 1, nomebin);
+    fwrite(registro.uniMedida, sizeof(char), 1, nomebin);
+    fwrite(&registro.tamanho, sizeof(int), 1, nomebin);
+    fwrite(registro.nEspecie, sizeof(char), 100, nomebin);
+    fwrite(registro.alimento, sizeof(char), 100, nomebin);
 }

@@ -31,7 +31,7 @@ int main() {
     //inicializa_cabecalho(inicio);
     //fwrite(&inicio, sizeof(Cabecalho), 1, arquivo_binario);
     
-    lendo_csv(nomeCSV,  inicio);
+    lendo_csv(nomeCSV, arquivo_binario, inicio);
 
 
     fclose(arquivo_binario);

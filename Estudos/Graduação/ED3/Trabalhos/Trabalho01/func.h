@@ -41,6 +41,7 @@ typedef struct {
 void inicializa_cabecalho(Cabecalho *c);
 
 //leitura do arquivo CSV
-void lendo_csv(char *nomeCSV,  Cabecalho *cabecalho);
-
+void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho *cabecalho);
+//void adiciona_registro(FILE *arquivo, Registro *novo_registro, Cabecalho *cabecalho);
+void arquivobin(FILE *nomebin, Registro registro);
 #endif
