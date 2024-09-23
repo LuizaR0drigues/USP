@@ -34,12 +34,9 @@ int main() {
             printf("Falha ao abrir o arquivo binário.\n");
             return 1;
         }
-        else{
-            printf("Lendo do arquivo binario concluida \n");
-        }
         
          // Escreve o cabeçalho no arquivo binário
-        fwrite(inicio, sizeof(Cabecalho), 1, arquivo_binario);
+        //fwrite(inicio, sizeof(Cabecalho), 1, arquivo_binario);
 
         //leitura do arquivo csv
         lendo_csv(nomeCSV, arquivo_binario, inicio);
@@ -50,7 +47,7 @@ int main() {
         //leitura do arquvio binario
         scanf("%s", nomearqbin);
         // Chama a função para recuperar e mostrar os registros
-        recuperar_todos_os_registros(nomearqbin, inicio);
+        recuperar_todos_os_registros(nomearqbin);
         break;
     default:
         break;
