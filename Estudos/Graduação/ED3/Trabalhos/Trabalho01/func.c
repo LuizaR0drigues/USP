@@ -86,6 +86,41 @@ void inicializa_cabecalho(Cabecalho *c) {
     memset(c->padding, FILL_CHAR, sizeof(c->padding));
     
 }
+void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho)
+{
+    Registro registro;
+    
+    int tamT, tamD, tamA, tamE, tamH, tam;
+    char linha[160]; // Tamanho máximo que o registro pode ocupar
+    
+
+    FILE *arquivo_csv = fopen(nomeCSV, "r");
+    if (arquivo_csv == NULL) {
+        printf("Falha ao abrir o arquivo CSV\n");
+        return;
+    }
+    cabecalho->status = '1';
+    fwrite(cabecalho, sizeof(Cabecalho), 1, nomeBin);
+
+    //lendo o nome das colunas
+    char buffer[100];
+    const char *deli = ",";
+    fgets(buffer, sizeof(buffer), arquivo_csv);
+    //printf("%s\n", buffer);
+    char *campo;
+    char *linha_copy = linha;
+    while (fgets(linha, sizeof(linha), arquivo_csv)) {
+        linha[strcspn(linha, "\n")] = '\0';
+        linha[strcspn(linha, "\r")] = '\0';
+
+        while((campo = strsep(&linha_copy, deli)) != NULL)
+        {
+            printf("%s ", campo);
+        }
+        printf("\n");
+    }
+}
+/*
 void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho) {
     Registro registro;
     
@@ -105,13 +140,14 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho) {
 
     //lendo o nome das colunas
     char buffer[100];
+    
     fgets(buffer, sizeof(buffer), arquivo_csv);
     //printf("%s\n", buffer);
     char *campo;
     while (fgets(linha, sizeof(linha), arquivo_csv)) {
         //printf("%s\n", linha);
         linha[strcspn(linha, "\n")] = '\0'; // Remove o caractere de nova linha
-        
+        linha[strcspn(linha, "\r")] = '\0';
         campo = strtok(linha, ",");
         // Nome
         if (campo != NULL) {
@@ -200,7 +236,7 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho) {
     //printf("%c\n", cabecalho->status);
     fclose(arquivo_csv);
 
-}
+}*/
 void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *cabecalho) {
     // Escreve campos de tamanho fixo
     fwrite(&registro.removido, sizeof(char), 1, nomebin);
@@ -236,30 +272,36 @@ void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *cabecalho)
     int espacoRestante = 160 - tamanhoEscrito;
     if (espacoRestante > 0) {
         char preenchimento[espacoRestante];
-        memset(preenchimento, '$', espacoRestante);
+        memset(preenchimento, '$', espacoRestante); //preenchendo o vetor com $
         fwrite(preenchimento, sizeof(char), espacoRestante, nomebin);
     }
 
-    printf("Tamanho escrito: %d, Espaço restante: %d\n", tamanhoEscrito, espacoRestante);
+    //printf("Tamanho escrito: %d, Espaço restante: %d\n", tamanhoEscrito, espacoRestante);
 }
 
-
 // Função para recuperar todos os registros e mostrar na saída padrão (função 2)
+//registro
+// agora quando status 1 o arquivo é lido e da o print porem com dados problemáticos
+// estando fragmentados, parece que o codigo nao esta separando corretamente oq deveria ser cada variavel 
+// verificar se o registro foi logicamente removido
 void recuperar_todos_os_registros(char *nomeBin) {
-    
     FILE *arquivo_binario = fopen(nomeBin, "rb");
     if (arquivo_binario == NULL) {
         printf("Falha no processamento do arquivo.\n");
         return;
     }
-    
+
     Cabecalho cabecalho;
-    fread(&cabecalho, sizeof(Cabecalho), 1, arquivo_binario);
+    if (fread(&cabecalho, sizeof(Cabecalho), 1, arquivo_binario) != 1) {
+        printf("Erro ao ler o cabeçalho do arquivo.\n");
+        fclose(arquivo_binario);
+        return;
+    }
+
     printf("Status: %c\n", cabecalho.status);
 
-    // Verificar se o arquivo está consistente
     if (cabecalho.status == '0') {
-        printf("Falha no processamento do arquivo.\n");
+        printf("Falha no processamento do arquivo: arquivo inconsistente.\n");
         fclose(arquivo_binario);
         return;
     }
@@ -267,37 +309,184 @@ void recuperar_todos_os_registros(char *nomeBin) {
     Registro registro;
     int registros_encontrados = 0;
 
-    // Ler registros do arquivo binário
-    while (fread(&registro, sizeof(Registro), 1, arquivo_binario) == 1) {
+    while (fread(&registro.removido, sizeof(char), 1, arquivo_binario) == 1) {
+        // Verificar se o registro foi logicamente removido
         if (registro.removido == '1') {
-            continue; // Pular registros removidos
+            fseek(arquivo_binario, sizeof(Registro) - sizeof(char), SEEK_CUR);
+            continue; // Ignorar registros removidos
         }
 
-        // Incrementa apenas para registros não removidos
-        registros_encontrados++;
+        fread(&registro.encadeamento, sizeof(int), 1, arquivo_binario);
+        fread(&registro.populacao, sizeof(int), 1, arquivo_binario);
+        fread(&registro.tamanho, sizeof(float), 1, arquivo_binario);
+        fread(&registro.uniMedida, sizeof(char), 1, arquivo_binario);
+        fread(&registro.velocidade, sizeof(int), 1, arquivo_binario);
+
+        // Ler o tamanho e o conteúdo da string nome
+        int tamanho_nome;
+        fread(&tamanho_nome, sizeof(int), 1, arquivo_binario);
+        registro.nome = (char *)malloc(tamanho_nome + 1);
+        fread(registro.nome, sizeof(char), tamanho_nome, arquivo_binario);
+        registro.nome[tamanho_nome] = '\0';  // Adicionar terminador nulo
+
+        // Ler a dieta
+        int tamanho_dieta;
+        fread(&tamanho_dieta, sizeof(int), 1, arquivo_binario);
+        registro.dieta = (char *)malloc(tamanho_dieta + 1);
+        fread(registro.dieta, sizeof(char), tamanho_dieta, arquivo_binario);
+        registro.dieta[tamanho_dieta] = '\0';
+
+        // Ler o habitat
+        int tamanho_habitat;
+        fread(&tamanho_habitat, sizeof(int), 1, arquivo_binario);
+        registro.habitat = (char *)malloc(tamanho_habitat + 1);
+        fread(registro.habitat, sizeof(char), tamanho_habitat, arquivo_binario);
+        registro.habitat[tamanho_habitat] = '\0';
+
+        // Ler o tipo
+        int tamanho_tipo;
+        fread(&tamanho_tipo, sizeof(int), 1, arquivo_binario);
+        registro.tipo = (char *)malloc(tamanho_tipo + 1);
+        fread(registro.tipo, sizeof(char), tamanho_tipo, arquivo_binario);
+        registro.tipo[tamanho_tipo] = '\0';
+
+        // Ler a espécie
+        int tamanho_nEspecie;
+        fread(&tamanho_nEspecie, sizeof(int), 1, arquivo_binario);
+        registro.nEspecie = (char *)malloc(tamanho_nEspecie + 1);
+        fread(registro.nEspecie, sizeof(char), tamanho_nEspecie, arquivo_binario);
+        registro.nEspecie[tamanho_nEspecie] = '\0';
+
+        // Ler o alimento
+        int tamanho_alimento;
+        fread(&tamanho_alimento, sizeof(int), 1, arquivo_binario);
+        registro.alimento = (char *)malloc(tamanho_alimento + 1);
+        fread(registro.alimento, sizeof(char), tamanho_alimento, arquivo_binario);
+        registro.alimento[tamanho_alimento] = '\0';
 
         // Exibir os dados do registro
+        registros_encontrados++;
         printf("Nome: %s\n", registro.nome);
         printf("Dieta: %s\n", registro.dieta);
         printf("Habitat: %s\n", registro.habitat);
-        if (registro.populacao != -1) {
-            printf("População: %d\n", registro.populacao);
-        }
+        printf("População: %d\n", registro.populacao);
         printf("Tipo: %s\n", registro.tipo);
-        if (registro.velocidade != -1) {
-            printf("Velocidade: %d %c/h\n", registro.velocidade, registro.uniMedida);
-        }
-        if (registro.tamanho != -1) {
-            printf("Tamanho: %.2f\n", registro.tamanho);
-        }
+        printf("Velocidade: %d %c/h\n", registro.velocidade, registro.uniMedida);
+        printf("Tamanho: %.2f\n", registro.tamanho);
         printf("Espécie: %s\n", registro.nEspecie);
         printf("Alimento: %s\n", registro.alimento);
         printf("\n");
+
+        // Libera memória alocada para strings
+        free(registro.nome);
+        free(registro.dieta);
+        free(registro.habitat);
+        free(registro.tipo);
+        free(registro.nEspecie);
+        free(registro.alimento);
     }
 
-    // Verificar se nenhum registro foi encontrado
     if (registros_encontrados == 0) {
         printf("Registro inexistente.\n");
+    }
+
+    fclose(arquivo_binario);
+}
+// Função para recuperar todos os registros e mostrar na saída padrão (função 2)
+void buscar_registros_por_campo(char *nomeBin, int n) {
+    FILE *arquivo_binario = fopen(nomeBin, "rb");
+    if (arquivo_binario == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+
+    Cabecalho cabecalho;
+    if (fread(&cabecalho, sizeof(Cabecalho), 1, arquivo_binario) != 1) {
+        printf("Erro ao ler o cabeçalho do arquivo.\n");
+        fclose(arquivo_binario);
+        return;
+    }
+
+    // Verificar se o arquivo está consistente
+    if (cabecalho.status == '0') {
+        printf("Falha no processamento do arquivo: arquivo inconsistente.\n");
+        fclose(arquivo_binario);
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        char nomeCampo[30];
+        char valorCampo[100];
+        int registros_encontrados = 0;
+
+        // Lê o nome do campo e o valor do campo
+        scanf("%s", nomeCampo);
+        scan_quote_string(valorCampo); // Usa a função fornecida para tratar strings com aspas
+
+        Registro registro;
+        rewind(arquivo_binario); // Volta para o início do arquivo binário após o cabeçalho
+        fseek(arquivo_binario, sizeof(Cabecalho), SEEK_SET); // Pula o cabeçalho do arquivo binário
+
+        // Ler registros do arquivo binário
+        while (fread(&registro.removido, sizeof(char), 1, arquivo_binario) == 1) {
+            if (registro.removido == '1') {
+                // Pular registros removidos
+                fseek(arquivo_binario, sizeof(int) + sizeof(int) + sizeof(float) + sizeof(char) + sizeof(int) + 160, SEEK_CUR);
+                continue;
+            }
+
+            fread(&registro.encadeamento, sizeof(int), 1, arquivo_binario);
+            fread(&registro.populacao, sizeof(int), 1, arquivo_binario);
+            fread(&registro.tamanho, sizeof(float), 1, arquivo_binario);
+            fread(&registro.uniMedida, sizeof(char), 1, arquivo_binario);
+            fread(&registro.velocidade, sizeof(int), 1, arquivo_binario);
+
+            // Ler strings de tamanho variável (nome, dieta, habitat, tipo, etc.)
+            char buffer[100];
+            int tamanho_string;
+
+            // Ler e comparar o campo especificado
+            if (strcmp(nomeCampo, "nome") == 0) {
+                fread(&tamanho_string, sizeof(int), 1, arquivo_binario);
+                fread(buffer, sizeof(char), tamanho_string, arquivo_binario);
+                buffer[tamanho_string] = '\0';
+                if (strcmp(buffer, valorCampo) == 0) {
+                    printf("Nome: %s\n", buffer);
+                    registros_encontrados++;
+                }
+            } else if (strcmp(nomeCampo, "dieta") == 0) {
+                fread(&tamanho_string, sizeof(int), 1, arquivo_binario);
+                fread(buffer, sizeof(char), tamanho_string, arquivo_binario);
+                buffer[tamanho_string] = '\0';
+                if (strcmp(buffer, valorCampo) == 0) {
+                    printf("Dieta: %s\n", buffer);
+                    registros_encontrados++;
+                }
+            } else if (strcmp(nomeCampo, "habitat") == 0) {
+                fread(&tamanho_string, sizeof(int), 1, arquivo_binario);
+                fread(buffer, sizeof(char), tamanho_string, arquivo_binario);
+                buffer[tamanho_string] = '\0';
+                if (strcmp(buffer, valorCampo) == 0) {
+                    printf("Habitat: %s\n", buffer);
+                    registros_encontrados++;
+                }
+            } else if (strcmp(nomeCampo, "populacao") == 0) {
+                fread(&tamanho_string, sizeof(int), 1, arquivo_binario);
+                fread(buffer, sizeof(char), tamanho_string, arquivo_binario);
+                buffer[tamanho_string] = '\0';
+                if (atoi(buffer) == atoi(valorCampo)) {
+                    printf("População: %s\n", buffer);
+                    registros_encontrados++;
+                }
+            } // continue comparando para outros campos, como tipo, velocidade, etc.
+
+            // Pular para o próximo registro no arquivo binário
+            fseek(arquivo_binario, sizeof(int) + sizeof(float) + sizeof(int) + 160, SEEK_CUR);
+        }
+
+        if (registros_encontrados == 0) {
+            printf("Registro inexistente.\n");
+        }
     }
 
     fclose(arquivo_binario);
