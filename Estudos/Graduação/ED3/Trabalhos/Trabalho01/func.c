@@ -78,12 +78,16 @@ void inicializa_cabecalho(Cabecalho c, FILE* bin) {
     fwrite(&c.status, sizeof(char), 1, bin);
     fwrite(&c.topo, sizeof(int), 1, bin);
     fwrite(&c.proxRRN, sizeof(int), 1, bin);
-    fwrite(&c.nroRegRem, sizeof(char), 1, bin);
-    fwrite(&c.nroPagDisco, sizeof(char), 1, bin);
+    fwrite(&c.nroRegRem, sizeof(int), 1, bin);
+    fwrite(&c.nroPagDisco, sizeof(int), 1, bin);
     // Preencher o restante da página de disco com o caractere '$'
-    memset(c.padding, FILL_CHAR, sizeof(c.padding));
-    int tam = 1600 - (sizeof(char) + 4 * sizeof(int));
-    fwrite(&c.padding, sizeof(char), tam, bin);
+    int resto = 1600- 4 * sizeof(int) - sizeof(int);
+    char aux[resto];
+    for(int i=0; i< resto; i++)
+    {
+        aux[i] = '$';
+    }
+    fwrite(aux, sizeof(char), resto, bin);
     
 }
 

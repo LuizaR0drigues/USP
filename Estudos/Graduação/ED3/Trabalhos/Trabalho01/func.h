@@ -17,7 +17,7 @@ typedef struct {
     int nroRegRem;          // 4 bytes
     int nroPagDisco;        // 4 bytes
     int qttCompacta;        // 4 bytes
-    char padding[1600 - (sizeof(char) + 4 * sizeof(int))];       // Preenche o restante da página de disco com lixo
+   // char padding[1600 - (sizeof(char) + 4 * sizeof(int))];       // Preenche o restante da página de disco com lixo
 } Cabecalho;
 
 // Exemplo de estrutura Registro (ajuste conforme necessário)
