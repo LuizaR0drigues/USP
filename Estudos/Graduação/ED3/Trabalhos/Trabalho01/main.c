@@ -37,8 +37,8 @@ int main() {
         }
         // Inicializa o cabeçalho
         escreve_cabecalho(cabecalho, arquivo_binario);
-         // Escreve o cabeçalho no arquivo binário
-        //fwrite(inicio, sizeof(Cabecalho), 1, arquivo_binario);
+        Cabecalho test2 = leitura_cabecalho(cabecalho, arquivo_binario);
+        printf("S2: %c\n", test2.status);
 
         //leitura do arquivo csv
         lendo_csv(nomeCSV, arquivo_binario, cabecalho, registro);
@@ -47,6 +47,8 @@ int main() {
         //atualizo o valor de cabecalho e escrevo novamente
         cabecalho.status = '1';
         escreve_cabecalho(cabecalho, arquivo_binario);
+        Cabecalho teste = leitura_cabecalho(cabecalho, arquivo_binario);
+        printf("ST: %c\n", teste.status);
 
 
         fclose(arquivo_binario);

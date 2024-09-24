@@ -45,7 +45,7 @@ void scan_quote_string(char *str);
 //----------------------------------------------
 
 void escreve_cabecalho(Cabecalho c, FILE* bin);
-
+Cabecalho leitura_cabecalho(Cabecalho c, FILE* bin);
 //leitura do arquivo CSV
 void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho cabecalho, Registro registro);
 void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho c);
