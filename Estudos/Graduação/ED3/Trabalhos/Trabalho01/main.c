@@ -47,7 +47,7 @@ int main() {
         //leitura do arquvio binario
         scanf("%s", nomearqbin);
         // Chama a função para recuperar e mostrar os registros
-        recuperar_todos_os_registros(nomearqbin, registro);
+        recuperar_todos_os_registros(nomearqbin);
         break;
             
     default:

@@ -48,11 +48,11 @@ void inicializa_cabecalho(Cabecalho *c);
 
 //leitura do arquivo CSV
 void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho *cabecalho, Registro registro);
-void arquivobin(FILE *nomebin, Registro registro,  Cabecalho *c);
+void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho *c);
 
 
 // Função para recuperar todos os registros e mostrar na saída padrão (função 2)
-void recuperar_todos_os_registros(char *nomeBin, Registro registro);
+void recuperar_todos_os_registros(char *nomeBin);
 void buscar_registros_por_campo(char *nomeBin, int n) ;
 
 
