@@ -73,21 +73,33 @@ void scan_quote_string(char *str) {
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-void escreve_cabecalho(Cabecalho c, FILE* bin) {
-    fwrite(&c.status, sizeof(char), 1, bin);
-    printf("Statusc: %c\n", c.status);
-    fwrite(&c.topo, sizeof(int), 1, bin);
-    fwrite(&c.proxRRN, sizeof(int), 1, bin);
-    fwrite(&c.nroRegRem, sizeof(int), 1, bin);
-    fwrite(&c.nroPagDisco, sizeof(int), 1, bin);
-    // Preencher o restante da página de disco com o caractere '$'
-    int resto = 1600- 4 * sizeof(int) - sizeof(int);
-    char aux[resto];
-    for(int i=0; i< resto; i++)
-    {
-        aux[i] = '$';
+void escreve_cabecalho(Cabecalho c, FILE* bin, char str) {
+
+    if(str == '1')
+    {   
+        c.status = str;
+        fwrite(&c.status, sizeof(char), 1, bin);
     }
-    fwrite(aux, sizeof(char), resto, bin);//completa com $
+    else{
+        c.status = '0';
+        fwrite(&c.status, sizeof(char), 1, bin);
+        
+    }
+
+    fwrite(&c.topo, sizeof(int), 1, bin);
+        fwrite(&c.proxRRN, sizeof(int), 1, bin);
+        fwrite(&c.nroRegRem, sizeof(int), 1, bin);
+        fwrite(&c.nroPagDisco, sizeof(int), 1, bin);
+        // Preencher o restante da página de disco com o caractere '$'
+        int resto = 1600- 4 * sizeof(int) - sizeof(int);
+        char aux[resto];
+        for(int i=0; i< resto; i++)
+        {
+            aux[i] = '$';
+        }
+        fwrite(aux, sizeof(char), resto, bin);//completa com $
+    
+    
     
 }
 Cabecalho leitura_cabecalho(Cabecalho c, FILE* bin) {

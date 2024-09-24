@@ -44,7 +44,7 @@ void binarioNaTela(char *nomeArquivoBinario);
 void scan_quote_string(char *str);
 //----------------------------------------------
 
-void escreve_cabecalho(Cabecalho c, FILE* bin);
+void escreve_cabecalho(Cabecalho c, FILE* bin, char status);
 Cabecalho leitura_cabecalho(Cabecalho c, FILE* bin);
 //leitura do arquivo CSV
 void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho cabecalho, Registro registro);

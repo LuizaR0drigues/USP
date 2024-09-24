@@ -5,7 +5,7 @@
 
 int main() {
     
-    int comando, rrn, Idbusca;
+    int comando;
     char nomeCSV[100], nomearqbin[100];
     Registro registro;
     
@@ -20,52 +20,55 @@ int main() {
 
     // Leitura dos parâmetros de arquivos
     scanf("%d", &comando);
-    
-    
 
-    switch (comando)
-    {
-    case 1:
-        scanf("%s", nomeCSV);
-        scanf("%s", nomearqbin);
+    switch (comando) {
+        case 1:
+            scanf("%s", nomeCSV);
+            scanf("%s", nomearqbin);
 
-        // Abre o arquivo binário para leitura e escrita 
-        FILE *arquivo_binario = fopen(nomearqbin, "wb");
-        if (arquivo_binario == NULL) {
-            printf("Falha ao abrir o arquivo binário.\n");
-            return 1;
-        }
-        // Inicializa o cabeçalho
-        escreve_cabecalho(cabecalho, arquivo_binario);
-        Cabecalho test2 = leitura_cabecalho(cabecalho, arquivo_binario);
-        printf("S2: %c\n", test2.status);
+            // Abre o arquivo binário para leitura e escrita 
+            FILE *arquivo_binario = fopen(nomearqbin, "wb");
+            if (arquivo_binario == NULL) {
+                printf("Falha ao abrir o arquivo binário.\n");
+                return 1;
+            }
 
-        //leitura do arquivo csv
-        lendo_csv(nomeCSV, arquivo_binario, cabecalho, registro);
-        binarioNaTela(nomearqbin);
+            // Inicializa o cabeçalho
+            escreve_cabecalho(cabecalho, arquivo_binario, '0');
 
-        //atualizo o valor de cabecalho e escrevo novamente
-        cabecalho.status = '1';
-        escreve_cabecalho(cabecalho, arquivo_binario);
-        Cabecalho teste = leitura_cabecalho(cabecalho, arquivo_binario);
-        printf("ST: %c\n", teste.status);
+            // Leitura do arquivo CSV e escrita dos registros
+            lendo_csv(nomeCSV, arquivo_binario, cabecalho, registro);
 
+            // Fecha o arquivo após a escrita dos registros
+            fclose(arquivo_binario);
 
-        fclose(arquivo_binario);
-        break;
-    case 2:
-        //leitura do arquvio binario
-        scanf("%s", nomearqbin);
-        // Chama a função para recuperar e mostrar os registros
-        recuperar_todos_os_registros(nomearqbin);
-        break;
-            
-    default:
-        break;
+            // Abre o arquivo binário novamente para atualizar o cabeçalho
+            arquivo_binario = fopen(nomearqbin, "r+b");
+            if (arquivo_binario == NULL) {
+                printf("Falha ao abrir o arquivo binário para atualização.\n");
+                return 1;
+            }
+
+            // Atualiza o status do cabeçalho para '1'
+            cabecalho.status = '1';
+            fseek(arquivo_binario, 0, SEEK_SET); // Move o ponteiro para o início do arquivo
+            fwrite(&cabecalho.status, sizeof(char), 1, arquivo_binario);
+
+            fclose(arquivo_binario);
+
+            // Exibe o conteúdo do arquivo binário na tela
+            binarioNaTela(nomearqbin);
+
+            break;
+        case 2:
+            // Leitura do arquivo binário
+            scanf("%s", nomearqbin);
+            // Chama a função para recuperar e mostrar os registros
+            recuperar_todos_os_registros(nomearqbin);
+            break;
+        default:
+            break;
     }
-    
-
-
     
     return 0;
 }
