@@ -7,7 +7,7 @@ int main() {
     
     int comando, rrn, Idbusca;
     char nomeCSV[100], nomearqbin[100];
-    Registro *registro;
+    Registro registro;
     
     // Allocate memory for Cabecalho
     Cabecalho *inicio = (Cabecalho *)malloc(sizeof(Cabecalho));
@@ -39,7 +39,7 @@ int main() {
         //fwrite(inicio, sizeof(Cabecalho), 1, arquivo_binario);
 
         //leitura do arquivo csv
-        lendo_csv(nomeCSV, arquivo_binario, inicio);
+        lendo_csv(nomeCSV, arquivo_binario, inicio, registro);
         binarioNaTela(nomearqbin);
         fclose(arquivo_binario);
         break;
@@ -47,7 +47,7 @@ int main() {
         //leitura do arquvio binario
         scanf("%s", nomearqbin);
         // Chama a função para recuperar e mostrar os registros
-        recuperar_todos_os_registros(nomearqbin);
+        recuperar_todos_os_registros(nomearqbin, registro);
         break;
             
     default:

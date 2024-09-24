@@ -47,12 +47,12 @@ void scan_quote_string(char *str);
 void inicializa_cabecalho(Cabecalho *c);
 
 //leitura do arquivo CSV
-void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho *cabecalho);
-void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *c);
+void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho *cabecalho, Registro registro);
+void arquivobin(FILE *nomebin, Registro registro,  Cabecalho *c);
 
 
 // Função para recuperar todos os registros e mostrar na saída padrão (função 2)
-void recuperar_todos_os_registros(char *nomeBin);
+void recuperar_todos_os_registros(char *nomeBin, Registro registro);
 void buscar_registros_por_campo(char *nomeBin, int n) ;
 
 

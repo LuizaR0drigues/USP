@@ -86,41 +86,7 @@ void inicializa_cabecalho(Cabecalho *c) {
     memset(c->padding, FILL_CHAR, sizeof(c->padding));
     
 }
-void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho)
-{
-    Registro registro;
-    
-    int tamT, tamD, tamA, tamE, tamH, tam;
-    char linha[160]; // Tamanho máximo que o registro pode ocupar
-    
-
-    FILE *arquivo_csv = fopen(nomeCSV, "r");
-    if (arquivo_csv == NULL) {
-        printf("Falha ao abrir o arquivo CSV\n");
-        return;
-    }
-    cabecalho->status = '1';
-    fwrite(cabecalho, sizeof(Cabecalho), 1, nomeBin);
-
-    //lendo o nome das colunas
-    char buffer[100];
-    const char *deli = ",";
-    fgets(buffer, sizeof(buffer), arquivo_csv);
-    //printf("%s\n", buffer);
-    char *campo;
-    char *linha_copy = linha;
-    while (fgets(linha, sizeof(linha), arquivo_csv)) {
-        linha[strcspn(linha, "\n")] = '\0';
-        linha[strcspn(linha, "\r")] = '\0';
-
-        while((campo = strsep(&linha_copy, deli)) != NULL)
-        {
-            printf("%s ", campo);
-        }
-        printf("\n");
-    }
-}
-/*
+/**
 void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho) {
     Registro registro;
     
@@ -237,7 +203,131 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho) {
     fclose(arquivo_csv);
 
 }*/
-void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *cabecalho) {
+void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho, Registro registro) {
+    
+    int tamT = 0, tamD = 0, tamA = 0, tamE = 0, tamH = 0, tam = 0;
+    char linha[160]; // Tamanho máximo que o registro pode ocupar
+    char *campo;
+
+    FILE *arquivo_csv = fopen(nomeCSV, "r");
+    if (arquivo_csv == NULL) {
+        printf("Falha ao abrir o arquivo CSV\n");
+        return;
+    }
+
+    // Marca o status do cabeçalho como '1'
+    cabecalho->status = '1';
+    fwrite(cabecalho, sizeof(Cabecalho), 1, nomeBin);
+    char buffer[160];
+    // Lendo o cabeçalho do arquivo CSV (nomes das colunas)
+    fgets(buffer, sizeof(buffer), arquivo_csv); // Pula a linha de cabeçalho
+
+  
+    while (fgets(linha, sizeof(linha), arquivo_csv)) {
+        // Remove os caracteres de nova linha (tanto \n quanto \r)
+        linha[strcspn(linha, "\n")] = '\0';
+        linha[strcspn(linha, "\r")] = '\0';
+   
+        // Início da leitura dos campos separados por vírgula
+        char *linha_copy = linha;
+
+        // Nome
+        campo = strsep(&linha_copy, ",");
+
+        if (campo != NULL) {
+            tam = strlen(campo);
+            registro.nome = (char*) malloc((tam + 1) * sizeof(char));
+            strcpy(registro.nome, campo);
+            registro.nome[tam] = '#'; // Finaliza com '#'
+        }
+        
+        // Dieta
+        campo = strsep(&linha_copy, ",");
+        if (campo != NULL) {
+            tamD = strlen(campo);
+            registro.dieta = (char*) malloc((tamD + 1) * sizeof(char));
+            strcpy(registro.dieta, campo);
+            registro.dieta[tamD] = '#'; // Finaliza com '#'
+            
+           
+        }
+
+        // Habitat
+        campo = strsep(&linha_copy, ",");
+        if (campo != NULL) {
+            tamH = strlen(campo);
+            registro.habitat = (char*) malloc((tamH + 1) * sizeof(char));
+            strcpy(registro.habitat, campo);
+            registro.habitat[tamH] = '#'; // Finaliza com '#'
+        }
+
+        // População
+        campo = strsep(&linha_copy, ",");
+        registro.populacao = (campo != NULL) ? atoi(campo) : -1;
+
+        // Tipo
+        campo = strsep(&linha_copy, ",");
+        if (campo != NULL) {
+            tamT = strlen(campo);
+            registro.tipo = (char*) malloc((tamT + 1) * sizeof(char));
+            strcpy(registro.tipo, campo);
+            registro.tipo[tamT] = '#'; // Finaliza com '#'
+        }
+
+        // Velocidade
+        campo = strsep(&linha_copy, ",");
+        registro.velocidade = (campo != NULL) ? atoi(campo) : -1;
+
+        // Unidade de medida
+        campo = strsep(&linha_copy, ",");
+        registro.uniMedida = (campo != NULL) ? campo[0] : '$';
+
+        // Tamanho
+        campo = strsep(&linha_copy, ",");
+        registro.tamanho = (campo != NULL) ? atof(campo) : -1;
+
+        // Espécie
+        campo = strsep(&linha_copy, ",");
+        if (campo != NULL) {
+            tamE = strlen(campo);
+            registro.nEspecie = (char*) malloc((tamE + 1) * sizeof(char));
+            strcpy(registro.nEspecie, campo);
+            registro.nEspecie[tamE] = '#'; // Finaliza com '#'
+        }
+
+        // Alimento
+        campo = strsep(&linha_copy, ",");
+        if (campo != NULL) {
+            tamA = strlen(campo);
+           registro.alimento = (char*) malloc((tamA + 1) * sizeof(char));
+            strcpy(registro.alimento, campo);
+            registro.alimento[tamA] = '#'; // Finaliza com '#'
+        }
+
+        // Calcular bytes restantes para completar os 160 bytes
+        int soma = 160 - (tam + tamD + tamH + tamT + tamE + tamA + 18);
+
+        // Armazena o registro no arquivo binário
+        registro.removido = '0'; // não removido
+        registro.encadeamento = 0; // não há encadeamento
+        
+        // Função fictícia para armazenar o registro no arquivo binário
+        arquivobin(nomeBin, registro,  cabecalho);
+
+        // Libera a memória alocada
+        free(registro.nome);
+        free(registro.dieta);
+        free(registro.habitat);
+        free(registro.tipo);
+        free(registro.nEspecie);
+        free(registro.alimento);
+    }
+    
+
+    fclose(arquivo_csv);
+}
+
+void arquivobin(FILE *nomebin, Registro registro,  Cabecalho *cabecalho) {
     // Escreve campos de tamanho fixo
     fwrite(&registro.removido, sizeof(char), 1, nomebin);
     fwrite(&registro.encadeamento, sizeof(int), 1, nomebin);
@@ -248,10 +338,10 @@ void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *cabecalho)
 
     // Escreve strings (sem \0, já que é um formato binário e tamanho variável)
     fwrite(registro.nome, sizeof(char), strlen(registro.nome), nomebin);
-    fwrite(registro.dieta, sizeof(char), strlen(registro.dieta), nomebin);
+    fwrite(registro.nEspecie, sizeof(char), strlen(registro.nEspecie), nomebin);
     fwrite(registro.habitat, sizeof(char), strlen(registro.habitat), nomebin);
     fwrite(registro.tipo, sizeof(char), strlen(registro.tipo), nomebin);
-    fwrite(registro.nEspecie, sizeof(char), strlen(registro.nEspecie), nomebin);
+    fwrite(registro.dieta, sizeof(char), strlen(registro.dieta), nomebin);
     fwrite(registro.alimento, sizeof(char), strlen(registro.alimento), nomebin);
 
     // Calcula o tamanho já escrito (campos fixos + strings)
@@ -261,12 +351,7 @@ void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *cabecalho)
                        + sizeof(float)   // tamanho
                        + sizeof(char)    // uniMedida
                        + sizeof(int)     // velocidade
-                       + strlen(registro.nome)
-                       + strlen(registro.dieta)
-                       + strlen(registro.habitat)
-                       + strlen(registro.tipo)
-                       + strlen(registro.nEspecie)
-                       + strlen(registro.alimento);
+    + strlen(registro.nome)+ strlen(registro.dieta)+ strlen(registro.habitat)+ strlen(registro.tipo)+ strlen(registro.nEspecie)+ strlen(registro.alimento);
 
     // Verifica quanto falta para completar os 160 bytes
     int espacoRestante = 160 - tamanhoEscrito;
@@ -276,7 +361,7 @@ void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *cabecalho)
         fwrite(preenchimento, sizeof(char), espacoRestante, nomebin);
     }
 
-    //printf("Tamanho escrito: %d, Espaço restante: %d\n", tamanhoEscrito, espacoRestante);
+   
 }
 
 // Função para recuperar todos os registros e mostrar na saída padrão (função 2)
@@ -284,7 +369,7 @@ void arquivobin(FILE *nomebin, Registro registro, int aux, Cabecalho *cabecalho)
 // agora quando status 1 o arquivo é lido e da o print porem com dados problemáticos
 // estando fragmentados, parece que o codigo nao esta separando corretamente oq deveria ser cada variavel 
 // verificar se o registro foi logicamente removido
-void recuperar_todos_os_registros(char *nomeBin) {
+void recuperar_todos_os_registros(char *nomeBin, Registro registro) {
     FILE *arquivo_binario = fopen(nomeBin, "rb");
     if (arquivo_binario == NULL) {
         printf("Falha no processamento do arquivo.\n");
@@ -306,7 +391,7 @@ void recuperar_todos_os_registros(char *nomeBin) {
         return;
     }
 
-    Registro registro;
+    ///Registro registro;
     int registros_encontrados = 0;
 
     while (fread(&registro.removido, sizeof(char), 1, arquivo_binario) == 1) {
@@ -315,6 +400,7 @@ void recuperar_todos_os_registros(char *nomeBin) {
             fseek(arquivo_binario, sizeof(Registro) - sizeof(char), SEEK_CUR);
             continue; // Ignorar registros removidos
         }
+        //printf("%d", sizeof(Registro));
 
         fread(&registro.encadeamento, sizeof(int), 1, arquivo_binario);
         fread(&registro.populacao, sizeof(int), 1, arquivo_binario);
@@ -323,13 +409,15 @@ void recuperar_todos_os_registros(char *nomeBin) {
         fread(&registro.velocidade, sizeof(int), 1, arquivo_binario);
 
         // Ler o tamanho e o conteúdo da string nome
-        int tamanho_nome;
-        fread(&tamanho_nome, sizeof(int), 1, arquivo_binario);
-        registro.nome = (char *)malloc(tamanho_nome + 1);
+        int tamanho_nome = sizeof(registro.nome);
+        printf("%d\n", tamanho_nome);
+        //registro.nome = (char *)malloc((tamanho_nome + 1) * sizeof(char));
         fread(registro.nome, sizeof(char), tamanho_nome, arquivo_binario);
         registro.nome[tamanho_nome] = '\0';  // Adicionar terminador nulo
 
-        // Ler a dieta
+        
+        /*
+        //Ler a dieta
         int tamanho_dieta;
         fread(&tamanho_dieta, sizeof(int), 1, arquivo_binario);
         registro.dieta = (char *)malloc(tamanho_dieta + 1);
@@ -363,6 +451,7 @@ void recuperar_todos_os_registros(char *nomeBin) {
         registro.alimento = (char *)malloc(tamanho_alimento + 1);
         fread(registro.alimento, sizeof(char), tamanho_alimento, arquivo_binario);
         registro.alimento[tamanho_alimento] = '\0';
+        
 
         // Exibir os dados do registro
         registros_encontrados++;
@@ -376,7 +465,9 @@ void recuperar_todos_os_registros(char *nomeBin) {
         printf("Espécie: %s\n", registro.nEspecie);
         printf("Alimento: %s\n", registro.alimento);
         printf("\n");
-
+*/
+        registros_encontrados++;
+        printf("Nome: %s\n", registro.nome);
         // Libera memória alocada para strings
         free(registro.nome);
         free(registro.dieta);
