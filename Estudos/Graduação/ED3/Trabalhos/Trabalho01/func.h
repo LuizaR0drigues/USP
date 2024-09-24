@@ -44,11 +44,11 @@ void binarioNaTela(char *nomeArquivoBinario);
 void scan_quote_string(char *str);
 //----------------------------------------------
 
-void inicializa_cabecalho(Cabecalho *c);
+void inicializa_cabecalho(Cabecalho c, FILE* bin);
 
 //leitura do arquivo CSV
-void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho *cabecalho, Registro registro);
-void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho *c);
+void lendo_csv(char *nomeCSV, FILE *bin,  Cabecalho cabecalho, Registro registro);
+void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho c);
 
 
 // Função para recuperar todos os registros e mostrar na saída padrão (função 2)

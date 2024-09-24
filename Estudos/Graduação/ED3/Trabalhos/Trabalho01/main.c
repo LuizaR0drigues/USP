@@ -10,17 +10,18 @@ int main() {
     Registro registro;
     
     // Allocate memory for Cabecalho
-    Cabecalho *inicio = (Cabecalho *)malloc(sizeof(Cabecalho));
-    if (inicio == NULL) {
-        printf("Erro ao alocar memória para o cabeçalho.\n");
-        return 1;
-    }
+    Cabecalho cabecalho;
+    cabecalho.status = '0';
+    cabecalho.topo = -1;
+    cabecalho.proxRRN = 0;
+    cabecalho.nroRegRem = 0;
+    cabecalho.nroPagDisco = 0;
+    cabecalho.qttCompacta = 0;
 
     // Leitura dos parâmetros de arquivos
     scanf("%d", &comando);
     
-    // Inicializa o cabeçalho
-    inicializa_cabecalho(inicio);
+    
 
     switch (comando)
     {
@@ -34,12 +35,13 @@ int main() {
             printf("Falha ao abrir o arquivo binário.\n");
             return 1;
         }
-        
+        // Inicializa o cabeçalho
+        inicializa_cabecalho(cabecalho, arquivo_binario);
          // Escreve o cabeçalho no arquivo binário
         //fwrite(inicio, sizeof(Cabecalho), 1, arquivo_binario);
 
         //leitura do arquivo csv
-        lendo_csv(nomeCSV, arquivo_binario, inicio, registro);
+        lendo_csv(nomeCSV, arquivo_binario, cabecalho, registro);
         binarioNaTela(nomearqbin);
         fclose(arquivo_binario);
         break;

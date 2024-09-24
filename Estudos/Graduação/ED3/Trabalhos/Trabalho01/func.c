@@ -73,23 +73,24 @@ void scan_quote_string(char *str) {
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-void inicializa_cabecalho(Cabecalho *c) {
-    c->status = '0';
-    c->topo = -1;
-    c->proxRRN = 0;
-    c->nroRegRem = 0;
-    c->nroPagDisco = 0;
-    c->qttCompacta = 0;
-
+void inicializa_cabecalho(Cabecalho c, FILE* bin) {
+    
+    fwrite(&c.status, sizeof(char), 1, bin);
+    fwrite(&c.topo, sizeof(int), 1, bin);
+    fwrite(&c.proxRRN, sizeof(int), 1, bin);
+    fwrite(&c.nroRegRem, sizeof(char), 1, bin);
+    fwrite(&c.nroPagDisco, sizeof(char), 1, bin);
     // Preencher o restante da página de disco com o caractere '$'
-    memset(c->padding, FILL_CHAR, sizeof(c->padding));
+    memset(c.padding, FILL_CHAR, sizeof(c.padding));
+    int tam = 1600 - (sizeof(char) + 4 * sizeof(int));
+    fwrite(&c.padding, sizeof(char), tam, bin);
     
 }
 
-void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho, Registro registro) {
+void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho cabecalho, Registro registro) {
     
-    int tamT = 0, tamD = 0, tamA = 0, tamE = 0, tamH = 0, tam = 0;
-    char linha[160]; // Tamanho máximo que o registro pode ocupar
+    int tamT = 0, tamD = 0, tamA = 0, tamE = 0, tamH = 0, tam = 0; //variaveis que irao armazenar os tamanhos dos campos variaveis
+    char linha[160]; // uma variavel responsavel por receber o registro completo
     char *campo;
 
     FILE *arquivo_csv = fopen(nomeCSV, "r");
@@ -99,8 +100,8 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho, Registro regi
     }
 
     // Marca o status do cabeçalho como '1'
-    cabecalho->status = '1';
-    fwrite(cabecalho, sizeof(Cabecalho), 1, nomeBin);
+    cabecalho.status = '1';
+    fwrite(&cabecalho, sizeof(Cabecalho), 1, nomeBin);
     char buffer[160];
     // Lendo o cabeçalho do arquivo CSV (nomes das colunas)
     fgets(buffer, sizeof(buffer), arquivo_csv); // Pula a linha de cabeçalho
@@ -108,14 +109,14 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho, Registro regi
   
     while (fgets(linha, sizeof(linha), arquivo_csv)) {
         // Remove os caracteres de nova linha (tanto \n quanto \r)
-        linha[strcspn(linha, "\n")] = '\0';
+        linha[strcspn(linha, "\n")] = '\0'; //remove o \n e \r de cada linha do csv
         linha[strcspn(linha, "\r")] = '\0';
    
         // Início da leitura dos campos separados por vírgula
         char *linha_copy = linha;
 
         // Nome
-        campo = strsep(&linha_copy, ",");
+        campo = strsep(&linha_copy, ","); //usando a função strsep para dividir em tokens
 
         if (campo != NULL) {
             tam = strlen(campo);
@@ -151,7 +152,7 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho, Registro regi
             registro.populacao = atoi(campo);
         }
         else{
-            registro.populacao = -1;
+            registro.populacao = -1; //para caso de poulação -> null
         }
 
         // Tipo
@@ -235,7 +236,7 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho *cabecalho, Registro regi
     fclose(arquivo_csv);
 }
 
-void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho *cabecalho) {
+void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho cabecalho) {
     // Escreve campos de tamanho fixo
     fwrite(&registro.removido, sizeof(char), 1, nomebin);
     fwrite(&registro.encadeamento, sizeof(int), 1, nomebin);
@@ -244,7 +245,7 @@ void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho *cabecalho) {
     fwrite(&registro.uniMedida, sizeof(char), 1, nomebin);
     fwrite(&registro.velocidade, sizeof(int), 1, nomebin);
 
-    // Escreve strings (sem \0, já que é um formato binário e tamanho variável)
+    // Escreve strings (sem \0, já que é um formato binário e tamanho variável) usando o tamanho de cada uma
     int tamT = 0, tamD = 0, tamA = 0, tamE = 0, tamH = 0, tam = 0;
     tam = strlen(registro.nome);
     tamA = strlen(registro.alimento);
@@ -281,7 +282,6 @@ void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho *cabecalho) {
 }
 
 
-
 // Função para recuperar todos os registros e mostrar na saída padrão (função 2)
 //registro
 // agora quando status 1 o arquivo é lido e da o print porem com dados problemáticos
@@ -295,7 +295,7 @@ void recuperar_todos_os_registros(char *nomeBin) {
     }
 
     Cabecalho cabecalho;
-    if (fread(&cabecalho, sizeof(Cabecalho), 1, arquivo_binario) != 1) {
+    if (fread(&cabecalho, sizeof(Cabecalho), 1600, arquivo_binario) != 1) { //lendo todo o cabeçalho
         printf("Erro ao ler o cabeçalho do arquivo.\n");
         fclose(arquivo_binario);
         return;
@@ -325,47 +325,7 @@ void recuperar_todos_os_registros(char *nomeBin) {
         fread(&registro.uniMedida, sizeof(char), 1, arquivo_binario);
         fread(&registro.velocidade, sizeof(int), 1, arquivo_binario);
 
-        // Ler o tamanho e o conteúdo da string nome
-        int tamanho_nome;
-        if (fread(&tamanho_nome, sizeof(int), 1, arquivo_binario) != 1) break;
-        registro.nome = (char *)malloc(tamanho_nome + 1);
-        fread(registro.nome, sizeof(char), tamanho_nome, arquivo_binario);
-        registro.nome[tamanho_nome] = '\0';  // Adicionar terminador nulo
-
-        // Ler a dieta
-        int tamanho_dieta;
-        if (fread(&tamanho_dieta, sizeof(int), 1, arquivo_binario) != 1) break;
-        registro.dieta = (char *)malloc(tamanho_dieta + 1);
-        fread(registro.dieta, sizeof(char), tamanho_dieta, arquivo_binario);
-        registro.dieta[tamanho_dieta] = '\0';
-
-        // Ler o habitat
-        int tamanho_habitat;
-        if (fread(&tamanho_habitat, sizeof(int), 1, arquivo_binario) != 1) break;
-        registro.habitat = (char *)malloc(tamanho_habitat + 1);
-        fread(registro.habitat, sizeof(char), tamanho_habitat, arquivo_binario);
-        registro.habitat[tamanho_habitat] = '\0';
-
-        // Ler o tipo
-        int tamanho_tipo;
-        if (fread(&tamanho_tipo, sizeof(int), 1, arquivo_binario) != 1) break;
-        registro.tipo = (char *)malloc(tamanho_tipo + 1);
-        fread(registro.tipo, sizeof(char), tamanho_tipo, arquivo_binario);
-        registro.tipo[tamanho_tipo] = '\0';
-
-        // Ler a espécie
-        int tamanho_nEspecie;
-        if (fread(&tamanho_nEspecie, sizeof(int), 1, arquivo_binario) != 1) break;
-        registro.nEspecie = (char *)malloc(tamanho_nEspecie + 1);
-        fread(registro.nEspecie, sizeof(char), tamanho_nEspecie, arquivo_binario);
-        registro.nEspecie[tamanho_nEspecie] = '\0';
-
-        // Ler o alimento
-        int tamanho_alimento;
-        if (fread(&tamanho_alimento, sizeof(int), 1, arquivo_binario) != 1) break;
-        registro.alimento = (char *)malloc(tamanho_alimento + 1);
-        fread(registro.alimento, sizeof(char), tamanho_alimento, arquivo_binario);
-        registro.alimento[tamanho_alimento] = '\0';
+        
 
         // Exibir os dados do registro
         registros_encontrados++;
