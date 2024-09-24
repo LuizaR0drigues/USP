@@ -9,7 +9,7 @@ int main() {
     char nomeCSV[100], nomearqbin[100];
     Registro registro;
     
-    // Allocate memory for Cabecalho
+    // Cabecalho
     Cabecalho cabecalho;
     cabecalho.status = '0';
     cabecalho.topo = -1;
@@ -36,13 +36,19 @@ int main() {
             return 1;
         }
         // Inicializa o cabeçalho
-        inicializa_cabecalho(cabecalho, arquivo_binario);
+        escreve_cabecalho(cabecalho, arquivo_binario);
          // Escreve o cabeçalho no arquivo binário
         //fwrite(inicio, sizeof(Cabecalho), 1, arquivo_binario);
 
         //leitura do arquivo csv
         lendo_csv(nomeCSV, arquivo_binario, cabecalho, registro);
         binarioNaTela(nomearqbin);
+
+        //atualizo o valor de cabecalho e escrevo novamente
+        cabecalho.status = '1';
+        escreve_cabecalho(cabecalho, arquivo_binario);
+
+
         fclose(arquivo_binario);
         break;
     case 2:

@@ -73,9 +73,10 @@ void scan_quote_string(char *str) {
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-void inicializa_cabecalho(Cabecalho c, FILE* bin) {
+void escreve_cabecalho(Cabecalho c, FILE* bin) {
     
     fwrite(&c.status, sizeof(char), 1, bin);
+    printf("Statusc: %c\n", c.status);
     fwrite(&c.topo, sizeof(int), 1, bin);
     fwrite(&c.proxRRN, sizeof(int), 1, bin);
     fwrite(&c.nroRegRem, sizeof(int), 1, bin);
@@ -103,9 +104,7 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho cabecalho, Registro regis
         return;
     }
 
-    // Marca o status do cabeçalho como '1'
-    cabecalho.status = '1';
-    fwrite(&cabecalho, sizeof(Cabecalho), 1, nomeBin);
+    
     char buffer[160];
     // Lendo o cabeçalho do arquivo CSV (nomes das colunas)
     fgets(buffer, sizeof(buffer), arquivo_csv); // Pula a linha de cabeçalho
@@ -238,6 +237,7 @@ void lendo_csv(char *nomeCSV, FILE *nomeBin, Cabecalho cabecalho, Registro regis
     
 
     fclose(arquivo_csv);
+   
 }
 
 void Escrevebin(FILE *nomebin, Registro registro,  Cabecalho cabecalho) {
