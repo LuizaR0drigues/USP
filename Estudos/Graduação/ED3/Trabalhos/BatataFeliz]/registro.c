@@ -10,25 +10,12 @@ void registro_writebin(FILE *nomebin, Registro *registro){// escreve o registro 
     //formatando as strings de tamanho variaveis
     // Escreve strings (sem \0, já que é um formato binário e tamanho variável) usando o tamanho de cada uma
     int tamT = 0, tamD = 0, tamA = 0, tamE = 0, tamH = 0, tam = 0;
-    //nome
     tam = strlen(registro->nome);
-    //registro->nome[tam] = '#'; // Finaliza com '#'
-    printf("%s\n", registro->nome);
-    //alimento
     tamA = strlen(registro->alimento);
-    //registro->alimento[tamA] = '#'; // Finaliza com '#'
-
     tamD = strlen(registro->dieta);
-    //registro->dieta[tamD] = '#'; // Finaliza com '#'
-
     tamE = strlen(registro->nEspecie);
-    //registro->nEspecie[tamE] = '#'; // Finaliza com '#'
-
     tamT = strlen(registro->tipo);
-    //registro->tipo[tamT] = '#'; // Finaliza com '#'
-
     tamH = strlen(registro->habitat);
-    //registro->habitat[tamH] = '#'; // Finaliza com '#'
 
     
     
