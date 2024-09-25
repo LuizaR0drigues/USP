@@ -21,7 +21,9 @@
     } Cabecalho;
 
     // Funções de leitura e escrita binária
+    Cabecalho* cabecalho_inicializa();
     Cabecalho *cabecalho_readbin(FILE *file);
+    void cabecalho_verificacao(Cabecalho *cabecalho);
     void cabecalho_writebin(FILE *file, Cabecalho *cabecalho);
     void cabecalho_readcsv(FILE *csv);
 

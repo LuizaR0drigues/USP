@@ -20,6 +20,12 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin){
             //nome das colunas
             cabecalho_readcsv(arquivo_csv);
 
+            //estrutura padrão do cabecalho
+            Cabecalho *cabecalho = cabecalho_inicializa();
+
+            //escrita
+            cabecalho_writebin(arquivo_binario,cabecalho);
+
             while (!feof(arquivo_csv)) { //salva todos os dados em dino
                 Registro *dino = registro_readcsv(arquivo_csv);
                 
@@ -44,6 +50,12 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin){
                 free(dino);
             }
             
+            // Verificação do cabeçalho
+            cabecalho_getStatus(cabecalho);
+
+            // Escreve o cabeçalho no arquivo binário
+            cabecalho_writebin(arquivo_binario, cabecalho);
+
             // chamada pra função de criar a tabela
             fclose(arquivo_csv);
             fclose(arquivo_binario);

@@ -4,27 +4,57 @@
 Cabecalho *cabecalho_readbin(FILE *file){
     // lê o cabecalho de um arquivo binário
 }
+Cabecalho* cabecalho_inicializa()
+{
+    //estrutura padrão do cabecalho
+    Cabecalho *cabecalho  = malloc(sizeof(Cabecalho));
+    cabecalho->status = '0';
+    cabecalho->topo = -1;
+    cabecalho->proxRRN = 0;
+    cabecalho->nroRegRem = 0;
+    cabecalho->nroPagDisco = 0;
+    cabecalho->qttCompacta = 0;
 
-void cabecalho_writebin(FILE *file, Cabecalho *cabecalho){
-    // escreve o cabecalho no arquivo binário
-
+    return cabecalho;
 }
 
-void cabecalho_readcsv(FILE *csv){
+bool cabecalho_getStatus(Cabecalho *cabecalho) {
+    // Verifica o valor do campo status
+    if (cabecalho->status == CABECALHO_STATUS_OK) {
+        return true; // Retorna verdadeiro se o status for '1'
+    } else {
+        return false; // Retorna falso caso contrário
+    }
+}
+
+void cabecalho_writebin(FILE *file, Cabecalho *cabecalho) {
+    // Escreve o cabeçalho no arquivo binário
+    if (cabecalho_getStatus(cabecalho)) {
+        fwrite(&cabecalho->status, sizeof(char), 1, file); // Escreve o status se for OK
+    } else {
+        char status = '0'; // Escreve '0' se o status não for OK
+        fwrite(&status, sizeof(char), 1, file);
+    }
+
+    fwrite(&cabecalho->topo, sizeof(int), 1, file);
+    fwrite(&cabecalho->proxRRN, sizeof(int), 1, file);
+    fwrite(&cabecalho->nroRegRem, sizeof(int), 1, file);
+    fwrite(&cabecalho->nroPagDisco, sizeof(int), 1, file);
+
+    // Preencher o restante da página de disco com o caractere '$'
+    int resto = 1600 - (4 * sizeof(int)) - sizeof(char); // Calcula o espaço restante
+    char aux[resto];
+    for (int i = 0; i < resto; i++) {
+        aux[i] = '$'; // Preenche o array com '$'
+    }
+    fwrite(aux, sizeof(char), resto, file); // Escreve o preenchimento no arquivo
+}
+
+void cabecalho_readcsv(FILE *csv) {
     char buffer[300];
     fgets(buffer, sizeof(buffer), csv); // Pula a linha de cabeçalho
 }
 
-bool cabecalho_getStatus(Cabecalho *cabecalho){
-    // verifica o valor do campos status
-    if(cabecalho->status == CABECALHO_STATUS_OK){
-        return true;
-    }
-    else{
-        return false;
-    }
-    
-}
 
 int cabecalho_getTopo(Cabecalho *cabecalho){
     // verifica o valor do campo topo
