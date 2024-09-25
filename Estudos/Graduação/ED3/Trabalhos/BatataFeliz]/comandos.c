@@ -60,3 +60,29 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin){
             fclose(arquivo_csv);
             fclose(arquivo_binario);
 }   
+
+void SELECT_TABLE(char *nomearqbin) {
+    printf("%s\n", nomearqbin);
+    printf("Teste\n");
+    FILE *arquivo_binario = fopen(nomearqbin, "rb");
+    if (arquivo_binario == NULL) {
+        printf("Falha ao abrir o arquivo \n");
+        return;
+    }
+
+    Registro registro;  // Estrutura para armazenar um registro
+
+    // Lê registros do arquivo binário
+    while (1) {
+        Registro *dino = registro_readbin(arquivo_binario);
+        
+        // Verifica se a leitura foi bem-sucedida
+        if (dino == NULL) {
+            break;  // Sai do loop se não houver mais registros para ler
+        }
+        
+        registro_print(dino);  // Imprime o registro lido
+    }
+
+    fclose(arquivo_binario); 
+}

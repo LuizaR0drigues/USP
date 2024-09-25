@@ -21,6 +21,11 @@ int main()
             binarioNaTela(nomearqbin);
             
             break;
+        case 2:
+            SELECT_TABLE(nomearqbin);
+            break;
+        case 3:
+            break;
     }
     //     default:
     //         printf("Comando desconhecido\n");

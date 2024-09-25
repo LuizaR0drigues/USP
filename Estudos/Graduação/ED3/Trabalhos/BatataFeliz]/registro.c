@@ -1,8 +1,50 @@
 #include "registro.h"
+#include "cabecalho.h"
 
-Registro *registro_readbin(FILE *file){
-    // lê o registro de um arquivo binário
-    return NULL;
+
+Registro *registro_readbin(FILE *file) {
+    // Lê o registro de um arquivo binário
+    // Não abrir o arquivo aqui, pois já foi passado como parâmetro
+     Registro *registro;
+    Cabecalho cabecalho;
+    // Lê o cabeçalho do arquivo
+    if (fread(&cabecalho, sizeof(Cabecalho), 1, file) != 1) {
+        printf("Erro ao ler o cabeçalho do arquivo.\n");
+        return NULL;  // Retorna NULL em caso de erro
+    }
+
+    printf("Status: %c\n", cabecalho.status);
+
+    if (cabecalho.status == '0') {
+        printf("Falha no processamento do arquivo: arquivo inconsistente.\n");
+        return NULL;  // Retorna NULL se o cabeçalho está inconsistente
+    }
+
+    // Lê os registros
+    int registros_encontrados = 0;
+    
+    while (fread(&registro->removido, sizeof(char), 1, file) == 1) {
+        // Verifica se o registro foi logicamente removido
+        if (registro->removido == '1') {
+            fseek(file, sizeof(int) + sizeof(int) + sizeof(float) + sizeof(char) + sizeof(int), SEEK_CUR); // Pula para o próximo registro
+            continue;  // Ignora registros removidos
+        }
+
+        fread(&registro->encadeamento, sizeof(int), 1, file);
+        fread(&registro->populacao, sizeof(int), 1, file);
+        fread(&registro->tamanho, sizeof(float), 1, file);
+        fread(&registro->uniMedida, sizeof(char), 1, file);
+        fread(&registro->velocidade, sizeof(int), 1, file);
+
+        registros_encontrados++; // Incrementa o contador de registros encontrados
+    }
+
+    if (registros_encontrados == 0) {
+        printf("Registro inexistente.\n");
+        return NULL;  // Retorna NULL se nenhum registro for encontrado
+    }
+
+    return registro;  // Retorna o registro lido
 }
 
 void registro_writebin(FILE *nomebin, Registro *registro){// escreve o registro no arquivo binário

@@ -10,5 +10,5 @@
 
 //comandos basicos
 void CREATE_TABLE(char *nomeCSV, char *nomearqbin);
-
+void SELECT_TABLE(char *nomearqbin);
 #endif
