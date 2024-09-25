@@ -22,7 +22,7 @@ int main() {
     scanf("%d", &comando);
 
     switch (comando) {
-        case 1:
+        case 1: //CREATE TABLE
             scanf("%s", nomeCSV);
             scanf("%s", nomearqbin);
 
@@ -60,7 +60,7 @@ int main() {
             binarioNaTela(nomearqbin);
 
             break;
-        case 2:
+        case 2: // SELECT TABLE
             // Leitura do arquivo binário
             scanf("%s", nomearqbin);
             // Chama a função para recuperar e mostrar os registros
@@ -72,3 +72,4 @@ int main() {
     
     return 0;
 }
+

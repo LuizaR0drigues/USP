@@ -102,7 +102,7 @@ void escreve_cabecalho(Cabecalho c, FILE* bin, char str) {
     
     
 }
-Cabecalho leitura_cabecalho(Cabecalho c, FILE* bin) {
+void leitura_cabecalho(Cabecalho c, FILE* bin) {
     
     fread(&c.status, sizeof(char), 1, bin);
     printf("Status3: %c\n", c.status);
