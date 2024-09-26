@@ -6,6 +6,10 @@
 */
 Cabecalho *cabecalho_readbin(FILE *file){
     // lê o cabecalho de um arquivo binário
+    char buffer[1600];
+    fread(buffer, sizeof(char), 1600, file);
+    printf("Leitura do cabecalho, check\n");
+    
 }
 Cabecalho* cabecalho_inicializa()
 {
@@ -56,6 +60,7 @@ void cabecalho_writebin(FILE *file, Cabecalho *cabecalho) {
 void cabecalho_readcsv(FILE *csv) {
     char buffer[300];
     fgets(buffer, sizeof(buffer), csv); // Pula a linha de cabeçalho
+    
 }
 
 

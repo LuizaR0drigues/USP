@@ -3,10 +3,10 @@
 
 
 Registro *registro_readbin(FILE *file) {
-    printf("Inicio da leitura\n");
+    
     // Lê o registro de um arquivo binário
     // Não abrir o arquivo aqui, pois já foi passado como parâmetro
-     Registro *registro;
+    Registro *registro;
     Cabecalho cabecalho;
     // Lê o cabeçalho do arquivo
     if (fread(&cabecalho, sizeof(Cabecalho), 1, file) != 1) {
@@ -21,13 +21,17 @@ Registro *registro_readbin(FILE *file) {
 
     // Lê os registros
     int registros_encontrados = 0;
-    
+    cabecalho_readbin(file);
+
     while(!feof(file)) {
         // Verifica se o registro foi logicamente removido
         //printf("Remov: %c\n", registro->removido);
+        
+        char *aux = calloc(10, sizeof(char));
+
         if (registro->removido == '1') {
-            fseek(file, sizeof(int) + sizeof(int) + sizeof(float) + sizeof(char) + sizeof(int), SEEK_CUR); // Pula para o próximo registro
-            continue;  // Ignora registros removidos
+            fseek(file, 160, SEEK_CUR); // Pula para o próximo registro
+           continue; // Ignora registros removidos
         }
 
         fread(&registro->encadeamento, sizeof(int), 1, file);
@@ -35,6 +39,34 @@ Registro *registro_readbin(FILE *file) {
         fread(&registro->tamanho, sizeof(float), 1, file);
         fread(&registro->uniMedida, sizeof(char), 1, file);
         fread(&registro->velocidade, sizeof(int), 1, file);
+        printf("1Inicio da leitura\n");
+
+        //leitura dos campos variaveis
+        fread(&registro->nome, sizeof(char), 1, file);
+        fread(aux, sizeof(char), 1, file); //leitura do delimitador
+        printf("nome: %s\n", registro->nome);
+
+        fread(&registro->nEspecie, sizeof(char), 1, file);
+        fread(aux, sizeof(char), 1, file); //leitura do delimitador
+        printf("nEspecie: %s\n", registro->nEspecie);
+
+        fread(&registro->habitat, sizeof(char), 1, file);
+        fread(aux, sizeof(char), 1, file); //leitura do delimitador
+        printf("habitat: %s\n", registro->habitat);
+
+        fread(&registro->tipo, sizeof(char), 1, file);
+        fread(aux, sizeof(char), 1, file); //leitura do delimitador
+        printf("tipo: %s\n", registro->tipo);
+
+        fread(&registro->dieta, sizeof(char), 1, file);
+        fread(aux, sizeof(char), 1, file); //leitura do delimitador
+        printf("dieta: %s\n", registro->dieta);
+
+        fread(&registro->alimento, sizeof(char), 1, file);
+        fread(aux, sizeof(char), 1, file); //leitura do delimitador
+        printf("alimento: %s\n", registro->alimento);
+
+        free(aux);
 
         registros_encontrados++; // Incrementa o contador de registros encontrados
     }
