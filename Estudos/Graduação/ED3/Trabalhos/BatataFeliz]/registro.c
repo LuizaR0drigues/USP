@@ -14,8 +14,6 @@ Registro *registro_readbin(FILE *file) {
         return NULL;  // Retorna NULL em caso de erro
     }
 
-    printf("Status: %c\n", cabecalho.status);
-
     if (cabecalho.status == '0') {
         printf("Falha no processamento do arquivo: arquivo inconsistente.\n");
         return NULL;  // Retorna NULL se o cabeçalho está inconsistente
@@ -26,7 +24,7 @@ Registro *registro_readbin(FILE *file) {
     
     while(!feof(file)) {
         // Verifica se o registro foi logicamente removido
-        printf("Remov: %c\n", registro->removido);
+        //printf("Remov: %c\n", registro->removido);
         if (registro->removido == '1') {
             fseek(file, sizeof(int) + sizeof(int) + sizeof(float) + sizeof(char) + sizeof(int), SEEK_CUR); // Pula para o próximo registro
             continue;  // Ignora registros removidos
@@ -49,20 +47,17 @@ Registro *registro_readbin(FILE *file) {
     return registro;  // Retorna o registro lido
 }
 
-void registro_writebin(FILE *nomebin, Registro *registro){// escreve o registro no arquivo binário
-//função: // pformata as strings sem o \0, adicionando o delimitador, depois coloca o preenchimento usando a 'tam_preenchimento'
-    //formatando as strings de tamanho variaveis
-    // Escreve strings (sem \0, já que é um formato binário e tamanho variável) usando o tamanho de cada uma
-    int tamT = 0, tamD = 0, tamA = 0, tamE = 0, tamH = 0, tam = 0;
-    tam = strlen(registro->nome);
-    tamA = strlen(registro->alimento);
-    tamD = strlen(registro->dieta);
-    tamE = strlen(registro->nEspecie);
-    tamT = strlen(registro->tipo);
-    tamH = strlen(registro->habitat);
+void registro_writebin(FILE *nomebin, Registro *registro) {
+    // Função para escrever o registro no arquivo binário
 
-    
-    
+    // Obter o tamanho das strings de tamanho variável
+    int tam = strlen(registro->nome);
+    int tamA = strlen(registro->alimento);
+    int tamD = strlen(registro->dieta);
+    int tamE = strlen(registro->nEspecie);
+    int tamT = strlen(registro->tipo);
+    int tamH = strlen(registro->habitat);
+
     // Escreve campos de tamanho fixo
     fwrite(&registro->removido, sizeof(char), 1, nomebin);
     fwrite(&registro->encadeamento, sizeof(int), 1, nomebin);
@@ -70,160 +65,137 @@ void registro_writebin(FILE *nomebin, Registro *registro){// escreve o registro 
     fwrite(&registro->tamanho, sizeof(float), 1, nomebin);
     fwrite(&registro->uniMedida, sizeof(char), 1, nomebin);
     fwrite(&registro->velocidade, sizeof(int), 1, nomebin);
-    //escreve campos de tamanho variavel
-    fwrite(registro->nome, sizeof(char), tam, nomebin);
+
+    // Escreve campos de tamanho variável com delimitador #
+    if (registro->nome != NULL && strcmp(registro->nome, "#") != 0) {
+        fwrite(registro->nome, sizeof(char), tam, nomebin);
+    }
     fwrite("#", sizeof(char), 1, nomebin);  // Delimitador
 
-    fwrite(registro->nEspecie, sizeof(char), tamE, nomebin);
+    if (registro->nEspecie != NULL && strcmp(registro->nEspecie, "#") != 0) {
+        fwrite(registro->nEspecie, sizeof(char), tamE, nomebin);
+    }
     fwrite("#", sizeof(char), 1, nomebin);  // Delimitador
 
-    fwrite(registro->habitat, sizeof(char), tamH, nomebin);
+    if (registro->habitat != NULL && strcmp(registro->habitat, "#") != 0) {
+        fwrite(registro->habitat, sizeof(char), tamH, nomebin);
+    }
     fwrite("#", sizeof(char), 1, nomebin);  // Delimitador
 
-    fwrite(registro->tipo, sizeof(char), tamT, nomebin);
+    if (registro->tipo != NULL && strcmp(registro->tipo, "#") != 0) {
+        fwrite(registro->tipo, sizeof(char), tamT, nomebin);
+    }
     fwrite("#", sizeof(char), 1, nomebin);  // Delimitador
 
-    fwrite(registro->dieta, sizeof(char), tamD, nomebin);
+    if (registro->dieta != NULL && strcmp(registro->dieta, "#") != 0) {
+        fwrite(registro->dieta, sizeof(char), tamD, nomebin);
+    }
     fwrite("#", sizeof(char), 1, nomebin);  // Delimitador
 
-    fwrite(registro->alimento, sizeof(char), tamA, nomebin);
-    fwrite("#", sizeof(char), 1, nomebin);  // Delimitado
+    if (registro->alimento != NULL && strcmp(registro->alimento, "#") != 0) {
+        fwrite(registro->alimento, sizeof(char), tamA, nomebin);
+    }
+    fwrite("#", sizeof(char), 1, nomebin);  // Delimitador
 
-    
     // Verifica quanto falta para completar os 160 bytes
     int preenche = registro->tam_preenchimento;
     char aux[preenche];
-    for(int i=0; i<preenche; i++)
-    {
-        aux[i] = REGISTRO_FILL;
-    }
+    memset(aux, REGISTRO_FILL, preenche);  // Preenche com o caractere de preenchimento
     fwrite(aux, sizeof(char), preenche, nomebin);
-
 }
 
-Registro *registro_readcsv(FILE *csv){
+Registro *registro_readcsv(FILE *csv) {
     Registro *registro = malloc(sizeof(Registro));
-
     char linha[300];
     fgets(linha, sizeof(linha), csv);
 
     // Remove os caracteres de nova linha (tanto \n quanto \r)
-    linha[strcspn(linha, "\n")] = '\0'; //remove o \n e \r de cada linha do csv
+    linha[strcspn(linha, "\n")] = '\0';
     linha[strcspn(linha, "\r")] = '\0';
 
-    // Início da leitura dos campos separados por vírgula
     char *linha_copy = linha;
+    //alocando memoria
+    registro->nome = calloc(160,sizeof(registro->nome));
+    registro->nEspecie = calloc(160,sizeof(registro->nEspecie));
+    registro->dieta = calloc(160,sizeof(registro->dieta));
+    registro->habitat = calloc(160,sizeof(registro->habitat));
+    registro->alimento = calloc(160,sizeof(registro->alimento));
+    registro->tipo = calloc(160,sizeof(registro->tipo));
 
     // Nome
-    char* campo = strsep(&linha_copy, ","); //usando a função strsep para dividir em tokens
-    
-    int tamT = 0, tamD = 0, tamA = 0, tamE = 0, tamH = 0, tam = 0; //variaveis que irao armazenar os tamanhos dos campos variaveis
-    if (campo != NULL) {
-        tam = strlen(campo);
-        registro->nome = (char*) malloc((tam + 1) * sizeof(char));
-        strcpy(registro->nome, campo);
-        // registro->nome[tam] = '#'; // Finaliza com '#'
-    }
-    
+    strcpy(registro->nome,strsep(&linha_copy, ","));
+
     // Dieta
-    campo = strsep(&linha_copy, ",");
-    if (campo != NULL) {
-        tamD = strlen(campo);
-        registro->dieta = (char*) malloc((tamD + 1) * sizeof(char));
-        strcpy(registro->dieta, campo);
-        // registro->dieta[tamD] = '#'; // Finaliza com '#'
-        
-    }
+    strcpy(registro->dieta,strsep(&linha_copy, ","));
 
     // Habitat
-    campo = strsep(&linha_copy, ",");
-    if (campo != NULL) {
-        tamH = strlen(campo);
-        registro->habitat = (char*) malloc((tamH + 1) * sizeof(char));
-        strcpy(registro->habitat, campo);
-        // registro->habitat[tamH] = '#'; // Finaliza com '#'
-            
-    }
+    strcpy(registro->habitat,strsep(&linha_copy, ","));
 
     // População
-    campo = strsep(&linha_copy, ",");
-    if(campo != NULL)
-    {
-        registro->populacao = atoi(campo);
-    }
-    else{
-        registro->populacao = -1; //para caso de poulação -> null
-    }
-
-    // Tipo
-    campo = strsep(&linha_copy, ",");
-    if (campo != NULL) {
-        tamT = strlen(campo);
-        registro->tipo = (char*) malloc((tamT + 1) * sizeof(char));
-        strcpy(registro->tipo, campo);
-        // registro->tipo[tamT] = '#'; // Finaliza com '#'
-    }
-
-    // Velocidade
-    campo = strsep(&linha_copy, ",");
-    if(campo != NULL)
-    {
-        registro->velocidade = atoi(campo);
-    }
-    else{
+    char *populacao = strsep(&linha_copy, ",");
+    if (strlen(populacao) == 0) {
         registro->populacao = -1;
     }
+    else{
+        registro->populacao = atoi(populacao);
+    }
+    
+    // Tipo
+    strcpy(registro->tipo,strsep(&linha_copy, ","));
+    
 
-    // Unidade de medida
-    campo = strsep(&linha_copy, ",");
-    registro->uniMedida = (campo != NULL) ? campo[0] : '$';
-    if(campo != NULL)
-    {
-        registro->uniMedida = campo[0];
+    // Velocidade
+    char *velocidade = strsep(&linha_copy, ",");
+    if (strlen(velocidade) == 0) {
+        registro->velocidade = -1;
     }
     else{
+        registro->velocidade = atoi(velocidade);
+    }
+    
+    // Unidade de medida
+    char *unidade = strsep(&linha_copy, ",");
+    if (strlen(unidade) == 0) {
         registro->uniMedida = '$';
+    }
+    else{
+        registro->uniMedida = unidade[0];
     }
 
     // Tamanho
-    campo = strsep(&linha_copy, ",");
-    if(campo != NULL)
-    {
-        registro->tamanho = atof(campo);
+    char *tamanho = strsep(&linha_copy, ",");
+    if (strlen(tamanho) == 0) {
+        registro->tamanho = -1;
     }
     else{
-        registro->tamanho = -1.0;
+        registro->tamanho = atof(tamanho);
     }
 
     // Espécie
-    campo = strsep(&linha_copy, ",");
-    if (campo != NULL) {
-        tamE = strlen(campo);
-        registro->nEspecie = (char*) malloc((tamE + 1) * sizeof(char));
-        strcpy(registro->nEspecie, campo);
-        // registro->nEspecie[tamE] = '#'; // Finaliza com '#'
-    }
-
+    strcpy(registro->nEspecie,strsep(&linha_copy, ","));
+   
     // Alimento
-    campo = strsep(&linha_copy, ",");
-    if (campo != NULL) {
-        tamA = strlen(campo);
-        registro->alimento = (char*) malloc((tamA + 1) * sizeof(char));
-        strcpy(registro->alimento, campo);
-        // registro->alimento[tamA] = '#'; // Finaliza com '#'
-    }
+    strcpy(registro->alimento,strsep(&linha_copy, ","));
+    
+    // Configurações adicionais para o registro
+    registro->removido = REGISTRO_REMOVIDO_FALSE;
+    registro->encadeamento = 0;
 
     // Calcular bytes restantes para completar os 160 bytes
-    // nome + dieta + habitat + tipo + especie + alimento
-    // 18 = tamanho das variáveis fixas
-    registro->tam_preenchimento = 160 - ((tam + tamD + tamH + tamT + tamE + tamA)*sizeof(char) + 18+6);
+    // calcular tam_preenchimento corretamente com base nos tamanhos das strings
+    int tam = strlen(registro->nome);
+    int tamE = strlen(registro->nEspecie);
+    int tamA = strlen(registro->alimento);
+    int tamH = strlen(registro->habitat);
+    int tamD = strlen(registro->dieta);
+    int tamT = strlen(registro->tipo);
 
-    // Armazena o registro no arquivo binário
-    registro->removido = REGISTRO_REMOVIDO_FALSE; // não removido
-    registro->encadeamento = 0; // não há encadeamento
-    
+    // 18 bytes para os campos fixos (população, tamanho, velocidade, uniMedida, removido e encadeamento) e 6 bytes para delimitadores '#'
+    registro->tam_preenchimento = 160 - ((tam + tamD + tamH + tamT + tamE + tamA) * sizeof(char) + 18 +6);
+
     return registro;
 }
+
 
 void registro_print(Registro *registro){
     printf("Nome: %s\n", registro->nome);

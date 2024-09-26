@@ -15,10 +15,10 @@
 
     // Exemplo de estrutura Registro (ajuste conforme necessário)
     typedef struct {
-        int populacao;
-        float tamanho;
-        char uniMedida;
-        int velocidade;
+        int populacao; //4 bytes
+        float tamanho; // 4 bytes
+        char uniMedida; //1 byte
+        int velocidade; //4 bytes
         char *nome;
         char *nEspecie;
         char *habitat;
@@ -26,8 +26,8 @@
         char *dieta;
         char *alimento;
 
-        char removido;
-        int encadeamento;
+        char removido; //1 byte
+        int encadeamento; //4 bytes
         int tam_preenchimento;
 
     } Registro;

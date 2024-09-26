@@ -39,7 +39,6 @@ void cabecalho_writebin(FILE *file, Cabecalho *cabecalho) {
     }
     fwrite(&cabecalho->status, sizeof(char), 1, file);
     fwrite(&cabecalho->topo, sizeof(int), 1, file);
-    printf("%d %d\n", cabecalho->nroPagDisco, cabecalho->proxRRN);
     fwrite(&cabecalho->proxRRN, sizeof(int), 1, file);
     fwrite(&cabecalho->nroRegRem, sizeof(int), 1, file);
     fwrite(&cabecalho->nroPagDisco, sizeof(int), 1, file);

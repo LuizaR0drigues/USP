@@ -30,10 +30,10 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
 
             //escrita
             cabecalho_writebin(arquivo_binario,cabecalho);
-            printf("Status: %c\n", cabecalho->status);
+            //printf("Status: %c\n", cabecalho->status);
             while (!feof(arquivo_csv)) { //salva todos os dados em dino
                 Registro *dino = registro_readcsv(arquivo_csv);
-                
+
                 // Verifica se leu corretamente o registro
                 if (dino == NULL) {
                     printf("Erro ao ler o registro do CSV\n");
@@ -49,13 +49,7 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
                 //qtt de registros
                 qtt++;
                 // Liberar a memória alocada para o registro
-                free(dino->nome);
-                free(dino->dieta);
-                free(dino->habitat);
-                free(dino->tipo);
-                free(dino->nEspecie);
-                free(dino->alimento);
-                free(dino);
+                //free(dino->nome);
             }
             
             // Verificação do cabeçalho
