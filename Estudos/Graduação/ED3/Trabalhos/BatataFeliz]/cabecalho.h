@@ -35,7 +35,7 @@
     int cabecalho_getQttCompacta(Cabecalho *cabecalho);
 
     // Funções para definir valores dos campos do cabeçalho
-    void cabecalho_setStatus(Cabecalho *cabecalho, bool status);
+    void cabecalho_setStatus(Cabecalho *cabecalho, char status);
     void cabecalho_setTopo(Cabecalho *cabecalho, int topo);
     void cabecalho_setProxRRN(Cabecalho *cabecalho, int proxRRN);
     void cabecalho_setNroPagDisco(Cabecalho *cabecalho, int nropag);

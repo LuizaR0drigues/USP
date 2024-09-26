@@ -6,9 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 //comandos basicos
-void CREATE_TABLE(char *nomeCSV, char *nomearqbin);
+void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *c);
 void SELECT_TABLE(char *nomearqbin);
 #endif

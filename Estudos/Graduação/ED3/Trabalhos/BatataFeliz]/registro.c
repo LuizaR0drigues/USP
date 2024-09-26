@@ -3,6 +3,7 @@
 
 
 Registro *registro_readbin(FILE *file) {
+    printf("Inicio da leitura\n");
     // Lê o registro de um arquivo binário
     // Não abrir o arquivo aqui, pois já foi passado como parâmetro
      Registro *registro;
@@ -23,8 +24,9 @@ Registro *registro_readbin(FILE *file) {
     // Lê os registros
     int registros_encontrados = 0;
     
-    while (fread(&registro->removido, sizeof(char), 1, file) == 1) {
+    while(!feof(file)) {
         // Verifica se o registro foi logicamente removido
+        printf("Remov: %c\n", registro->removido);
         if (registro->removido == '1') {
             fseek(file, sizeof(int) + sizeof(int) + sizeof(float) + sizeof(char) + sizeof(int), SEEK_CUR); // Pula para o próximo registro
             continue;  // Ignora registros removidos

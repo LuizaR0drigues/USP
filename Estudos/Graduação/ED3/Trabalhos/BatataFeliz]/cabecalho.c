@@ -1,6 +1,9 @@
 #include "cabecalho.h"
 
-
+/*
+#define CABECALHO_STATUS_OK 1
+#define CABECALHO_STATUS_INCON 0
+*/
 Cabecalho *cabecalho_readbin(FILE *file){
     // lê o cabecalho de um arquivo binário
 }
@@ -8,7 +11,7 @@ Cabecalho* cabecalho_inicializa()
 {
     //estrutura padrão do cabecalho
     Cabecalho *cabecalho  = malloc(sizeof(Cabecalho));
-    cabecalho->status = '0';
+    cabecalho->status = CABECALHO_STATUS_INCON;
     cabecalho->topo = -1;
     cabecalho->proxRRN = 0;
     cabecalho->nroRegRem = 0;
@@ -20,29 +23,30 @@ Cabecalho* cabecalho_inicializa()
 
 bool cabecalho_getStatus(Cabecalho *cabecalho) {
     // Verifica o valor do campo status
-    if (cabecalho->status == CABECALHO_STATUS_OK) {
+    /*if (cabecalho->status == CABECALHO_STATUS_OK) {
         return true; // Retorna verdadeiro se o status for '1'
     } else {
         return false; // Retorna falso caso contrário
-    }
+    }*/
+   return cabecalho->status == CABECALHO_STATUS_OK;
 }
 
 void cabecalho_writebin(FILE *file, Cabecalho *cabecalho) {
     // Escreve o cabeçalho no arquivo binário
-    if (cabecalho_getStatus(cabecalho)) {
-        fwrite(&cabecalho->status, sizeof(char), 1, file); // Escreve o status se for OK
-    } else {
-        char status = '0'; // Escreve '0' se o status não for OK
-        fwrite(&status, sizeof(char), 1, file);
+    if (!cabecalho_getStatus(cabecalho)) {
+        // Se o status não for OK, ajusta para '1'
+        cabecalho_setStatus(cabecalho, '1');
     }
-
+    fwrite(&cabecalho->status, sizeof(char), 1, file);
     fwrite(&cabecalho->topo, sizeof(int), 1, file);
+    printf("%d %d\n", cabecalho->nroPagDisco, cabecalho->proxRRN);
     fwrite(&cabecalho->proxRRN, sizeof(int), 1, file);
     fwrite(&cabecalho->nroRegRem, sizeof(int), 1, file);
     fwrite(&cabecalho->nroPagDisco, sizeof(int), 1, file);
+    fwrite(&cabecalho->qttCompacta, sizeof(int), 1, file);
 
     // Preencher o restante da página de disco com o caractere '$'
-    int resto = 1600 - (4 * sizeof(int)) - sizeof(char); // Calcula o espaço restante
+    int resto = 1600 - (5 * sizeof(int)) - sizeof(char); // Calcula o espaço restante
     char aux[resto];
     for (int i = 0; i < resto; i++) {
         aux[i] = '$'; // Preenche o array com '$'
@@ -75,7 +79,7 @@ int cabecalho_getQttCompacta(Cabecalho *cabecalho){
     return cabecalho->qttCompacta;
 }
 
-void cabecalho_setStatus(Cabecalho *cabecalho, bool status){
+void cabecalho_setStatus(Cabecalho *cabecalho, char status){
     cabecalho->status = status;
 }
 
