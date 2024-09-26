@@ -216,7 +216,7 @@ Registro *registro_readcsv(FILE *csv){
     // Calcular bytes restantes para completar os 160 bytes
     // nome + dieta + habitat + tipo + especie + alimento
     // 18 = tamanho das variáveis fixas
-    registro->tam_preenchimento = 160 - ((tam + tamD + tamH + tamT + tamE + tamA)*sizeof(char) + 18);
+    registro->tam_preenchimento = 160 - ((tam + tamD + tamH + tamT + tamE + tamA)*sizeof(char) + 18+6);
 
     // Armazena o registro no arquivo binário
     registro->removido = REGISTRO_REMOVIDO_FALSE; // não removido

@@ -42,7 +42,7 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
                 
                 // Exibir as informações do registro lido
                 //registro_print(dino);
-
+                registro_setEncadeamento(dino, -1);
                 //escreve no arquivo binario
                 registro_writebin(arquivo_binario, dino);
 
