@@ -3,8 +3,9 @@
 #include <math.h>
 #include "registro.h"
 #include "cabecalho.h"
+#include "funcoesFornecidas.h"
 
-
+ #define PAGINA_TAMANHO 1600
 /*
 #define CABECALHO_STATUS_OK 1
 #define CABECALHO_STATUS_INCON 0
@@ -71,13 +72,13 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
             fclose(arquivo_binario);
 }   
 
-void SELECT_TABLE(char *nomearqbin) { //vamos ver onde da bosta
+void SELECT_TABLE(char *nomearqbin) {
     FILE *arquivo_binario = fopen(nomearqbin, "rb");
     if (arquivo_binario == NULL) {
         printf("Falha ao abrir o arquivo \n");
         return;
     }
-//sabemo que o arquivo abre
+
     Registro *registro;  // Estrutura para armazenar um registro
 
     Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
@@ -87,11 +88,11 @@ void SELECT_TABLE(char *nomearqbin) { //vamos ver onde da bosta
     while (1) {
         
         //sabemos que ele morre no while, mas passa uma vez so aqui
-        Registro *registro = registro_readbin(arquivo_binario);
+        registro = registro_readbin(arquivo_binario);
         cont_registro++;
 
         //ele nao passa do primeiro registro_readbin (local do problema )
-        // Verifica se a leitura foi bem-sucedida
+        // Verifica se a lei/sabemo que o arquivo abretura foi bem-sucedida
         if (registro->removido == 'E') {
             break;  // Sai do loop se não houver mais registros para ler
         }
@@ -104,11 +105,63 @@ void SELECT_TABLE(char *nomearqbin) { //vamos ver onde da bosta
     }
     printf("Numero de paginas de disco: %d\n", cabecalho->nroPagDisco);
     printf("\n");
-
+    free(registro);
+    free(cabecalho);
     fclose(arquivo_binario); 
 }
 
-void SELECT_WHERE(char *nome, char *campo, char *valor)
-{
+int SELECT_WHERE(char *nome, char *campo) {
+    FILE *arquivo_binario = fopen(nome, "rb");
+    if (arquivo_binario == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return 0; // Retorna 0 se não conseguiu abrir o arquivo
+    }
 
+    Registro *registro;
+    Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario); // leitura do cabeçalho do arquivo
+    fseek(arquivo_binario, 1600, SEEK_SET); // setando a leitura
+
+    int nroPagDisco = cabecalho->nroPagDisco;
+    int found = 0; // Indicador para verificar se algum registro foi encontrado
+    int cont_registro = 0;
+
+    while (1) {
+        registro = registro_readbin(arquivo_binario);
+        if (registro == NULL) {
+            break; // Sai do loop se não houver mais registros
+        }
+        if (registro_isValid(registro) == false) {
+            fseek(arquivo_binario, 1600 + REGISTRO_SIZE * (cont_registro), SEEK_SET);
+            free(registro); // Libera memória do registro lido antes de continuar
+            cont_registro++;
+            continue;
+        }
+
+        // Verificação do tipo da variável que deve-se buscar no arquivo binário
+        int teste = verificacaoString(campo);
+        if (teste == 0 || teste == 1 || teste == 2 || teste == 3 || teste == 4 || teste == 5) {
+            char valor[100];
+            scan_quote_string(valor); // Leitura para o caso de string
+            registro_busca_elemento(valor, -1, -1.0f, registro);
+        } else if (teste == 6 || teste == 7) {
+            int valorint;
+            scanf("%d", &valorint); // Leitura para o caso de inteiro
+            registro_busca_elemento(NULL, valorint, -1.0f, registro);
+        } else if (teste == 8) {
+            float valorf;
+            scanf("%f", &valorf); // Leitura para o caso de float
+            registro_busca_elemento(NULL, -1, valorf, registro);
+        } else if (teste == -1) { // Campo inválido
+            free(registro);
+            break;
+        }
+
+        free(registro); // Libera memória do registro lido
+        cont_registro++;
+    }
+
+    free(cabecalho);
+    fclose(arquivo_binario);
+
+    return nroPagDisco;
 }

@@ -31,25 +31,25 @@ int main()
             scanf("%s", aux);
             SELECT_TABLE(aux);
             break;
-        case 3:
-            int i=0;
-            scanf("%s %d", aux, &quant);
-            while(i != quant)
-            {
+         case 3: {
+            int quant = 0;
+            char nomearquivo[15];
+            scanf("%s %d", nomearquivo, &quant); // Leitura do nome do arquivo e a quantidade
+
+            int i = 0;
+            while (i != quant) {
+                char nomecampo[100];
+                // Lê o nome do campo
                 scanf("%s", nomecampo);
-                scan_quote_string(valorcampo);
-                SELECT_WHERE(aux, nomecampo, valorcampo);
+                printf("Busca %d\n", i + 1);
+
+                // Chama a função SELECT_WHERE com os parâmetros lidos
+                int paginasDisco = SELECT_WHERE(nomearquivo, nomecampo);
                 i++;
             }
             break;
+        }
     }
-    //     default:
-    //         printf("Comando desconhecido\n");
-    //         exit(1);
-    // }
-    free(aux);
-    free(nomecampo);
-    free(valorcampo);
-    
+            
     return 0;
     }

@@ -67,7 +67,8 @@
     char* registro_getAlimenta(Registro *registro);
     char registro_getRemovido(Registro *registro);
     int registro_getEncadeamento(Registro *registro);
-
+    int verificacaoString(char *campo);
+    void registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro);
     // Funções para definir valores dos campos do registro
     void registro_setPop(Registro *registro, int pop);
     void registro_setTam(Registro *registro, float tam);

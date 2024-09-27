@@ -232,6 +232,53 @@ void registro_print(Registro *registro){
     printf("\n");
     
 }
+void registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro) {
+    if (valor != NULL && strcmp(registro->nome, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->nEspecie, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->alimento, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->dieta, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->tipo, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->habitat, valor) == 0) {
+        registro_print(registro);
+    } else if (registro->populacao == valorint) {
+        registro_print(registro);
+    } else if (registro->velocidade == valorint) {
+        registro_print(registro);
+    } else if (registro->tamanho == valorf) {
+        registro_print(registro);
+    }
+}
+
+int verificacaoString(char *campo) {
+    // Verifica o tipo do campo e retorna a posição
+    if (strcmp("nome", campo) == 0) {
+        return 0; // Retorna 0 para 'nome'
+    } else if (strcmp("especie", campo) == 0) {
+        return 1; // Retorna 1 para 'especie'
+    } else if (strcmp("habitat", campo) == 0) {
+        return 2; // Retorna 2 para 'habitat'
+    } else if (strcmp("tipo", campo) == 0) {
+        return 3; // Retorna 3 para 'tipo'
+    } else if (strcmp("dieta", campo) == 0) {
+        return 4; // Retorna 4 para 'dieta'
+    } else if (strcmp("alimento", campo) == 0) {
+        return 5; // Retorna 5 para 'alimento'
+    } else if (strcmp("velocidade", campo) == 0) {
+        return 6;
+    } else if (strcmp("populacao", campo) == 0) {
+        return 7;
+    } else if (strcmp("tamanho", campo) == 0) {
+        return 8;
+    } else {
+        printf("Campo inexistente.\n");
+        return -1; // Campo inexistente
+    }
+}
 
 bool registro_field(char *nome_campo){
     // retorna se é um campo de string ou inteiro
