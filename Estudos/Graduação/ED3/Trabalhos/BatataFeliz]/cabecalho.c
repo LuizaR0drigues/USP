@@ -37,7 +37,7 @@ Cabecalho* cabecalho_inicializa()
 
 // Função para ler o cabeçalho do arquivo binário
 Cabecalho* cabecalho_readbin(FILE *entrada) {
-    Cabecalho *cabecalho = cria_cabecalho();
+    Cabecalho *cabecalho = cabecalho_inicializa();
     
     // Leitura do status do cabeçalho
     if (!fread(&cabecalho->status, sizeof(char), 1, entrada)) {
@@ -52,14 +52,14 @@ Cabecalho* cabecalho_readbin(FILE *entrada) {
     fread(&cabecalho->nroPagDisco, sizeof(int), 1, entrada);
     fread(&cabecalho->qttCompacta, sizeof(int), 1, entrada);
     
-    // Exibição dos dados lidos do cabeçalho
+    /*/ Exibição dos dados lidos do cabeçalho
     printf("Status: %c\n", cabecalho->status);
     printf("Topo: %d\n", cabecalho->topo);
     printf("Próximo RRN: %d\n", cabecalho->proxRRN);
     printf("Número de Registros Removidos: %d\n", cabecalho->nroRegRem);
     printf("Número de Páginas de Disco: %d\n", cabecalho->nroPagDisco);
     printf("Quantidade de Compactações: %d\n", cabecalho->qttCompacta);
-
+    */
     return cabecalho;
 }
 bool cabecalho_getStatus(Cabecalho *cabecalho) {
@@ -84,6 +84,8 @@ void cabecalho_writebin(FILE *file, Cabecalho *cabecalho) {
     fwrite(&cabecalho->nroRegRem, sizeof(int), 1, file);
     fwrite(&cabecalho->nroPagDisco, sizeof(int), 1, file);
     fwrite(&cabecalho->qttCompacta, sizeof(int), 1, file);
+
+    
 
     // Preencher o restante da página de disco com o caractere '$'
     int resto = 1600 - (5 * sizeof(int)) - sizeof(char); // Calcula o espaço restante

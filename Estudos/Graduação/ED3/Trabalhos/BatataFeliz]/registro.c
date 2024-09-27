@@ -11,7 +11,7 @@ Registro *registro_readbin(FILE* entrada) {
         return registro;
     }
 
-    if (registro->removido == '1') { 
+    if (registro->removido == '1') {
         return registro;
     }
  //freads para os campos de tamanho fixo
@@ -206,7 +206,7 @@ Registro *registro_readcsv(FILE *csv) {
 }
 
 
-void registro_print(Registro *registro, Cabecalho *c){
+void registro_print(Registro *registro){
 
     
     printf("Nome: %s\n", registro->nome);
@@ -230,7 +230,7 @@ void registro_print(Registro *registro, Cabecalho *c){
         printf("Velocidade: %d %cm/h\n", registro->velocidade, registro->uniMedida);
     }
     printf("\n");
-    printf("Numero de paginas de disco: %d\n", c->nroPagDisco);
+    
 }
 
 bool registro_field(char *nome_campo){
@@ -243,6 +243,7 @@ void registro_remove(Registro *registro){
 
 bool registro_isValid(Registro *registro){
     // retorna true caso o registro não seja removido
+    return registro->removido == REGISTRO_REMOVIDO_FALSE;
 }
 
 

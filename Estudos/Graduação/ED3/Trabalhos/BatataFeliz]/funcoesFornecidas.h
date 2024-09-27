@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void readline(char *string);
+void scan_quote_string(char *str);
 
 /**
  * Use essa função para comparação no run.codes.

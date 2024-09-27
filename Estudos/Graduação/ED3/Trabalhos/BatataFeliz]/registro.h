@@ -43,7 +43,7 @@
     Registro *registro_readcsv(FILE *csv);
 
     // Função para imprimir os dados do registro
-    void registro_print(Registro *registro, Cabecalho *c);
+    void registro_print(Registro *registro);
 
     // Verifica se o campo é string ou inteiro
     bool registro_field(char *nome_campo);

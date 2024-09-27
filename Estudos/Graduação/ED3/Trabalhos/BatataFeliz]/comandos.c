@@ -78,27 +78,37 @@ void SELECT_TABLE(char *nomearqbin) { //vamos ver onde da bosta
         return;
     }
 //sabemo que o arquivo abre
-    Registro registro;  // Estrutura para armazenar um registro
+    Registro *registro;  // Estrutura para armazenar um registro
 
-
+    Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
     fseek (arquivo_binario, 1600, SEEK_SET);
     // Lê registros do arquivo binário
+    int cont_registro=0;
     while (1) {
         
         //sabemos que ele morre no while, mas passa uma vez so aqui
         Registro *registro = registro_readbin(arquivo_binario);
-        Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
-        
+        cont_registro++;
+
         //ele nao passa do primeiro registro_readbin (local do problema )
         // Verifica se a leitura foi bem-sucedida
         if (registro->removido == 'E') {
             break;  // Sai do loop se não houver mais registros para ler
         }
-        if(registro->removido == '1'){
+        if(registro_isValid(registro)==false){
+            fseek (arquivo_binario, 1600+REGISTRO_SIZE*(cont_registro), SEEK_SET);
             continue;
         }
-        registro_print(registro, cabecalho);  // Imprime o registro lido
+        
+        registro_print(registro);  // Imprime o registro lido
     }
+    printf("Numero de paginas de disco: %d\n", cabecalho->nroPagDisco);
+    printf("\n");
 
     fclose(arquivo_binario); 
+}
+
+void SELECT_WHERE(char *nome, char *campo, char *valor)
+{
+
 }
