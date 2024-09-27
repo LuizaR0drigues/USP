@@ -3,14 +3,24 @@
 /*
 #define CABECALHO_STATUS_OK 1
 #define CABECALHO_STATUS_INCON 0
-*/
-Cabecalho *cabecalho_readbin(FILE *file){
-    // lê o cabecalho de um arquivo binário
-    char buffer[1600];
-    fread(buffer, sizeof(char), 1600, file);
-    printf("Leitura do cabecalho, check\n");
-    
-}
+*//*0
+Cabecalho *cabecalho_readbin(FILE *file) {
+    // Aloca memória para o cabeçalho
+    Cabecalho *cabecalho = malloc(sizeof(Cabecalho));
+    if (!cabecalho) {
+        //printf("Erro ao alocar memória para o cabeçalho.\n");
+        return NULL;
+    }
+
+    // Lê o cabeçalho do arquivo binário
+    if (fread(cabecalho, sizeof(Cabecalho), 1, file) != 1) {
+        printf("Erro ao ler o cabeçalho do arquivo.\n");
+        free(cabecalho);  // Libera memória em caso de erro
+        return NULL;
+    }
+    return cabecalho;  // Retorna o ponteiro para o cabeçalho lido
+}*/
+
 Cabecalho* cabecalho_inicializa()
 {
     //estrutura padrão do cabecalho
@@ -25,6 +35,33 @@ Cabecalho* cabecalho_inicializa()
     return cabecalho;
 }
 
+// Função para ler o cabeçalho do arquivo binário
+Cabecalho* cabecalho_readbin(FILE *entrada) {
+    Cabecalho *cabecalho = cria_cabecalho();
+    
+    // Leitura do status do cabeçalho
+    if (!fread(&cabecalho->status, sizeof(char), 1, entrada)) {
+        cabecalho->status = 'E'; // Indica erro de leitura
+        return cabecalho;
+    }
+
+    // Leitura dos campos de tamanho fixo do cabeçalho
+    fread(&cabecalho->topo, sizeof(int), 1, entrada);
+    fread(&cabecalho->proxRRN, sizeof(int), 1, entrada);
+    fread(&cabecalho->nroRegRem, sizeof(int), 1, entrada);
+    fread(&cabecalho->nroPagDisco, sizeof(int), 1, entrada);
+    fread(&cabecalho->qttCompacta, sizeof(int), 1, entrada);
+    
+    // Exibição dos dados lidos do cabeçalho
+    printf("Status: %c\n", cabecalho->status);
+    printf("Topo: %d\n", cabecalho->topo);
+    printf("Próximo RRN: %d\n", cabecalho->proxRRN);
+    printf("Número de Registros Removidos: %d\n", cabecalho->nroRegRem);
+    printf("Número de Páginas de Disco: %d\n", cabecalho->nroPagDisco);
+    printf("Quantidade de Compactações: %d\n", cabecalho->qttCompacta);
+
+    return cabecalho;
+}
 bool cabecalho_getStatus(Cabecalho *cabecalho) {
     // Verifica o valor do campo status
     /*if (cabecalho->status == CABECALHO_STATUS_OK) {

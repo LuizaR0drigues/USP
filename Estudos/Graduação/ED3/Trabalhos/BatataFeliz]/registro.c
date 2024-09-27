@@ -2,81 +2,58 @@
 #include "cabecalho.h"
 
 
-Registro *registro_readbin(FILE *file) {
+Registro *registro_readbin(FILE* entrada) { 
+      Registro *registro = cria_registro();
+
+    if (!fread(&registro->removido, sizeof(char), 1, entrada)) {
+        registro->removido = 'E'; // Indica que não foi possível ler o registro
+
+        return registro;
+    }
+
+    if (registro->removido == '1') { 
+        return registro;
+    }
+ //freads para os campos de tamanho fixo
+    fread(&registro->encadeamento, sizeof(int), 1, entrada);
+    fread(&registro->populacao, sizeof(int), 1, entrada);
+    fread(&registro->tamanho, sizeof(float), 1, entrada);
+    fread(&registro->uniMedida, sizeof(char), 1, entrada);
+    fread(&registro->velocidade, sizeof(int), 1, entrada);
+// char*linha = calloc (160, sizeof(char)); para alocar memoria
+    char* linha = calloc(160, sizeof(char));
+    fgets(linha, 161 - sizeof(int) * 4 - sizeof(char) * 2, entrada); // lê o restante da linha
+
+    strcpy (registro->nome , strsep(&linha, "#")); // strtok para separar os campos e delimitador
+    strcpy (registro->nEspecie , strsep(&linha, "#"));
+    strcpy (registro->habitat , strsep(&linha, "#"));
+    strcpy (registro->tipo , strsep(&linha, "#"));
+    strcpy (registro->dieta , strsep(&linha, "#"));
+    strcpy (registro->alimento , strsep(&linha, "#"));
+
+    //free(linha);
     
-    // Lê o registro de um arquivo binário
-    // Não abrir o arquivo aqui, pois já foi passado como parâmetro
-    Registro *registro;
-    Cabecalho cabecalho;
-    // Lê o cabeçalho do arquivo
-    if (fread(&cabecalho, sizeof(Cabecalho), 1, file) != 1) {
-        printf("Erro ao ler o cabeçalho do arquivo.\n");
-        return NULL;  // Retorna NULL em caso de erro
-    }
+    return registro;
+}
 
-    if (cabecalho.status == '0') {
-        printf("Falha no processamento do arquivo: arquivo inconsistente.\n");
-        return NULL;  // Retorna NULL se o cabeçalho está inconsistente
-    }
+Registro* cria_registro ()
+{
+    Registro *registro  = malloc(sizeof(Registro));
+    registro -> removido = '0';
+    registro -> encadeamento = -1;
+    registro -> populacao = -1;
+    registro -> tamanho = -1;
+    registro -> uniMedida = '$';
+    registro -> velocidade = -1;
+    registro -> nome = calloc (160, sizeof(char));
+    registro -> nEspecie = calloc (160, sizeof(char));
+    registro -> habitat = calloc (160, sizeof(char));
+    registro -> tipo = calloc (160, sizeof(char));
+    registro -> dieta = calloc (160, sizeof(char));
+    registro -> alimento = calloc (160, sizeof(char));
 
-    // Lê os registros
-    int registros_encontrados = 0;
-    cabecalho_readbin(file);
+    return registro;
 
-    while(!feof(file)) {
-        // Verifica se o registro foi logicamente removido
-        //printf("Remov: %c\n", registro->removido);
-        
-        char *aux = calloc(10, sizeof(char));
-
-        if (registro->removido == '1') {
-            fseek(file, 160, SEEK_CUR); // Pula para o próximo registro
-           continue; // Ignora registros removidos
-        }
-
-        fread(&registro->encadeamento, sizeof(int), 1, file);
-        fread(&registro->populacao, sizeof(int), 1, file);
-        fread(&registro->tamanho, sizeof(float), 1, file);
-        fread(&registro->uniMedida, sizeof(char), 1, file);
-        fread(&registro->velocidade, sizeof(int), 1, file);
-        printf("1Inicio da leitura\n");
-
-        //leitura dos campos variaveis
-        fread(&registro->nome, sizeof(char), 1, file);
-        fread(aux, sizeof(char), 1, file); //leitura do delimitador
-        printf("nome: %s\n", registro->nome);
-
-        fread(&registro->nEspecie, sizeof(char), 1, file);
-        fread(aux, sizeof(char), 1, file); //leitura do delimitador
-        printf("nEspecie: %s\n", registro->nEspecie);
-
-        fread(&registro->habitat, sizeof(char), 1, file);
-        fread(aux, sizeof(char), 1, file); //leitura do delimitador
-        printf("habitat: %s\n", registro->habitat);
-
-        fread(&registro->tipo, sizeof(char), 1, file);
-        fread(aux, sizeof(char), 1, file); //leitura do delimitador
-        printf("tipo: %s\n", registro->tipo);
-
-        fread(&registro->dieta, sizeof(char), 1, file);
-        fread(aux, sizeof(char), 1, file); //leitura do delimitador
-        printf("dieta: %s\n", registro->dieta);
-
-        fread(&registro->alimento, sizeof(char), 1, file);
-        fread(aux, sizeof(char), 1, file); //leitura do delimitador
-        printf("alimento: %s\n", registro->alimento);
-
-        free(aux);
-
-        registros_encontrados++; // Incrementa o contador de registros encontrados
-    }
-
-    if (registros_encontrados == 0) {
-        printf("Registro inexistente.\n");
-        return NULL;  // Retorna NULL se nenhum registro for encontrado
-    }
-
-    return registro;  // Retorna o registro lido
 }
 
 void registro_writebin(FILE *nomebin, Registro *registro) {
@@ -229,17 +206,31 @@ Registro *registro_readcsv(FILE *csv) {
 }
 
 
-void registro_print(Registro *registro){
+void registro_print(Registro *registro, Cabecalho *c){
+
+    
     printf("Nome: %s\n", registro->nome);
+    printf("Especie: %s\n", registro->nEspecie);
+
+    if(strcmp(registro->tipo, "") != 0){
+        printf("Tipo: %s\n", registro->tipo);
+    }
+
+   
     printf("Dieta: %s\n", registro->dieta);
-    printf("Habitat: %s\n", registro->habitat);
-    printf("População: %d\n", registro->populacao);
-    printf("Tipo: %s\n", registro->tipo);
-    printf("Velocidade: %d %c/h\n", registro->velocidade, registro->uniMedida);
-    printf("Tamanho: %.2f\n", registro->tamanho);
-    printf("Espécie: %s\n", registro->nEspecie);
-    printf("Alimento: %s\n", registro->alimento);
+    
+    if(strcmp(registro->habitat, "") != 0){
+        printf("Lugar que habitava: %s\n", registro->habitat);
+    }
+
+    if(registro->tamanho != -1){
+        printf("Tamanho: %.1f m\n", registro->tamanho);
+    }
+    if (registro->velocidade != -1 && registro->uniMedida != '$'){
+        printf("Velocidade: %d %cm/h\n", registro->velocidade, registro->uniMedida);
+    }
     printf("\n");
+    printf("Numero de paginas de disco: %d\n", c->nroPagDisco);
 }
 
 bool registro_field(char *nome_campo){

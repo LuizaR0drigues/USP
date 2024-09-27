@@ -1,3 +1,4 @@
+
 #ifndef REGISTRO_H
     #define REGISTRO_H
     
@@ -5,6 +6,8 @@
     #include <stdlib.h>
     #include <string.h>
     #include <stdbool.h>
+    #include <stdlib.h>
+    #include "cabecalho.h"
 
     #define REGISTRO_SIZE 160
     #define REGISTRO_FILL '$'
@@ -32,6 +35,7 @@
 
     } Registro;
     
+    Registro* cria_registro();
 
     // Funções de leitura e escrita binária
     Registro *registro_readbin(FILE *file);
@@ -39,7 +43,7 @@
     Registro *registro_readcsv(FILE *csv);
 
     // Função para imprimir os dados do registro
-    void registro_print(Registro *registro);
+    void registro_print(Registro *registro, Cabecalho *c);
 
     // Verifica se o campo é string ou inteiro
     bool registro_field(char *nome_campo);
