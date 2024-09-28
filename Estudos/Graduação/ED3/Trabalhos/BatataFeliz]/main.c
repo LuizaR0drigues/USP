@@ -35,20 +35,18 @@ int main()
             int quant = 0;
             char nomearquivo[15];
             scanf("%s %d", nomearquivo, &quant); // Leitura do nome do arquivo e a quantidade
-
-            int i = 0;
-            while (i != quant) {
-                char nomecampo[100];
-                // Lê o nome do campo
+            for(int i=0; i<quant; i++){
                 scanf("%s", nomecampo);
-                printf("Busca %d\n", i + 1);
 
-                // Chama a função SELECT_WHERE com os parâmetros lidos
-                int paginasDisco = SELECT_WHERE(nomearquivo, nomecampo);
-                i++;
+                printf("Busca %d\n",i+1);
+                int paginasDisco = SELECT_WHERE(nomearquivo, nomecampo, quant);
+               
             }
             break;
+           
         }
+         default:
+                return 0;
     }
             
     return 0;

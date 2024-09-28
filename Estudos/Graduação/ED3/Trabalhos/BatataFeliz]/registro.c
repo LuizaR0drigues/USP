@@ -232,26 +232,38 @@ void registro_print(Registro *registro){
     printf("\n");
     
 }
-void registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro) {
-    if (valor != NULL && strcmp(registro->nome, valor) == 0) {
-        registro_print(registro);
-    } else if (valor != NULL && strcmp(registro->nEspecie, valor) == 0) {
-        registro_print(registro);
-    } else if (valor != NULL && strcmp(registro->alimento, valor) == 0) {
-        registro_print(registro);
-    } else if (valor != NULL && strcmp(registro->dieta, valor) == 0) {
-        registro_print(registro);
-    } else if (valor != NULL && strcmp(registro->tipo, valor) == 0) {
-        registro_print(registro);
-    } else if (valor != NULL && strcmp(registro->habitat, valor) == 0) {
-        registro_print(registro);
-    } else if (registro->populacao == valorint) {
-        registro_print(registro);
-    } else if (registro->velocidade == valorint) {
-        registro_print(registro);
-    } else if (registro->tamanho == valorf) {
-        registro_print(registro);
+int registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro) {
+    // Verifica se 'valor' não é nulo
+    if (valor != NULL) {
+        printf("%d %f %s\n", valorint, valorf, valor);
+
+        // Comparações de strings
+        if (strcmp(registro->nome, valor) == 0 ||
+            strcmp(registro->nEspecie, valor) == 0 ||
+            strcmp(registro->alimento, valor) == 0 ||
+            strcmp(registro->dieta, valor) == 0 ||
+            strcmp(registro->tipo, valor) == 0 ||
+            strcmp(registro->habitat, valor) == 0) {
+            
+            // Se encontrar uma correspondência, imprime o registro
+            registro_print(registro);
+            return 1;
+        }
+
+        // Comparações de inteiros e float
+        if (registro->populacao == valorint ||
+            registro->velocidade == valorint ||
+            registro->tamanho == valorf) {
+            
+            // Se encontrar uma correspondência, imprime o registro
+            registro_print(registro);
+            return 1;
+        }
+
+        // Se não encontrou nenhuma correspondência
+        return 9; // Considere documentar o significado de 9
     }
+
 }
 
 int verificacaoString(char *campo) {
@@ -275,8 +287,8 @@ int verificacaoString(char *campo) {
     } else if (strcmp("tamanho", campo) == 0) {
         return 8;
     } else {
-        printf("Campo inexistente.\n");
-        return -1; // Campo inexistente
+        printf("Registro inexistente.\n");
+        return 9; // Campo inexistente
     }
 }
 

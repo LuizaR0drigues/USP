@@ -12,6 +12,6 @@
 //comandos basicos
 void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *c);
 void SELECT_TABLE(char *nomearqbin);
-int SELECT_WHERE(char *nome, char *campo);
+int SELECT_WHERE(char *nome, char *campo, int n);
 
 #endif

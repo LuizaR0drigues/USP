@@ -78,7 +78,7 @@ void SELECT_TABLE(char *nomearqbin) {
         printf("Falha ao abrir o arquivo \n");
         return;
     }
-    
+
     Registro *registro;  // Estrutura para armazenar um registro
 
     Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
@@ -109,102 +109,60 @@ void SELECT_TABLE(char *nomearqbin) {
     free(cabecalho);
     fclose(arquivo_binario); 
 }
-
-//função que busca registros pelo campo e valor
-int SELECT_WHERE(char *nomearquivo, char *campo, int quant) {
-    FILE *arquivo_binario = fopen(nomearquivo, "rb");
+int SELECT_WHERE(char *nome, char *campo) {
+    FILE *arquivo_binario = fopen(nome, "rb");
     if (arquivo_binario == NULL) {
         printf("Falha no processamento do arquivo.\n");
         return 0; // Retorna 0 se não conseguiu abrir o arquivo
     }
 
-    Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
-    if (cabecalho == NULL) {
-        printf("Falha ao ler o cabeçalho do arquivo.\n");
-        fclose(arquivo_binario);
-        return 0;
-    }
+    Registro *registro;
+    Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario); // leitura do cabeçalho do arquivo
+    fseek(arquivo_binario, 1600, SEEK_SET); // setando a leitura
 
-    Registro *registro ;
-    fseek(arquivo_binario,1600, SEEK_SET); // Setando a leitura para a primeira página de dados
-
-    int cont_registro = 0;
+    int nroPagDisco = cabecalho->nroPagDisco;
     int found = 0; // Indicador para verificar se algum registro foi encontrado
-    int teste = verificacaoString(campo); // Verifica o tipo do campo
+    int cont_registro = 0;
 
-    // Verificação do tipo da variável que deve-se buscar no arquivo binário
-    if (teste == -1) {
-        printf("Campo inválido.\n");
-        free(cabecalho);
-        fclose(arquivo_binario);
-        return 0; // Campo inválido
-    }
-
-    // Leitura do valor a ser buscado
-    char valorString[100];
-    int valorInt = -1;
-    float valorFloat = -1.0f;
-   
-    if (teste <= 5) {
-        scan_quote_string(valorString); // Leitura de valor string
-    } else if (teste <= 7) {
-        scanf("%d", &valorInt); // Leitura de valor int
-    } else if (teste == 8) {
-        scanf("%f", &valorFloat); // Leitura de valor float
-    }
-
-    printf("TESTE: %d\n", teste);
-    // Itera sobre todos os registros até o final do arquivo
-    while (!feof(arquivo_binario)) {
-       registro = registro_readbin(arquivo_binario);
-       if(registro == NULL)
-       {
-        printf("Falha no processamento do arquivo.\n");
-        break;
-       }
-        if (registro_isValid(registro)) {
-            // Verifica se o registro corresponde ao valor buscado
-            if (teste <= 5) {
-                printf("TESTEANDO \n");
-                printf("VAlor: %d", registro_busca_elemento(valorString, -1, -1.0f, registro));
-               if(registro_busca_elemento(valorString, -1, -1.0f, registro) == 1){
-                continue;
-               }
-               else{
-                printf("Registro inexistente.\n\n");
-                break;
-               }
-                
-            } else if (teste <= 7) {
-               if(registro_busca_elemento(NULL, valorInt, -1.0f, registro) != 9)
-                {
-                    continue;
-                }
-                else{
-                    printf("Registro inexistente.\n\n");
-                    break;
-                }
-            } else if (teste == 8) {
-               if(registro_busca_elemento(NULL, -1, valorFloat, registro))
-                {
-                    continue;
-                }
-                else{
-                    printf("Registro inexistente.\n\n");
-                    break;
-                }
-            }
+    
+        registro = registro_readbin(arquivo_binario);
+        if (registro == NULL) {
+            return 0;// Sai do loop se não houver mais registros
         }
-      
-        free(registro); // Libera a memória do registro lido
-        cont_registro++;
-    }
+        if (registro_isValid(registro) == false) {
+            fseek(arquivo_binario, 1600 + REGISTRO_SIZE * (cont_registro), SEEK_SET);
+            free(registro); // Libera memória do registro lido antes de continuar
+            cont_registro++;
+        }
 
+        // Verificação do tipo da variável que deve-se buscar no arquivo binário
+        int teste = verificacaoString(campo);
+        if (teste == 0 || teste == 1 || teste == 2 || teste == 3 || teste == 4 || teste == 5) {
+            char valor[100];
+            scan_quote_string(valor); // Leitura para o caso de string
+            printf("\n Valores lidos \n %s\n", valor);
+            registro_busca_elemento(valor, -1, -1.0f, registro);
+        } else if (teste == 6 || teste == 7) {
+            int valorint;
+            scanf("%d", &valorint); // Leitura para o caso de inteiro
+            printf("\n Valores lidos \n%d\n", valorint);
+            registro_busca_elemento(NULL, valorint, -1.0f, registro);
+        } else if (teste == 8) {
+            float valorf;
+            scanf("%f", &valorf); // Leitura para o caso de float
+            printf("\n Valores lidos \n %f \n",valorf);
+            registro_busca_elemento(NULL, -1, valorf, registro);
+        } else if (teste == -1) { // Campo inválido
+            free(registro);
+            return -1;
+        }
+        
+        free(registro); // Libera memória do registro lido
+        cont_registro++;
     
-    
-    printf("Numero de paginas de disco: %d\n\n", cabecalho->nroPagDisco);
-    free(cabecalho); // Libera o cabeçalho lido
-    
-    fclose(arquivo_binario); // Fecha o arquivo binário
-    return 0;
+
+    free(cabecalho);
+    fclose(arquivo_binario);
+
+    return nroPagDisco;
 }
