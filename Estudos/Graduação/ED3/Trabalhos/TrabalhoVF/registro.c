@@ -7,7 +7,7 @@ Registro *registro_readbin(FILE* entrada) {
 
     if (!fread(&registro->removido, sizeof(char), 1, entrada)) {
         registro->removido = 'E'; // Indica que não foi possível ler o registro
-        
+
         return registro;
     }
 
@@ -207,7 +207,6 @@ Registro *registro_readcsv(FILE *csv) {
 
 
 void registro_print(Registro *registro){
-
     
     printf("Nome: %s\n", registro->nome);
     printf("Especie: %s\n", registro->nEspecie);
@@ -232,40 +231,28 @@ void registro_print(Registro *registro){
     printf("\n");
     
 }
-int registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro, int ncampo) {
-    // Verifica se 'valor' não é nulo
-    if(ncampo<0 || ncampo>8){
-        return 9;
+void registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro) {
+    if (valor != NULL && strcmp(registro->nome, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->nEspecie, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->alimento, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->dieta, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->tipo, valor) == 0) {
+        registro_print(registro);
+    } else if (valor != NULL && strcmp(registro->habitat, valor) == 0) {
+        registro_print(registro);
+    } else if (registro->populacao == valorint) {
+        registro_print(registro);
+    } else if (registro->velocidade == valorint) {
+        registro_print(registro);
+    } else if (registro->tamanho == valorf) {
+        registro_print(registro);
     }
-    // printf("ncampo: %d\n",ncampo);
-    if (valor != NULL) {
-        // printf("%d %f %s\n", valorint, valorf, valor);
-        
-        // Comparações de strings
-        if ((strcmp(registro->nome, valor) == 0 && ncampo==0) ||
-            (strcmp(registro->nEspecie, valor) == 0 && ncampo==1) ||
-            (strcmp(registro->alimento, valor) == 0 && ncampo==5) ||
-            (strcmp(registro->dieta, valor) == 0 && ncampo==4) ||
-            (strcmp(registro->tipo, valor) == 0 && ncampo==3) ||
-            (strcmp(registro->habitat, valor) == 0 && ncampo==2)) {
-            
-            // Se encontrar uma correspondência, imprime o registro
-            registro_print(registro);
-        }
-    }
-    else{
-        // Comparações de inteiros e float
-        if ((registro->populacao == valorint && ncampo==7) ||
-            (registro->velocidade == valorint && ncampo==6) ||
-            (registro->tamanho == valorf && ncampo==8)) {
-            
-            // Se encontrar uma correspondência, imprime o registro
-            // printf("Teoricamente deu certo\n");
-            registro_print(registro);
-        }
-    }
-    return 1;
-
+    else
+        return;
 }
 
 int verificacaoString(char *campo) {
@@ -289,14 +276,11 @@ int verificacaoString(char *campo) {
     } else if (strcmp("tamanho", campo) == 0) {
         return 8;
     } else {
-        printf("Registro inexistente.\n");
-        return 9; // Campo inexistente
+        printf("Campo inexistente.\n");
+        return -1; // Campo inexistente
     }
 }
 
-bool registro_field(char *nome_campo){
-    // retorna se é um campo de string ou inteiro
-}
 
 void registro_remove(Registro *registro){
     // remove logicamente um registro

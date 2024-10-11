@@ -1,3 +1,7 @@
+/*
+LUIZA RODRIGUES CARDOSO - 14593332
+CAUE SORDI PAULINO - 14564520
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +20,7 @@ int main()
     nomecampo = malloc(100*sizeof(char));
     valorcampo = malloc(100*sizeof(char));
     scanf("%d%*c",&comando);
-    
+
     //estrutura padrão do cabecalho
     Cabecalho *cabecalho = cabecalho_inicializa();
     switch(comando){
@@ -34,15 +38,14 @@ int main()
          case 3: {
             int quant = 0;
             char nomearquivo[15];
-            int paginasDisco=0;
             scanf("%s %d", nomearquivo, &quant); // Leitura do nome do arquivo e a quantidade
             for(int i=0; i<quant; i++){
                 scanf("%s", nomecampo);
 
                 printf("Busca %d\n",i+1);
-                paginasDisco = SELECT_WHERE(nomearquivo, nomecampo, quant);
+                int paginasDisco = SELECT_WHERE(nomearquivo, nomecampo, quant); //chamando a função responsavel por procurar cada
+               
             }
-            printf("\nNumero de paginas de disco: %d\n\n", paginasDisco);
             break;
            
         }

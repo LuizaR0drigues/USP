@@ -4,7 +4,7 @@ all:
 
 # Executar o programa
 run: runnable
-	./runnable
+	./runnable < in/6.in
 
 # Limpar os arquivos compilados
 clear:

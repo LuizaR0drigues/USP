@@ -46,7 +46,7 @@
     void registro_print(Registro *registro);
 
     // Verifica se o campo é string ou inteiro
-    bool registro_field(char *nome_campo);
+   int verificacaoString(char *campo);
 
     // Remove logicamente um registro
     void registro_remove(Registro *registro);
@@ -67,8 +67,8 @@
     char* registro_getAlimenta(Registro *registro);
     char registro_getRemovido(Registro *registro);
     int registro_getEncadeamento(Registro *registro);
-    int verificacaoString(char *campo);
-    int registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro, int ncampo);
+    
+    void registro_busca_elemento(char *valor, int valorint, float valorf, Registro *registro);
     // Funções para definir valores dos campos do registro
     void registro_setPop(Registro *registro, int pop);
     void registro_setTam(Registro *registro, float tam);
