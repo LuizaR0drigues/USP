@@ -6,7 +6,7 @@
 */
 #define TAMPAGE 93
 
-CabecalhoArvore* bcabecalho_inicializa();
+CabecalhoArvore* bcabecalho_inicializa()
 {
     //estrutura padrão do cabecalho
     CabecalhoArvore *cabecalho  = malloc(sizeof(CabecalhoArvore));
@@ -18,7 +18,7 @@ CabecalhoArvore* bcabecalho_inicializa();
 }
 
 // Função para ler o cabeçalho do arquivo binário
-CabecalhoArvore* cabecalho_readbin(FILE *entrada) {
+CabecalhoArvore* bcabecalho_readbin(FILE *entrada) {
     CabecalhoArvore *cabecalho = bcabecalho_inicializa();
     
     // Leitura do status do cabeçalho
@@ -33,7 +33,7 @@ CabecalhoArvore* cabecalho_readbin(FILE *entrada) {
     
     return cabecalho;
 }
-bool cabecalho_getStatus(CabecalhoArvore *cabecalho) {
+bool bcabecalho_getStatus(CabecalhoArvore *cabecalho) {
     // Verifica o valor do campo status
     /*if (cabecalho->status == CABECALHO_STATUS_OK) {
         return true; // Retorna verdadeiro se o status for '1'
@@ -43,11 +43,11 @@ bool cabecalho_getStatus(CabecalhoArvore *cabecalho) {
    return cabecalho->status == CABECALHO_STATUS_OK;
 }
 
-void cabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho) {
+void bcabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho) {
     // Escreve o cabeçalho no arquivo binário
-    if (!cabecalho_getStatus(cabecalho)) {
+    if (!bcabecalho_getStatus(cabecalho)) {
         // Se o status não for OK, ajusta para '1'
-        cabecalho_setStatus(cabecalho, '1');
+        bcabecalho_setStatus(cabecalho, '1');
     }
     fwrite(&cabecalho->status, sizeof(char), 1, file);
     fwrite(&cabecalho->noRaiz, sizeof(int), 1, file);
@@ -65,26 +65,26 @@ void cabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho) {
     fwrite(aux, sizeof(char), resto, file); // Escreve o preenchimento no arquivo
 }
 
-void cabecalho_readcsv(FILE *csv) {
+void bcabecalho_readcsv(FILE *csv) {
     char buffer[300];
     fgets(buffer, sizeof(buffer), csv); // Pula a linha de cabeçalho
     
 }
 
 
-int cabecalho_getNoRaiz(CabecalhoArvore *cabecalho){
+int bcabecalho_getNoRaiz(CabecalhoArvore *cabecalho){
     // verifica o valor do campo NoRaiz
     return cabecalho->noRaiz;
 }
 
-void cabecalho_setStatus(CabecalhoArvore *cabecalho, char status){
+void bcabecalho_setStatus(CabecalhoArvore *cabecalho, char status){
     cabecalho->status = status;
 }
 
-void cabecalho_setNoRaiz(CabecalhoArvore *cabecalho, int NoRaiz){
+void bcabecalho_setNoRaiz(CabecalhoArvore *cabecalho, int NoRaiz){
     cabecalho->noRaiz = NoRaiz;
 }
 
-void cabecalho_setproxRRNno(CabecalhoArvore *cabecalho, int proxRRNno){
+void bcabecalho_setproxRRNno(CabecalhoArvore *cabecalho, int proxRRNno){
     cabecalho->proxRRNno = proxRRNno;
 }

@@ -18,19 +18,19 @@
     } CabecalhoArvore;
 
     // Funções de leitura e escrita binária
-    CabecalhoArvore* cabecalho_inicializa();
-    CabecalhoArvore* cabecalho_readbin(FILE *file);
+    CabecalhoArvore* bcabecalho_inicializa();
+    CabecalhoArvore* bcabecalho_readbin(FILE *file);
     //void cabecalho_verificacao(CabecalhoArvore *cabecalho);
-    void cabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho);
-    void cabecalho_readcsv(FILE *csv);
+    void bcabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho);
+    void bcabecalho_readcsv(FILE *csv);
 
     // Funções para obter valores dos campos do cabeçalho
-    bool cabecalho_getStatus(CabecalhoArvore *cabecalho);
-    int cabecalho_getNoRaiz(CabecalhoArvore *cabecalho);
+    bool bcabecalho_getStatus(CabecalhoArvore *cabecalho);
+    int bcabecalho_getNoRaiz(CabecalhoArvore *cabecalho);
 
     // Funções para definir valores dos campos do cabeçalho
-    void cabecalho_setStatus(CabecalhoArvore *cabecalho, char status);
-    void cabecalho_setNoRaiz(CabecalhoArvore *cabecalho, int topo);
-    void cabecalho_setProxRRNno(CabecalhoArvore *cabecalho, int proxRRN);
+    void bcabecalho_setStatus(CabecalhoArvore *cabecalho, char status);
+    void bcabecalho_setNoRaiz(CabecalhoArvore *cabecalho, int topo);
+    void bcabecalho_setProxRRNno(CabecalhoArvore *cabecalho, int proxRRN);
     
 #endif

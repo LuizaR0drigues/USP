@@ -9,6 +9,16 @@
 
  #define PAGINA_TAMANHO 1600
 
+FILE* abertura_arqBin(char *nome, char *tipo)
+{
+    FILE *arquivo = fopen(nome,tipo);
+    if (arquivo == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return NULL; // Retorna 0 se não conseguiu abrir o arquivo
+    }
+    return arquivo;
+}
+
 void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
     // ler o arquivo csv (cria a página)
     //abertura do arquivo csv para leitur
@@ -181,45 +191,87 @@ int SELECT_WHERE(char *nomearquivo, char *campo, int quant) {
     fclose(arquivo_binario); // Fecha o arquivo binário
     return 0;
 }
+
 int INSERT_INDICE(char *binario, char *indice)
 {
-    //Ponteiros para os arquivos
-    FILE *arqindice = abertura_arqBin(indice);
-    FILE *arqbin  = abertura_arqBin(binario);
-
-    //Alocando o ponteiro pro indice
-    NoArvore *no = malloc(sizeof(NoArvore));
-
-    //leitura do arquivo de dados
-    Cabecalho *cabecalho = cabecalho_readbin(arqbin);
-    Registro *registro = cria_registro();    
-
-    //campo -> long int
-    long int campo;
-
-    while (!feof(arqbin))
-    {
-       registro = registro_readbin(arqbin);
-       campo = converteNome(registro->nome);
-       printf("%ld", campo);
-       
+   FILE *arquivo_binario = fopen(binario, "rb");
+    if (arquivo_binario == NULL) {
+        printf("Falha ao abrir o arquivo \n");
+        return 0;
     }
+     FILE *arquivo_indice = fopen(indice, "wb");
+    if (arquivo_indice== NULL) {
+        printf("Falha ao abrir o arquivo \n");
+        return 0;
+    }
+    
+    Registro *registro;  // Estrutura para armazenar um registro
+
+    Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
+    fseek (arquivo_binario, 1600, SEEK_SET);
+    // Lê registros do arquivo binário
+    int cont_registro=0;
+    while (1) {
+        
+        //sabemos que ele morre no while, mas passa uma vez so aqui
+        registro = registro_readbin(arquivo_binario);
+        cont_registro++;
+
+        //ele nao passa do primeiro registro_readbin (local do problema )
+        // Verifica se a lei/sabemo que o arquivo abretura foi bem-sucedida
+        if ( registro == NULL || registro->removido == 'E') {
+            break;  // Sai do loop se não houver mais registros para ler
+        }
+        if(registro_isValid(registro)==false){
+            fseek (arquivo_binario, 1600+REGISTRO_SIZE*(cont_registro), SEEK_SET);
+            continue;
+        }
+        long int campo = converteNome(registro->nome);
+        CPR valor;
+        valor.C = campo;
+        valor.PR = 16000+ (160 *cont_registro); //calculo do byetoffset
+        printf("Nome: %s %lu\n", registro->nome, campo);
+        int raiz_rrn =0;
+        NoArvore *raiz = no_criar(true,0);
+
+        if (raiz == NULL) {
+            printf("Falha ao criar a raiz da árvore.\n");
+            fclose(arquivo_binario);
+            fclose(arquivo_indice);
+            return 0;
+        }
+        PCPR retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn);
+
+
+         for (int i = 0; i < 4; i++) {
+            campo = converteNome(registro->nome);
+            valor.C = campo;
+            valor.PR = 16000 + (160 * i); // Calculo do byteoffset com base no índice
+            printf("Inserindo: Nome=%s C=%lu PR=%lu\n", registro->nome, campo, valor.PR);
+            
+            retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn);
+            printf("Resultado: ");
+            no_print(raiz);
+            printf("    PCPR: (%ld %ld) %d", retorno.corpo.C, retorno.corpo.PR, retorno.P);
+            printf("\n\n");
+        }
+
+        // Lê todos os registros e imprime
+        printf("\n\n\n\nTodos os registros:\n");
+        for (int rrn = 0; rrn < 2; rrn++) {
+            NoArvore *no = no_readbin(arquivo_indice, rrn);
+            printf("RRN = %d | ", rrn);
+            no_print(no);
+        }
+
+    }
+    
+    free(registro);
+    free(cabecalho);
+    fclose(arquivo_binario); 
+    fclose(arquivo_indice);
     return 0;
-
-    //no_inserir_recursivo(arqindice, campo);
 }
-/*int RECUPERACAO_INDICE(char *binario, char *indice, char *campo)
-{
 
-}*/
 
-FILE* abertura_arqBin(char *nome)
-{
-    FILE *arquivo = fopen(nome,"wb+");
-    if (arquivo == NULL) {
-        printf("Falha no processamento do arquivo.\n");
-        return 0; // Retorna 0 se não conseguiu abrir o arquivo
-    }
-    return arquivo;
-}
 

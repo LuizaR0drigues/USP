@@ -65,10 +65,10 @@ void no_writebin(FILE *nomebin, NoArvore *no)
     fwrite(&no->RRNdoNo, sizeof(int), 1, nomebin);
      for(int i =0; i<ORDEM-1; i++)
     {
-        fwrite(&no->CPRs[i].C, sizeof(int), 1, nomebin);
-        fwrite(&no->CPRs[i].PR, sizeof(int), 1, nomebin);
+        fwrite(&no->CPRs[i].C, sizeof(long int), 1, nomebin);
+        fwrite(&no->CPRs[i].PR, sizeof(long int), 1, nomebin);
     }
-
+    printf("Ok\n");
 }
 
 
@@ -84,7 +84,11 @@ void no_print(NoArvore *no){
 
 PCPR get_null_pcpr(){
     PCPR null_pcpr;
-    CPR null_cpr;null_cpr.C=NULL_VALUE;null_cpr.PR=-1;null_pcpr.corpo=null_cpr;null_pcpr.P=-1;
+    CPR null_cpr;
+    null_cpr.C=NULL_VALUE;
+    null_cpr.PR=-1;
+    null_pcpr.corpo=null_cpr;
+    null_pcpr.P=-1;
     return null_pcpr;
 }
 
@@ -126,13 +130,14 @@ bool PCPR_isnull(PCPR pcpr){
 
 
 // tratar o caso da raiz !!
-PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir,int rrn_raiz){
-    // O retorno é direcionado para o nó pai
+PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir,int rrn_raiz){
     
+    // O retorno é direcionado para o nó pai
     //critério de parada: é nó folha
+   //critério de parada: é nó folha
     if(atual->folha==FOLHA){
         // tentar inserir
-        PCPR overflow = no_tenta_inserir(atual,valor_inserir,nomebin);
+        PCPR overflow = no_tenta_inserir(atual,valor_inserir,indice);
 
         if(PCPR_isnull(overflow)){
             //retorna um nó nulo
@@ -177,10 +182,10 @@ PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir,int rr
             }
 
             // escrever o nó atual no disco
-            no_writebin(nomebin,atual);
+            no_writebin(indice,atual);
 
             // escrever o irmãozinho no disco
-            no_writebin(nomebin,irmaozinho);
+            no_writebin(indice,irmaozinho);
 
             // retorna o subiu
             return subiu;
@@ -198,13 +203,40 @@ PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir,int rr
     }
 
     int RRN_entrar = idx_entrar;
-    NoArvore *no_filho = no_readbin(nomebin,RRN_entrar);
-    PCPR inserir_restante = no_inserir_recursivo(nomebin,no_filho,valor_inserir,rrn_raiz);
-    // inserir_restante é o CBR que subiu depois de ter feito o split 1 para 2
+    NoArvore *no_filho = no_readbin(indice,RRN_entrar);
+    PCPR inserir_restante = no_inserir_recursivo(indice,no_filho,valor_inserir,rrn_raiz);// inserir_restante é o CBR que subiu depois de ter feito o split 1 para 2
+    
+    NoArvore *raiz;
+     if(rrn_raiz == atual->RRNdoNo && inserir_restante.corpo.C!=NULL_VALUE){   // significa que ele voltou de tudo e precisa criar uma raiz acima de tudo
+         raiz = no_criar(false, rrn_raiz); //criando uma raiz
 
-    // if(rrn_raiz == atual->RRNdoNo && inserir_restante.C!=NULL_VALUE){
-    //     // significa que ele voltou de tudo e precisa criar uma raiz acima de tudo
-    // }
+    }
 
-    // reorganiza os ponteiros
+    
 }
+
+/*
+int buscando_chave(FILE *arquivo, long int chave)
+{
+    
+    NoArvore *no = no_criar(true, 0); //procura na riaz
+    no = no_readbin(arquivo, 0);
+    if(no == NULL)
+    {
+        printf("Erro ao ler a página com RRN = %d\n", rrn);
+        return -1;
+    }
+
+    //procura pela chave dentro da pagina
+   int proximo_rrn = no->P[0]; // Adapte o índice conforme a chave a ser buscada
+    for (int i = 0; i < no->nroChavesIndexadas; i++) {
+        if (chave < no->CPRs[i].C) {
+            proximo_rrn = no->P[i];
+            break;
+        }
+        proximo_rrn = no->P[i + 1]; // Última comparação
+    }
+
+    free(no);
+    return buscar_chave(arquivo, chave);
+}*/

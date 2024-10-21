@@ -8,7 +8,7 @@
     #include <stdlib.h>
     #include "bcabecalho.h"
 
-    #define REGISTRO_SIZE 93
+    #define BREGISTRO_SIZE 93
     #define REGISTRO_FILL '$'
     #define REGISTRO_DELIMITADOR '#'
     #define MAXPAGE 93

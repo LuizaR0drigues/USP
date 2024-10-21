@@ -8,19 +8,22 @@ CAUE SORDI PAULINO - 14564520
 
 #include "registro.h"
 #include "cabecalho.h"
-#include "funcoesFornecidas.h"
-#include "comandos.h"
 #include "bcabecalho.h"
 #include "bregistro.h"
+#include "funcoesFornecidas.h"
+#include "comandos.h"
 
 int main()
 {
-     int comando, quant;
+    int comando, quant;
     char nomeCSV[100], nomearqbin[100], nomearquivo[15], nomearquivoindice[15], campo[30];
     char *aux, *nomecampo, *valorcampo;
+
+    //alocação de memoria
     aux = malloc(100*sizeof(char));
     nomecampo = malloc(100*sizeof(char));
     valorcampo = malloc(100*sizeof(char));
+
     scanf("%d%*c",&comando);
 
     //estrutura padrão do cabecalho
@@ -54,22 +57,22 @@ int main()
         case 7:{
             scanf("%s %s",nomearqbin,nomearquivoindice);
             INSERT_INDICE(nomearqbin, nomearquivoindice, cabecalho);
-            binarioNaTela(nomearquivoindice);
+            //binarioNaTela(nomearquivoindice);
           break;  
         }
 
         case 8:{
             
-            /*scanf("%s %s %*s %s",nomearqbin, nomearquivoindice, campo);
-            long int campoint[15] = converteNome(campo);
-            RECUPERACAO_INDICE(nomearqbin, nomearquivoindice, campoint);*/
+            scanf("%s %s %*s %s",nomearqbin, nomearquivoindice, campo);
+            long int campoint = converteNome(campo);
+            //RECUPERACAO_INDICE(nomearqbin, nomearquivoindice, campoint);
         break;
         }
          default:
                 return 0;
-    }
+    }/*
 
-   /* FILE *batata = fopen("batata.bin","wb+");
+    FILE *batata = fopen("batata.bin","wb+");
 
     int rrn_raiz = 0;
     NoArvore *raiz = no_criar(true,0);

@@ -16,5 +16,5 @@ int SELECT_WHERE(char *nome, char *campo, int n);
 int INSERT_INDICE(char *binario, char *indice, Cabecalho *c);
 int RECUPERACAO_INDICE(char *binario, char *indice, char *campo);
 //Abertura de arquivo
-FILE* abertura_arqBin(char *nome)
+FILE* abertura_arqBin(char *nome, char *tipo);
 #endif
