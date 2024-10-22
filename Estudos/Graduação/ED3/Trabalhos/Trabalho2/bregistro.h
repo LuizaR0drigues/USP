@@ -40,5 +40,5 @@
     void no_print(NoArvore *no);
     NoArvore *no_readbin(FILE* entrada,int RRN);
     PCPR no_tenta_inserir(NoArvore *no,CPR valor_inserir,FILE *arquivo);
-    PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir,int rrn_raiz, CabecalhoArvore *c);
+    PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir, CabecalhoArvore *c,int level);
 #endif

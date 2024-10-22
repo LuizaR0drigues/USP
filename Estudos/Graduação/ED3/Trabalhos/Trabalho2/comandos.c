@@ -205,7 +205,6 @@ int INSERT_INDICE(char *binario, char *indice)
         return 0;
     }
     
-    
     //estruturas do arquivos de dados
     Registro *registro;  // Estrutura para armazenar um registro
     Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
@@ -221,12 +220,14 @@ int INSERT_INDICE(char *binario, char *indice)
         
         //lendo o arquivo binario
         registro = registro_readbin(arquivo_binario);
+
         cont_registro++;
-    
+        // printf("Registro lido -----------------------------\n");
         //verificação de integridade
         if ( registro == NULL || registro->removido == 'E') {
             break;  // Sai do loop se não houver mais registros para ler
         }
+        
         if(registro_isValid(registro)==false){ //no positivo, colocamos o ponteiro do disco logo apos o cabecalho
             fseek (arquivo_binario, 1600+REGISTRO_SIZE*(cont_registro), SEEK_SET);
             continue;
@@ -237,39 +238,37 @@ int INSERT_INDICE(char *binario, char *indice)
         CPR valor;
         valor.C = campo;
         valor.PR = 16000+ (160 *cont_registro); //calculo do byetoffset
+        printf("-----------------------------------------------------------------------\n");
         printf("\nNome: %s %lu %d\n", registro->nome, campo, valor.PR);
-        int raiz_rrn =0;
+        
         NoArvore *raiz = no_criar(true,0);
+        raiz->RRNdoNo = 0;
+        bcabecalho->noRaiz = 0;
+        
+        PCPR retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, bcabecalho,0);
+        printf("\n Valores inseridos %lu %d\n", retorno.corpo.C, retorno.corpo.PR);
 
-        if (raiz == NULL) {
-            printf("Falha ao criar a raiz da árvore.\n");
-            fclose(arquivo_binario);
-            fclose(arquivo_indice);
-            return 0;
-        }
-        PCPR retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn, bcabecalho);
-
-
-         for (int i = 0; i < 4; i++) {
-            campo = converteNome(registro->nome);
-            valor.C = campo;
-            valor.PR = 1600 + (160 * i); // Calculo do byteoffset com base no índice
-            printf("Inserindo: Nome=%s C=%lu PR=%d\n", registro->nome, campo, valor.PR);
+        // for (int i = 0; i < 4; i++) {
+        //     campo = converteNome(registro->nome);
+        //     valor.C = campo;
+        //     valor.PR = 1600 + (160 * i); // Calculo do byteoffset com base no índice
+        //     printf("Inserindo: Nome=%s C=%lu PR=%d\n", registro->nome, campo, valor.PR);
             
-            retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn, bcabecalho);
-            printf("Resultado: ");
-            no_print(raiz);
-            printf("    PCPR: (%ld %d) %d", retorno.corpo.C, retorno.corpo.PR, retorno.P);
-            printf("\n\n");
-        }
+        //     retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, bcabecalho, 0);
+        //     printf("Resultado: ");
+        //     no_print(raiz);
+        //     printf("    PCPR: (%ld %d) %d", retorno.corpo.C, retorno.corpo.PR, retorno.P);
+        //     printf("\n\n");
+        // }
 
         // Lê todos os registros e imprime
-        printf("\n\n\n\nTodos os registros:\n");
-        for (int rrn = 0; rrn < 2; rrn++) {
+        printf("\nTodos os registros [%d]:\n",bcabecalho->proxRRNno);
+        for (int rrn = 0; rrn < bcabecalho->proxRRNno; rrn++) {
             NoArvore *no = no_readbin(arquivo_indice, rrn);
             printf("RRN = %d | ", rrn);
             no_print(no);
         }
+        printf("\n\n\n");
     }
 
     //modificando o cabeçalho e reescrevendo as novas informações

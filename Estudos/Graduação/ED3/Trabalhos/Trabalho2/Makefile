@@ -17,5 +17,10 @@ test:
 	make all
 	make run
 
+batata:
+	clear
+	make all
+	./runnable < input.txt > output.txt
+
 zip:
 	zip runcodes.zip Makefile *.c *.h

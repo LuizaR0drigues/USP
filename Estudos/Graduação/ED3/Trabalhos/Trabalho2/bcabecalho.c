@@ -52,7 +52,7 @@ void bcabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho) {
     // Preencher o restante da página de disco com o caractere '$'
     int resto = TAMPAGE - (2 * sizeof(int) + sizeof(char)); // Calcula o espaço restante
     char aux[resto];
-    printf("\n resto %d\n", resto);
+    // printf("\n resto %d\n", resto);
     for (int i = 0; i < resto; i++) {
         aux[i] = '$'; // Preenche o array com '$'
     }
