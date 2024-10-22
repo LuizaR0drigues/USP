@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "registro.h"
-#include "cabecalho.h"
 #include "bcabecalho.h"
 #include "bregistro.h"
+#include "registro.h"
+#include "cabecalho.h"
 #include "funcoesFornecidas.h"
 
  #define PAGINA_TAMANHO 1600
@@ -40,7 +40,7 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
 
             //escrita
             cabecalho_writebin(arquivo_binario,cabecalho);
-            //printf("Status: %c\n", cabecalho->status);
+            
             while (!feof(arquivo_csv)) { //salva todos os dados em dino
                 Registro *registro = registro_readcsv(arquivo_csv);
 
@@ -205,32 +205,39 @@ int INSERT_INDICE(char *binario, char *indice)
         return 0;
     }
     
+    
+    //estruturas do arquivos de dados
     Registro *registro;  // Estrutura para armazenar um registro
-
     Cabecalho *cabecalho = cabecalho_readbin(arquivo_binario);
+
+    //cabecalho da arvore b
+    CabecalhoArvore *bcabecalho = bcabecalho_inicializa();
+    bcabecalho_writebin(arquivo_indice, bcabecalho);
+    
     fseek (arquivo_binario, 1600, SEEK_SET);
     // Lê registros do arquivo binário
     int cont_registro=0;
     while (1) {
         
-        //sabemos que ele morre no while, mas passa uma vez so aqui
+        //lendo o arquivo binario
         registro = registro_readbin(arquivo_binario);
         cont_registro++;
-
-        //ele nao passa do primeiro registro_readbin (local do problema )
-        // Verifica se a lei/sabemo que o arquivo abretura foi bem-sucedida
+    
+        //verificação de integridade
         if ( registro == NULL || registro->removido == 'E') {
             break;  // Sai do loop se não houver mais registros para ler
         }
-        if(registro_isValid(registro)==false){
+        if(registro_isValid(registro)==false){ //no positivo, colocamos o ponteiro do disco logo apos o cabecalho
             fseek (arquivo_binario, 1600+REGISTRO_SIZE*(cont_registro), SEEK_SET);
             continue;
         }
+
+        //tranformado string -> long int
         long int campo = converteNome(registro->nome);
         CPR valor;
         valor.C = campo;
         valor.PR = 16000+ (160 *cont_registro); //calculo do byetoffset
-        printf("Nome: %s %lu\n", registro->nome, campo);
+        printf("\nNome: %s %lu %d\n", registro->nome, campo, valor.PR);
         int raiz_rrn =0;
         NoArvore *raiz = no_criar(true,0);
 
@@ -240,19 +247,19 @@ int INSERT_INDICE(char *binario, char *indice)
             fclose(arquivo_indice);
             return 0;
         }
-        PCPR retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn);
+        PCPR retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn, bcabecalho);
 
 
          for (int i = 0; i < 4; i++) {
             campo = converteNome(registro->nome);
             valor.C = campo;
-            valor.PR = 16000 + (160 * i); // Calculo do byteoffset com base no índice
-            printf("Inserindo: Nome=%s C=%lu PR=%lu\n", registro->nome, campo, valor.PR);
+            valor.PR = 1600 + (160 * i); // Calculo do byteoffset com base no índice
+            printf("Inserindo: Nome=%s C=%lu PR=%d\n", registro->nome, campo, valor.PR);
             
-            retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn);
+            retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, raiz_rrn, bcabecalho);
             printf("Resultado: ");
             no_print(raiz);
-            printf("    PCPR: (%ld %ld) %d", retorno.corpo.C, retorno.corpo.PR, retorno.P);
+            printf("    PCPR: (%ld %d) %d", retorno.corpo.C, retorno.corpo.PR, retorno.P);
             printf("\n\n");
         }
 
@@ -263,14 +270,25 @@ int INSERT_INDICE(char *binario, char *indice)
             printf("RRN = %d | ", rrn);
             no_print(no);
         }
-
     }
+
+    //modificando o cabeçalho e reescrevendo as novas informações
+    bcabecalho_getStatus(bcabecalho);
+    bcabecalho_setproxRRNno(bcabecalho, cont_registro);
+    fseek(arquivo_indice, 0, SEEK_SET); //posicionado o ponteiro no inicio novamente
+    bcabecalho_writebin(arquivo_indice, bcabecalho);
+
     
     free(registro);
     free(cabecalho);
     fclose(arquivo_binario); 
     fclose(arquivo_indice);
     return 0;
+}
+
+void SEARCH_INDICE(char *indice, long int campo)
+{
+
 }
 
 

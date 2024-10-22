@@ -1,9 +1,9 @@
 #include "cabecalho.h"
 
-/*
+
 #define CABECALHO_STATUS_OK 1
 #define CABECALHO_STATUS_INCON 0
-*/
+
 
 Cabecalho* cabecalho_inicializa()
 {
@@ -48,11 +48,7 @@ Cabecalho* cabecalho_readbin(FILE *entrada) {
 }
 bool cabecalho_getStatus(Cabecalho *cabecalho) {
     // Verifica o valor do campo status
-    /*if (cabecalho->status == CABECALHO_STATUS_OK) {
-        return true; // Retorna verdadeiro se o status for '1'
-    } else {
-        return false; // Retorna falso caso contrário
-    }*/
+    
    return cabecalho->status == CABECALHO_STATUS_OK;
 }
 

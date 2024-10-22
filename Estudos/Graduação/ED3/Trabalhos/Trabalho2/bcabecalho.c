@@ -1,9 +1,9 @@
 #include "bcabecalho.h"
 
-/*
-#define CABECALHO_STATUS_OK 1
-#define CABECALHO_STATUS_INCON 0
-*/
+
+#define BCABECALHO_STATUS_OK 1
+#define BCABECALHO_STATUS_INCON 0
+
 #define TAMPAGE 93
 
 CabecalhoArvore* bcabecalho_inicializa()
@@ -35,12 +35,7 @@ CabecalhoArvore* bcabecalho_readbin(FILE *entrada) {
 }
 bool bcabecalho_getStatus(CabecalhoArvore *cabecalho) {
     // Verifica o valor do campo status
-    /*if (cabecalho->status == CABECALHO_STATUS_OK) {
-        return true; // Retorna verdadeiro se o status for '1'
-    } else {
-        return false; // Retorna falso caso contrário
-    }*/
-   return cabecalho->status == CABECALHO_STATUS_OK;
+   return cabecalho->status == BCABECALHO_STATUS_OK;
 }
 
 void bcabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho) {
@@ -52,13 +47,12 @@ void bcabecalho_writebin(FILE *file, CabecalhoArvore *cabecalho) {
     fwrite(&cabecalho->status, sizeof(char), 1, file);
     fwrite(&cabecalho->noRaiz, sizeof(int), 1, file);
     fwrite(&cabecalho->proxRRNno, sizeof(int), 1, file);
-   
 
-    
 
     // Preencher o restante da página de disco com o caractere '$'
-    int resto = TAMPAGE - (2 * sizeof(int)) + sizeof(char); // Calcula o espaço restante
+    int resto = TAMPAGE - (2 * sizeof(int) + sizeof(char)); // Calcula o espaço restante
     char aux[resto];
+    printf("\n resto %d\n", resto);
     for (int i = 0; i < resto; i++) {
         aux[i] = '$'; // Preenche o array com '$'
     }

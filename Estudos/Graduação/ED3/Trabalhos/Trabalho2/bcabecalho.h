@@ -31,6 +31,6 @@
     // Funções para definir valores dos campos do cabeçalho
     void bcabecalho_setStatus(CabecalhoArvore *cabecalho, char status);
     void bcabecalho_setNoRaiz(CabecalhoArvore *cabecalho, int topo);
-    void bcabecalho_setProxRRNno(CabecalhoArvore *cabecalho, int proxRRN);
+    void bcabecalho_setproxRRNno(CabecalhoArvore *cabecalho, int proxRRNno);
     
 #endif

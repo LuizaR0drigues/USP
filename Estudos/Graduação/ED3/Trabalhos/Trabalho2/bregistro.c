@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "registro.h"
 
 #define LOTACAO_MAX 4
 
@@ -75,7 +76,7 @@ void no_writebin(FILE *nomebin, NoArvore *no)
 void no_print(NoArvore *no){
     printf("RRN=%d  |  P[0]=%d  ",no->RRNdoNo,no->P[0]);
     for(int i=0;i<LOTACAO_MAX;i++){
-        printf("(%ld %ld) P[%d]=%d  ",
+        printf("(%ld %d) P[%d]=%d  ",
             no->CPRs[i].C,no->CPRs[i].PR,
             i+1,no->P[i+1]);
     }
@@ -130,17 +131,22 @@ bool PCPR_isnull(PCPR pcpr){
 
 
 // tratar o caso da raiz !!
-PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir,int rrn_raiz){
+PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir,int rrn_raiz, CabecalhoArvore *c,bool *volta_recursao){
     
     // O retorno é direcionado para o nó pai
     //critério de parada: é nó folha
    //critério de parada: é nó folha
     if(atual->folha==FOLHA){
+        *volta_recursao = true;
+    }
+
+    //
+    if(*volta_recursao){ 
         // tentar inserir
         PCPR overflow = no_tenta_inserir(atual,valor_inserir,indice);
 
         if(PCPR_isnull(overflow)){
-            //retorna um nó nulo
+            //retorna um nó nulo (Conseguiu inserir diretamente)
             printf("   >> Não aconteceu overflow\n");
             PCPR null_pcpr = get_null_pcpr();
             return null_pcpr;
@@ -193,50 +199,47 @@ PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir,int rrn
         
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------------------------------------
     
-    // fazendo busca sequencial para saber onde entrar:
-    int idx_entrar = 0;
-    for(int i=0;i<atual->lotacao;i++){ // descobre a posição para inserir
-        if(valor_inserir.C > atual->CPRs[i].C){
-            idx_entrar = i+1;
-        }
-    }
-
-    int RRN_entrar = idx_entrar;
-    NoArvore *no_filho = no_readbin(indice,RRN_entrar);
-    PCPR inserir_restante = no_inserir_recursivo(indice,no_filho,valor_inserir,rrn_raiz);// inserir_restante é o CBR que subiu depois de ter feito o split 1 para 2
     
+    
+    ## chama outro tenta inserir
     NoArvore *raiz;
-     if(rrn_raiz == atual->RRNdoNo && inserir_restante.corpo.C!=NULL_VALUE){   // significa que ele voltou de tudo e precisa criar uma raiz acima de tudo
-         raiz = no_criar(false, rrn_raiz); //criando uma raiz
-
+    if(rrn_raiz == atual->RRNdoNo){   // significa que ele voltou de tudo e precisa criar uma raiz acima de tudo
+         raiz = no_criar(false, ++contador_RRN); //criando uma raiz
     }
 
-    
+    bcabecalho_setNoRaiz(c, rrn_raiz);
+
 }
 
-/*
+
 int buscando_chave(FILE *arquivo, long int chave)
 {
-    
-    NoArvore *no = no_criar(true, 0); //procura na riaz
-    no = no_readbin(arquivo, 0);
-    if(no == NULL)
+    NoArvore *no = no_criar(true, 0);
+    NoArvore *raiz = no_criar(false, 0);
+    Registro *registro = cria_registro();
+
+    int rrn_dados;
+    no = no_readbin(arquivo, 93);
+    if(no == NULL || registro == NULL)
     {
-        printf("Erro ao ler a página com RRN = %d\n", rrn);
         return -1;
     }
 
-    //procura pela chave dentro da pagina
-   int proximo_rrn = no->P[0]; // Adapte o índice conforme a chave a ser buscada
-    for (int i = 0; i < no->nroChavesIndexadas; i++) {
-        if (chave < no->CPRs[i].C) {
-            proximo_rrn = no->P[i];
-            break;
+    while(!feof(arquivo)){
+        
+        //procura pela chave dentro da pagina
+        int proximo_rrn = no->P[0]; // Adapte o índice conforme a chave a ser buscada
+        for (int i = 0; i < no->nroChavesIndexadas; i++) {
+            if (chave < no->CPRs[i].C) {
+                proximo_rrn = no->P[i];
+                break;
+            }
+            proximo_rrn = no->P[i + 1]; // Última comparação
         }
-        proximo_rrn = no->P[i + 1]; // Última comparação
     }
 
     free(no);
-    return buscar_chave(arquivo, chave);
-}*/
+    return rrn_dados;
+}

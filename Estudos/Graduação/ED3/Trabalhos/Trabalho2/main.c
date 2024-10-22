@@ -57,7 +57,8 @@ int main()
         case 7:{
             scanf("%s %s",nomearqbin,nomearquivoindice);
             INSERT_INDICE(nomearqbin, nomearquivoindice, cabecalho);
-            //binarioNaTela(nomearquivoindice);
+            binarioNaTela(nomearquivoindice);
+            binarioNaTela(nomearqbin);
           break;  
         }
 
@@ -67,6 +68,10 @@ int main()
             long int campoint = converteNome(campo);
             //RECUPERACAO_INDICE(nomearqbin, nomearquivoindice, campoint);
         break;
+        }
+        case 9:
+        {
+            break;
         }
          default:
                 return 0;
