@@ -1,0 +1,1 @@
+8 binario4.bin indiceDino4.bin nome "tyrannosaurus"

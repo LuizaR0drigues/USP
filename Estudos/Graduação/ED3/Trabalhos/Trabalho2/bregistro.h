@@ -36,9 +36,13 @@
         int lotacao;
     } NoArvore;
     
-    NoArvore *no_criar(bool folha,int rrn);
+    NoArvore *no_criar(bool folha);
     void no_print(NoArvore *no);
-    NoArvore *no_readbin(FILE* entrada,int RRN);
+    NoArvore *no_readbin(FILE* entrada);
+    NoArvore *arvore_readbin(FILE* entrada);
+    void no_writebin(FILE *nomebin, NoArvore *no);
     PCPR no_tenta_inserir(NoArvore *no,CPR valor_inserir,FILE *arquivo);
     PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir, CabecalhoArvore *c,int level);
+
+   int buscando_chave(FILE *arquivo_indice,NoArvore *atual, long int campo);
 #endif

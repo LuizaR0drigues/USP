@@ -216,16 +216,22 @@ int INSERT_INDICE(char *binario, char *indice)
     fseek (arquivo_binario, 1600, SEEK_SET);
     // Lê registros do arquivo binário
     int cont_registro=0;
+    bcabecalho->noRaiz = 0;
+
     while (1) {
-        
         //lendo o arquivo binario
         registro = registro_readbin(arquivo_binario);
 
         cont_registro++;
         // printf("Registro lido -----------------------------\n");
         //verificação de integridade
-        if ( registro == NULL || registro->removido == 'E') {
+        if ( registro == NULL) {
             break;  // Sai do loop se não houver mais registros para ler
+        }
+        if(registro->removido == 'E')
+        {
+            cont_registro++;
+            continue;
         }
         
         if(registro_isValid(registro)==false){ //no positivo, colocamos o ponteiro do disco logo apos o cabecalho
@@ -241,14 +247,151 @@ int INSERT_INDICE(char *binario, char *indice)
         printf("-----------------------------------------------------------------------\n");
         printf("\nNome: %s %lu %d\n", registro->nome, campo, valor.PR);
         
-        NoArvore *raiz = no_criar(true,0);
-        raiz->RRNdoNo = 0;
-        bcabecalho->noRaiz = 0;
-        
-        PCPR retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, bcabecalho,0);
-        printf("\n Valores inseridos %lu %d\n", retorno.corpo.C, retorno.corpo.PR);
+        NoArvore *noatual = no_criar(true);
+        noatual->RRNdoNo = 0;
+       
+        PCPR retorno = no_inserir_recursivo(arquivo_indice, noatual, valor, bcabecalho,0);
+       
 
-        // for (int i = 0; i < 4; i++) {
+        
+    }
+
+    //modificando o cabeçalho e reescrevendo as novas informações
+    bcabecalho_getStatus(bcabecalho);
+    bcabecalho_setproxRRNno(bcabecalho, cont_registro);
+    fseek(arquivo_indice, 0, SEEK_SET); //posicionado o ponteiro no inicio novamente
+    bcabecalho_writebin(arquivo_indice, bcabecalho);
+
+    
+    free(registro);
+    free(cabecalho);
+    fclose(arquivo_binario); 
+    fclose(arquivo_indice);
+    return 0;
+}
+
+void SEARCH_INDICE(char *arquivo, char *indice, long int campo) {
+    // Abertura dos arquivos binários
+    FILE *arquivodados = fopen(arquivo, "rb");
+    if (arquivodados == NULL) {
+        printf("Falha ao abrir o arquivo de dados.\n");
+        return;
+    }
+    
+    FILE *arquivo_indice = fopen(indice, "rb");  // Modo de leitura binária
+    if (arquivo_indice == NULL) {
+        printf("Falha ao abrir o arquivo de índice.\n");
+        fclose(arquivodados);
+        return;
+    }
+
+    // Inicializando e lendo o cabeçalho da árvore B
+    CabecalhoArvore *bcabe = bcabecalho_inicializa();
+    bcabe = bcabecalho_readbin(arquivo_indice);  // Ler o cabeçalho da árvore
+   
+    // Verificar se a leitura do cabeçalho foi bem-sucedida
+    if (bcabe == NULL) {
+        printf("Erro ao ler o cabeçalho da árvore B.\n");
+        fclose(arquivodados);
+        fclose(arquivo_indice);
+        return;
+    }
+    NoArvore *no = no_criar(true);
+    int aux = buscando_chave(arquivo_indice, no, campo );
+    
+
+    printf("\n ------> Aux: %d\n", aux);
+   
+
+    // Fechar os arquivos e liberar memória
+    fclose(arquivodados);
+    fclose(arquivo_indice);
+    free(no);
+    free(bcabe);
+}
+
+
+
+
+/*
+void SEARCH_INDICE(char *arquivo, char *indice, long int campo) {
+    // Abertura dos arquivos binários
+    FILE *arquivodados = fopen(arquivo, "rb");
+    if (arquivodados == NULL) {
+        printf("Falha ao abrir o arquivo de dados.\n");
+        return;
+    }
+    
+    FILE *arquivo_indice = fopen(indice, "rb");  // Modo de leitura binária
+    if (arquivo_indice == NULL) {
+        printf("Falha ao abrir o arquivo de índice.\n");
+        fclose(arquivodados);
+        return;
+    }
+
+    // Inicializando e lendo o cabeçalho da árvore B
+    CabecalhoArvore *bcabe = bcabecalho_inicializa();
+    bcabe = bcabecalho_readbin(arquivo_indice);  // Ler o cabeçalho da árvore
+    
+    // Verificar se a leitura do cabeçalho foi bem-sucedida
+    if (bcabe == NULL) {
+        printf("Erro ao ler o cabeçalho da árvore B.\n");
+        fclose(arquivodados);
+        fclose(arquivo_indice);
+        return;
+    }
+
+    
+
+    NoArvore *atual = no_criar(true);
+    fseek(arquivo_indice,0, SEEK_SET );
+    int cont=0;
+    printf("Entrando no while");
+    while (1)
+    {
+        printf("Oi :)\n");
+        // Ler o nó raiz da árvore B
+        atual = no_readbin(arquivo_indice, bcabe->noRaiz);  // Ler o nó raiz
+     
+        if (atual == NULL) {
+            printf("Erro ao ler o registro.\n");
+            break;
+        }
+
+        no_print(atual);
+        /// Chamar a função de busca de chave na árvore B
+        int posicao = buscando_chave(arquivo_indice, atual, campo);
+        
+
+        // Verificar se a chave foi encontrada
+        if (posicao != -1) {
+            printf("Chave %ld encontrada na posição %d no arquivo de índice.\n", campo, posicao);
+            
+            // Posicionar no arquivo de dados e acessar o registro
+            fseek(arquivodados, posicao, SEEK_SET);
+            // Aqui, você pode ler o registro correspondente no arquivo de dados
+            // Dependendo da estrutura dos registros, você usaria fread ou outra função
+            // para carregar o dado e processá-lo
+        } else {
+            printf("Chave %ld não encontrada no índice.\n", campo);
+        }
+        cont++;
+    }
+    
+    // Fechar os arquivos e liberar memória
+    fclose(arquivodados);
+    fclose(arquivo_indice);
+    free(atual);
+    free(bcabe);
+}
+
+*/
+
+
+
+
+
+/*/ for (int i = 0; i < 4; i++) {
         //     campo = converteNome(registro->nome);
         //     valor.C = campo;
         //     valor.PR = 1600 + (160 * i); // Calculo do byteoffset com base no índice
@@ -267,28 +410,4 @@ int INSERT_INDICE(char *binario, char *indice)
             NoArvore *no = no_readbin(arquivo_indice, rrn);
             printf("RRN = %d | ", rrn);
             no_print(no);
-        }
-        printf("\n\n\n");
-    }
-
-    //modificando o cabeçalho e reescrevendo as novas informações
-    bcabecalho_getStatus(bcabecalho);
-    bcabecalho_setproxRRNno(bcabecalho, cont_registro);
-    fseek(arquivo_indice, 0, SEEK_SET); //posicionado o ponteiro no inicio novamente
-    bcabecalho_writebin(arquivo_indice, bcabecalho);
-
-    
-    free(registro);
-    free(cabecalho);
-    fclose(arquivo_binario); 
-    fclose(arquivo_indice);
-    return 0;
-}
-
-void SEARCH_INDICE(char *indice, long int campo)
-{
-
-}
-
-
-
+        }*/

@@ -16,9 +16,9 @@ int contador_RRN = 0; // vai ser substituido pelo cabecalho
 
 //caso o ponteiro pi seja nulo = -1
 //os ints inicializam com -1
-NoArvore *no_criar(bool folha,int rrn)
+NoArvore *no_criar(bool folha)
 {
-    printf("Um novo no foi criado\n");
+    //printf("Um novo no foi criado\n");
     NoArvore *no = malloc(sizeof(NoArvore));
     if(folha){
         no->folha = FOLHA; // é folha
@@ -27,7 +27,7 @@ NoArvore *no_criar(bool folha,int rrn)
     }
     
     no->nroChavesIndexadas = -1;
-    no->RRNdoNo = rrn;
+    no->RRNdoNo = -1;
     for(int i=0; i< ORDEM; i++)
     {
         no->P[i] = -1; //5 ponteiros
@@ -41,10 +41,10 @@ NoArvore *no_criar(bool folha,int rrn)
  return no;
 }
 
-NoArvore *no_readbin(FILE* entrada,int RRN) 
+NoArvore *no_readbin(FILE* entrada) 
 {
-    fseek(entrada,TAMANHO_NO*RRN,SEEK_SET); //vai pro lugar certo
-    NoArvore* aux = no_criar(true,-1);
+    //fseek(entrada,TAMANHO_NO*RRN,SEEK_SET); //vai pro lugar certo
+    NoArvore* aux = no_criar(true);
 
 
     fread(&aux->folha, sizeof(char), 1, entrada);
@@ -53,6 +53,24 @@ NoArvore *no_readbin(FILE* entrada,int RRN)
     for(int i =0; i<ORDEM-1; i++)
     {
         fread(&aux->CPRs[i].C, sizeof(int), 1, entrada);
+        fread(&aux->CPRs[i].PR, sizeof(int), 1, entrada);
+    }
+
+    return aux;
+}
+
+NoArvore *arvore_readbin(FILE *entrada) 
+{
+    //fseek(entrada,TAMANHO_NO*cont,SEEK_SET); //vai pro lugar certo
+    NoArvore *aux = no_criar(true);
+
+
+    fread(&aux->folha, sizeof(char), 1, entrada);
+    fread(&aux->nroChavesIndexadas, sizeof(int), 1, entrada);
+    fread(&aux->RRNdoNo, sizeof(int), 1, entrada);
+    for(int i =0; i<ORDEM-1; i++)
+    {
+        fread(&aux->CPRs[i].C, sizeof(long), 1, entrada);
         fread(&aux->CPRs[i].PR, sizeof(int), 1, entrada);
     }
 
@@ -140,17 +158,24 @@ void space(int j){
 // tratar o caso da raiz !!
 PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir, CabecalhoArvore *c, int level){
     // caso de inicialização da árvore B
-    printf("Valor do ponteiro Btree: %p.  Valor do noraiz: %d\n",atual,c->noRaiz);
-    if(c->noRaiz==-1){
-        space(level);printf(">> inserção sem raiz -- criando raiz primária\n");
-        atual = no_criar(true,++contador_RRN);
+    printf("\nValor do ponteiro Btree: %p.  Valor do noraiz: %d\n",atual,c->noRaiz);
+   
+    if(c->noRaiz== 0){
         
-        // atualiza o cabecalho
+        space(level);printf(">> inserção sem raiz -- criando raiz primária\n");
+        atual = no_criar(true);
+        atual->RRNdoNo = contador_RRN++;
+        
+        // Atualiza o cabeçalho com o novo RRN da raiz
         bcabecalho_setNoRaiz(c,atual->RRNdoNo);
+        
+        // Atualiza o cabeçalho no arquivo binário
         fseek(indice,0,SEEK_SET);
         bcabecalho_writebin(indice,c);
+    
     }
-
+    
+    
 
     PCPR inserir_restante = get_null_pcpr();
     if(atual->folha!=FOLHA){
@@ -160,12 +185,13 @@ PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir, Cabeca
         for(int i=0;i<atual->lotacao;i++){ // descobre a posição para inserir
             if(valor_inserir.C > atual->CPRs[i].C){
                 idx_entrar = i+1;
+                printf("Indice de inserção: %d", idx_entrar);
             }
         }
 
         int RRN_entrar = idx_entrar;
-        NoArvore *no_filho = no_readbin(indice,RRN_entrar);
-        inserir_restante = no_inserir_recursivo(indice,no_filho,valor_inserir, c, level+1);// inserir_restante é o CBR que subiu depois de ter feito o split 1 para 2
+       // NoArvore *no_filho = no_readbin(indice,RRN_entrar);
+      //  inserir_restante = no_inserir_recursivo(indice,no_filho,valor_inserir, c, level+1);// inserir_restante é o CBR que subiu depois de ter feito o split 1 para 2
     }else{
         // é como se tivesse voltando do vazio da folha
         space(level);printf(">> É uma folha --> tentando inserir diretamente\n");
@@ -216,9 +242,8 @@ PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir, Cabeca
         // atual->lotacao++; // lotação volta a aumentar
 
         // passar para o irmaozinho tudo que vem desde do idx_meio até o fim
-        NoArvore *irmaozinho = no_criar(atual->folha,
-                                        ++contador_RRN);
-        
+        NoArvore *irmaozinho = no_criar(atual->folha);
+        irmaozinho->RRNdoNo = contador_RRN++;
         subiu.P = irmaozinho->RRNdoNo; // o que subiu aponta para o irmãozinho
         
         irmaozinho->CPRs[0] = overflow.corpo;
@@ -245,7 +270,8 @@ PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir, Cabeca
         // porém, se o nó que eu estiver inserindo (atual) já for a raiz, ele sube para a raiz
         if(c->noRaiz == atual->RRNdoNo){
             space(level);printf(">> Está tentando dar split na raiz --> cria uma nova raiz superior\n");
-            NoArvore *nova_raiz = no_criar(false,++contador_RRN);
+            NoArvore *nova_raiz = no_criar(false);
+            nova_raiz->RRNdoNo = contador_RRN++;
             nova_raiz->P[0] = atual->RRNdoNo; //aponta para o que era antes (que no caso é o atual)
             nova_raiz->P[1] = irmaozinho->RRNdoNo; // aponta para o irmãozinho que acabou de ser criado
             
@@ -261,33 +287,62 @@ PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir, Cabeca
     }
 }
 
-
-int buscando_chave(FILE *arquivo, long int chave)
+int buscando_chave(FILE *arquivo_indice, NoArvore *atual, long int campo)
 {
-    NoArvore *no = no_criar(true, 0);
-    NoArvore *raiz = no_criar(false, 0);
-    Registro *registro = cria_registro();
+    fseek(arquivo_indice, 0, SEEK_SET);
+    CabecalhoArvore *bcabe = bcabecalho_readbin(arquivo_indice);  // Apenas a leitura
 
-    int rrn_dados;
-    no = no_readbin(arquivo, 93);
-    if(no == NULL || registro == NULL)
-    {
-        return -1;
+    if (bcabe == NULL) {
+        return -1;  // Falha ao ler o cabeçalho
     }
 
-    while(!feof(arquivo)){
-        
-        //procura pela chave dentro da pagina
-        int proximo_rrn = no->P[0]; // Adapte o índice conforme a chave a ser buscada
-        for (int i = 0; i < no->nroChavesIndexadas; i++) {
-            if (chave < no->CPRs[i].C) {
-                proximo_rrn = no->P[i];
+    
+    int nronos = 0, rrndono = 0, ponteiro = 0;
+    long int chavesatual = 0;
+    int pr = -1;
+    char folha;
+    int rrnatual = bcabe->noRaiz;  // Começa no nó raiz
+
+    printf("No raiz %d\n", rrnatual);
+    while (1) {
+        //chavesatual = 0;
+        if (rrnatual == -1) {
+            return -1; // Retorna se o nó não for encontrado (chave não encontrada)
+        }
+
+       
+        fseek(arquivo_indice, (rrnatual * 93), SEEK_SET);
+
+        // Lê a estrutura do nó
+        fread(&folha, sizeof(char), 1, arquivo_indice) ; //primeiro campo 1 byte
+        fread(&nronos, sizeof(int), 1, arquivo_indice) ; //segundo campo 4 bytes
+        fread(&rrndono, sizeof(int), 1, arquivo_indice); //terceiro campo 4 bytes
+
+        // Loop pelos nós dentro do nó atual
+        for (int i = 0; i < nronos; i++) {
+           // printf("Numero de nos nesta pagina -> %d, %d", nronos, i);
+            fread(&ponteiro, sizeof(int), 1, arquivo_indice) ; //quarto campo - 4 bytes
+            fread(&chavesatual, sizeof(long), 1, arquivo_indice) ; // quinto campo  - 8 bytes
+            fread(&pr, sizeof(int), 1, arquivo_indice) ; //posição no arquivo de dados
+            printf("P[%d]: %d {%ld , %d} e o campo %ld\n", i, ponteiro, chavesatual, pr, campo);
+
+            if (chavesatual == campo) {
+                printf("Encontrou\n");
+                return pr;
+            } else if (campo < chavesatual) { //saio da chave e pego o ponteiro( -12 bytes a esquerda)
+                printf("É menor!\n");
+                //fseek(arquivo_indice, -(sizeof(long)), SEEK_CUR);
+                //fread(&rrnatual, sizeof(int), 1, arquivo_indice) ;
+                rrnatual = ponteiro;
+                printf("rrnatual -> %d chave atual : %ld P: %d\n", rrnatual, chavesatual, ponteiro);
                 break;
+            } else if (i == nronos - 1) {
+                printf("É maior\n");
+                // Lê o ponteiro à direita (P[nronos])
+               fread(&rrnatual, sizeof(int), 1, arquivo_indice);
+               break;
             }
-            proximo_rrn = no->P[i + 1]; // Última comparação
         }
     }
-
-    free(no);
-    return rrn_dados;
 }
+

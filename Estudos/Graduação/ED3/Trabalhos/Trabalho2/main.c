@@ -64,9 +64,11 @@ int main()
 
         case 8:{
             
-            scanf("%s %s %*s %s",nomearqbin, nomearquivoindice, campo);
-            long int campoint = converteNome(campo);
-            //RECUPERACAO_INDICE(nomearqbin, nomearquivoindice, campoint);
+            scanf("%s %s %*s ", nomearqbin, nomearquivoindice);
+            char* auxckeys = malloc(160*sizeof(char));
+            scan_quote_string(auxckeys);
+            long int campoint = converteNome(auxckeys);
+            SEARCH_INDICE(nomearqbin, nomearquivoindice, campoint);
         break;
         }
         case 9:
@@ -75,32 +77,8 @@ int main()
         }
          default:
                 return 0;
-    }/*
-
-    FILE *batata = fopen("batata.bin","wb+");
-
-    int rrn_raiz = 0;
-    NoArvore *raiz = no_criar(true,0);
-    no_print(raiz);
-    for(int i=0;i<4;i++){
-        CPR inserir;inserir.C = i*i;inserir.PR=i*4+i*i;
-        printf("Inserindo: C=%d PR=%d\n",inserir.C,inserir.PR);
-        PCPR retorno = no_inserir_recursivo(batata,raiz,inserir,rrn_raiz);
-        printf("Resultado: ");no_print(raiz);printf("    PCPR: (%ld %ld) %d",retorno.corpo.C,retorno.corpo.PR,retorno.P);
-        printf("\n\n");
     }
-
-
-    CPR inserir;inserir.C = 6;inserir.PR=1231;
-    printf("Inserindo: C=%d PR=%d\n",inserir.C,inserir.PR);
     
-    PCPR retorno = no_inserir_recursivo(batata,raiz,inserir,rrn_raiz);
-    // printf("   >> Deu overflow: %d\n",retorno);
-    printf("Resultado: ");no_print(raiz);printf("    PCPR: (%ld %ld) %d",retorno.corpo.C,retorno.corpo.PR,retorno.P);
-    printf("\n\n\n\n Todos os registros: \n");
-    for(int rrn=0;rrn<2;rrn++){
-        NoArvore *no = no_readbin(batata,rrn);
-        printf("RRN = %d | ",rrn);no_print(no);
-    }*/
+    
     return 0;
     }

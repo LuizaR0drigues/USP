@@ -22,5 +22,10 @@ batata:
 	make all
 	./runnable < input.txt > output.txt
 
+caso8:
+	clear
+	make all
+	./runnable < input8.txt > output8.txt
+
 zip:
 	zip runcodes.zip Makefile *.c *.h
