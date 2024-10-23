@@ -311,32 +311,32 @@ int buscando_chave(FILE *arquivo_indice, NoArvore *atual, long int campo)
         }
 
        
-        fseek(arquivo_indice, (rrnatual * 93), SEEK_SET);
+        fseek(arquivo_indice, ((rrnatual+1) * 93), SEEK_SET);
 
         // Lê a estrutura do nó
-        fread(&folha, sizeof(char), 1, arquivo_indice) ; //primeiro campo 1 byte
-        fread(&nronos, sizeof(int), 1, arquivo_indice) ; //segundo campo 4 bytes
-        fread(&rrndono, sizeof(int), 1, arquivo_indice); //terceiro campo 4 bytes
+        fread(&atual->folha, sizeof(char), 1, arquivo_indice) ; //primeiro campo 1 byte
+        fread(&atual->nroChavesIndexadas, sizeof(int), 1, arquivo_indice) ; //segundo campo 4 bytes
+        fread(&atual->RRNdoNo, sizeof(int), 1, arquivo_indice); //terceiro campo 4 bytes
 
         // Loop pelos nós dentro do nó atual
-        for (int i = 0; i < nronos; i++) {
+        for (int i = 0; i < atual->nroChavesIndexadas; i++) {
            // printf("Numero de nos nesta pagina -> %d, %d", nronos, i);
-            fread(&ponteiro, sizeof(int), 1, arquivo_indice) ; //quarto campo - 4 bytes
-            fread(&chavesatual, sizeof(long), 1, arquivo_indice) ; // quinto campo  - 8 bytes
-            fread(&pr, sizeof(int), 1, arquivo_indice) ; //posição no arquivo de dados
-            printf("P[%d]: %d {%ld , %d} e o campo %ld\n", i, ponteiro, chavesatual, pr, campo);
+            fread(&atual->P, sizeof(int), 1, arquivo_indice) ; //quarto campo - 4 bytes
+            fread(&atual->CPRs->C, sizeof(long), 1, arquivo_indice) ; // quinto campo  - 8 bytes
+            fread(&atual->CPRs->PR, sizeof(int), 1, arquivo_indice) ; //posição no arquivo de dados
+            printf("P[%d]: %d {%ld , %d} e o campo %ld\n", i, ponteiro, atual->CPRs->C, atual->CPRs->PR, campo);
 
-            if (chavesatual == campo) {
+            if (atual->CPRs->C == campo) {
                 printf("Encontrou\n");
-                return pr;
-            } else if (campo < chavesatual) { //saio da chave e pego o ponteiro( -12 bytes a esquerda)
+                return atual->CPRs->PR;
+            } else if (campo < atual->CPRs->C) { //saio da chave e pego o ponteiro( -12 bytes a esquerda)
                 printf("É menor!\n");
                 //fseek(arquivo_indice, -(sizeof(long)), SEEK_CUR);
                 //fread(&rrnatual, sizeof(int), 1, arquivo_indice) ;
-                rrnatual = ponteiro;
-                printf("rrnatual -> %d chave atual : %ld P: %d\n", rrnatual, chavesatual, ponteiro);
+                printf("rrnatual -> %d chave atual : %ld P: %d\n Saindo do for \n", rrnatual, atual->CPRs->C, atual->P[i]);
+                rrnatual = atual->P[i];
                 break;
-            } else if (i == nronos - 1) {
+            } else if (i == atual->nroChavesIndexadas - 1) {
                 printf("É maior\n");
                 // Lê o ponteiro à direita (P[nronos])
                fread(&rrnatual, sizeof(int), 1, arquivo_indice);
