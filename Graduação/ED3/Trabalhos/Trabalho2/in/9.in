@@ -1,0 +1,4 @@
+9 binario9.bin indiceDino9.bin 3
+"mosasaurus" "carnivorous" "oceans" 110 "mosasaur" 65 "k" 12.0 "hoffmanni" "Protosphyrna"
+"brithopus" "carnivorous" NULO 90 "therapsid" 50 "h" 4.0 "anomalus" "eoraptor"
+"cycadeoidea" "photosynthesis" NULO 50 "Plant" NULO NULO 1.0 NULO "Sunlight"
