@@ -19,7 +19,7 @@
 
     typedef struct CPR{
         long int C;
-         int PR;
+        long int PR;
     } CPR;
 
     typedef struct PCPR{
@@ -39,7 +39,7 @@
     NoArvore *no_criar(bool folha);
     void no_print(NoArvore *no);
     NoArvore *no_readbin(FILE* entrada);
-    NoArvore *arvore_readbin(FILE* entrada);
+    
     void no_writebin(FILE *nomebin, NoArvore *no);
     PCPR no_tenta_inserir(NoArvore *no,CPR valor_inserir,FILE *arquivo);
     PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir, CabecalhoArvore *c,int level);

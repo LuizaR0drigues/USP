@@ -8,7 +8,7 @@
 
 #define FOLHA '0'
 #define FOLHA_N '1'
-#define NULL_VALUE -2
+#define NULL_VALUE -1
 
 #define TAMANHO_NO 93
 
@@ -31,11 +31,13 @@ NoArvore *no_criar(bool folha)
     for(int i=0; i< ORDEM; i++)
     {
         no->P[i] = -1; //5 ponteiros
+        //printf("Ponteiro de indice[%d]: %d\n", i, no->P[i]);
     }
-    for(int i=0; i < ORDEM -1; i++)
+    for(int i=0; i < ORDEM-1 ; i++)
     {
         no->CPRs[i].C = NULL_VALUE; //4 campos de referencia
         no->CPRs[i].PR = -1;
+        //printf(" Chave[%d]: %ld   -- Pr: %ld\n", i, no->CPRs[i].C, no->CPRs[i].PR);
     }
     no->lotacao=0;
  return no;
@@ -59,23 +61,6 @@ NoArvore *no_readbin(FILE* entrada)
     return aux;
 }
 
-NoArvore *arvore_readbin(FILE *entrada) 
-{
-    //fseek(entrada,TAMANHO_NO*cont,SEEK_SET); //vai pro lugar certo
-    NoArvore *aux = no_criar(true);
-
-
-    fread(&aux->folha, sizeof(char), 1, entrada);
-    fread(&aux->nroChavesIndexadas, sizeof(int), 1, entrada);
-    fread(&aux->RRNdoNo, sizeof(int), 1, entrada);
-    for(int i =0; i<ORDEM-1; i++)
-    {
-        fread(&aux->CPRs[i].C, sizeof(long), 1, entrada);
-        fread(&aux->CPRs[i].PR, sizeof(int), 1, entrada);
-    }
-
-    return aux;
-}
 
 void no_writebin(FILE *nomebin, NoArvore *no)
 {
@@ -95,7 +80,7 @@ void no_writebin(FILE *nomebin, NoArvore *no)
 void no_print(NoArvore *no){
     printf("RRN=%d  |  P[0]=%d  ",no->RRNdoNo,no->P[0]);
     for(int i=0;i<LOTACAO_MAX;i++){
-        printf("(%ld %d) P[%d]=%d  ",
+        printf("(%ld %ld) P[%d]=%d  ",
             no->CPRs[i].C,no->CPRs[i].PR,
             i+1,no->P[i+1]);
     }
@@ -289,67 +274,48 @@ PCPR no_inserir_recursivo(FILE *indice,NoArvore *atual,CPR valor_inserir, Cabeca
 
 int buscando_chave(FILE *arquivo_indice, NoArvore *atual, long int campo)
 {
-    fseek(arquivo_indice, 0, SEEK_SET);
+    fseek(arquivo_indice, 0, SEEK_SET); //ponteiro no inicio pra leitura do cabecalho
     CabecalhoArvore *bcabe = bcabecalho_readbin(arquivo_indice);  // Apenas a leitura
 
-    if (bcabe == NULL) {
+    if (bcabe == NULL || atual == NULL) {
         return -1;  // Falha ao ler o cabeçalho
     }
 
+    int quant =0;
+    int posicao_atual = bcabe->noRaiz;  // Começa a busca pelo nó raiz
     
-    int nronos = 0, rrndono = 0, ponteiro = 0;
-    long int chavesatual = 0;
-    int pr = -1;
-    char folha;
-    int rrnatual = bcabe->noRaiz;  // Começa no nó raiz
-
-    printf("No raiz %d\n", rrnatual);
-    while (1) {
-        if (rrnatual == -1) {
-            return -1; // Retorna se o nó não for encontrado (chave não encontrada)
-        }
-
-        // Move para o início do nó correto
-        fseek(arquivo_indice, (rrnatual * 93), SEEK_SET);
-
+    while (posicao_atual != -1) { // procura até encontrar um rrn invalido
+       
+        // Move para o início do nó  a partir do campo folha
+        fseek(arquivo_indice, (posicao_atual+1) * 93 + sizeof(char), SEEK_SET);
         // Lê a estrutura do nó
-        fread(&atual->folha, sizeof(char), 1, arquivo_indice); //primeiro campo 1 byte
+        //fread(&atual->folha, sizeof(char), 1, arquivo_indice); //primeiro campo 1 byte
         fread(&atual->nroChavesIndexadas, sizeof(int), 1, arquivo_indice); //segundo campo 4 bytes
         fread(&atual->RRNdoNo, sizeof(int), 1, arquivo_indice); //terceiro campo 4 bytes
-        //fread(&atual->P[0], sizeof(int), 1, arquivo_indice); //pego o ponteiro mais a esqerda
-        printf("O número de chaves nesta página -> %d \n", atual->nroChavesIndexadas);
 
-        int quant =0;
-        if( ORDEM == atual->nroChavesIndexadas)
-        {
-            quant = ORDEM;
-        }
-        else {
-            quant = ORDEM - atual->nroChavesIndexadas;
-        }
-        // Loop pelos nós dentro do nó atual (usar número de chaves reais)
+        quant = atual->nroChavesIndexadas;
         for (int i = 0; i < quant; i++) { 
-            
-            fread(&atual->P[i], sizeof(int), 1, arquivo_indice) ; //quarto campo - 4 bytes
-            fread(&atual->CPRs[i].C, sizeof(long), 1, arquivo_indice) ; // quinto campo  - 8 bytes
-            fread(&atual->CPRs[i].PR, sizeof(int), 1, arquivo_indice) ; //posição no arquivo de dados
-            printf("P[%d]: %d {%ld , %d} e o campo %ld\n", i, atual->P[i], atual->CPRs[i].C, atual->CPRs[i].PR, campo);
-
+            //lendo os campos de cada regsitro da presente na pagina da arvore
+            fread(&atual->P[i], sizeof(int), 1, arquivo_indice); //lê o ponteiro
+            fread(&atual->CPRs[i].C, sizeof(long int), 1, arquivo_indice); // lê a chave
+            fread(&atual->CPRs[i].PR, sizeof(long int), 1, arquivo_indice);     // lê o PR
+                    
             if (atual->CPRs[i].C == campo) {
-                printf("Encontrou\n");
-                return atual->CPRs[i].PR;
-            } else if (campo < atual->CPRs[i].C) { //saio da chave e pego o atual->P( -12 bytes a esquerda)
-                printf("É menor!\nrrnatual -> %d chave atual : %ld P: %d  \n Saindo do for \n", rrnatual, atual->CPRs[i].C, atual->P[i]);
-                rrnatual = atual->P[i];
+                //printf("Encontrou\n");
+                return atual->CPRs[i].PR;  // Encontrou a chave
+            } else if (campo < atual->CPRs[i].C) {
+                posicao_atual =  atual->P[i];  // Atualiza o RRN para o ponteiro à esquerda
                 break;
-            } else if (i == atual->nroChavesIndexadas - 1) {
-                printf("É maior\n");
-                // Lê o ponteiro à direita (P[nronos])
-               fread(&rrnatual, sizeof(int), 1, arquivo_indice);
-               break;
-             }
+            } else if (i == quant-1) {
+                // Se chegou ao final do laço e o campo é maior que todas as chaves
+                fread(&posicao_atual, sizeof( int), 1, arquivo_indice);  // Lê o ponteiro à direita
+                break;
+            }
         }
+        
     }
-
+    return -1;
 }
+
+
 

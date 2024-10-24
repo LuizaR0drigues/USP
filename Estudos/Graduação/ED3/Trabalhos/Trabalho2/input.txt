@@ -1,1 +1,0 @@
-7 binario1.bin indiceDino1.bin

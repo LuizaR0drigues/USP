@@ -8,17 +8,11 @@
 #include "funcoesFornecidas.h"
 
  #define PAGINA_TAMANHO 1600
+ #define TAM_ARVORE 93
 
-FILE* abertura_arqBin(char *nome, char *tipo)
-{
-    FILE *arquivo = fopen(nome,tipo);
-    if (arquivo == NULL) {
-        printf("Falha no processamento do arquivo.\n");
-        return NULL; // Retorna 0 se não conseguiu abrir o arquivo
-    }
-    return arquivo;
-}
-
+//-------------------------------------------------------------------------------------------------------------------------------------
+//                                              COMANDOS REGISTROS
+//-------------------------------------------------------------------------------------------------------------------------------------
 void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
     // ler o arquivo csv (cria a página)
     //abertura do arquivo csv para leitur
@@ -191,6 +185,48 @@ int SELECT_WHERE(char *nomearquivo, char *campo, int quant) {
     fclose(arquivo_binario); // Fecha o arquivo binário
     return 0;
 }
+//-------------------------------------------------------------------------------------------------------------------------------------
+//                                             COAMANDOS - Arvore - B 
+//-------------------------------------------------------------------------------------------------------------------------------------
+
+void SEARCH_INDICE(char *arquivo, char *indice, long int campo) {
+    // Abertura dos arquivos binários
+    FILE *arquivodados = fopen(arquivo, "rb");
+    if (arquivodados == NULL) {
+        printf("Falaha no processamento do arquivo.\n");
+        return;
+    }
+    
+    FILE *arquivo_indice = fopen(indice, "rb");  // Modo de leitura binária
+    if (arquivo_indice == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        fclose(arquivodados);
+        return;
+    }
+
+   
+    NoArvore *no = no_criar(true); //crio um ponteiro de no folha
+    int aux = buscando_chave(arquivo_indice, no, campo ); 
+    Registro *dino;
+    if (aux != -1)
+    {
+        fseek(arquivodados, aux, SEEK_SET); //ajusta o ponteiro no arquivo de dados
+        dino = registro_readbin(arquivodados); //realiza a leitura do registro
+        registro_print(dino); //printa as informações que procuramos
+    }
+    else{
+        printf("Registro inexistente.\n"); //o registro que procuramos não existe no arquivo
+        
+    }
+
+    // Fechar os arquivos e liberar memória
+    fclose(arquivodados);
+    fclose(arquivo_indice);
+    free(no);
+    free(dino);
+    
+}
+
 
 int INSERT_INDICE(char *binario, char *indice)
 {
@@ -245,7 +281,7 @@ int INSERT_INDICE(char *binario, char *indice)
         valor.C = campo;
         valor.PR = 16000+ (160 *cont_registro); //calculo do byetoffset
         printf("-----------------------------------------------------------------------\n");
-        printf("\nNome: %s %lu %d\n", registro->nome, campo, valor.PR);
+        //printf("\nNome: %s %lu %d\n", registro->nome, campo, valor.PR);
         
         NoArvore *noatual = no_criar(true);
         noatual->RRNdoNo = 0;
@@ -269,145 +305,3 @@ int INSERT_INDICE(char *binario, char *indice)
     fclose(arquivo_indice);
     return 0;
 }
-
-void SEARCH_INDICE(char *arquivo, char *indice, long int campo) {
-    // Abertura dos arquivos binários
-    FILE *arquivodados = fopen(arquivo, "rb");
-    if (arquivodados == NULL) {
-        printf("Falha ao abrir o arquivo de dados.\n");
-        return;
-    }
-    
-    FILE *arquivo_indice = fopen(indice, "rb");  // Modo de leitura binária
-    if (arquivo_indice == NULL) {
-        printf("Falha ao abrir o arquivo de índice.\n");
-        fclose(arquivodados);
-        return;
-    }
-
-    // Inicializando e lendo o cabeçalho da árvore B
-    CabecalhoArvore *bcabe = bcabecalho_inicializa();
-    bcabe = bcabecalho_readbin(arquivo_indice);  // Ler o cabeçalho da árvore
-   
-    // Verificar se a leitura do cabeçalho foi bem-sucedida
-    if (bcabe == NULL) {
-        printf("Erro ao ler o cabeçalho da árvore B.\n");
-        fclose(arquivodados);
-        fclose(arquivo_indice);
-        return;
-    }
-    NoArvore *no = no_criar(true);
-    int aux = buscando_chave(arquivo_indice, no, campo );
-    
-
-    printf("\n ------> Aux: %d\n", aux);
-   
-
-    // Fechar os arquivos e liberar memória
-    fclose(arquivodados);
-    fclose(arquivo_indice);
-    free(no);
-    free(bcabe);
-}
-
-
-
-
-/*
-void SEARCH_INDICE(char *arquivo, char *indice, long int campo) {
-    // Abertura dos arquivos binários
-    FILE *arquivodados = fopen(arquivo, "rb");
-    if (arquivodados == NULL) {
-        printf("Falha ao abrir o arquivo de dados.\n");
-        return;
-    }
-    
-    FILE *arquivo_indice = fopen(indice, "rb");  // Modo de leitura binária
-    if (arquivo_indice == NULL) {
-        printf("Falha ao abrir o arquivo de índice.\n");
-        fclose(arquivodados);
-        return;
-    }
-
-    // Inicializando e lendo o cabeçalho da árvore B
-    CabecalhoArvore *bcabe = bcabecalho_inicializa();
-    bcabe = bcabecalho_readbin(arquivo_indice);  // Ler o cabeçalho da árvore
-    
-    // Verificar se a leitura do cabeçalho foi bem-sucedida
-    if (bcabe == NULL) {
-        printf("Erro ao ler o cabeçalho da árvore B.\n");
-        fclose(arquivodados);
-        fclose(arquivo_indice);
-        return;
-    }
-
-    
-
-    NoArvore *atual = no_criar(true);
-    fseek(arquivo_indice,0, SEEK_SET );
-    int cont=0;
-    printf("Entrando no while");
-    while (1)
-    {
-        printf("Oi :)\n");
-        // Ler o nó raiz da árvore B
-        atual = no_readbin(arquivo_indice, bcabe->noRaiz);  // Ler o nó raiz
-     
-        if (atual == NULL) {
-            printf("Erro ao ler o registro.\n");
-            break;
-        }
-
-        no_print(atual);
-        /// Chamar a função de busca de chave na árvore B
-        int posicao = buscando_chave(arquivo_indice, atual, campo);
-        
-
-        // Verificar se a chave foi encontrada
-        if (posicao != -1) {
-            printf("Chave %ld encontrada na posição %d no arquivo de índice.\n", campo, posicao);
-            
-            // Posicionar no arquivo de dados e acessar o registro
-            fseek(arquivodados, posicao, SEEK_SET);
-            // Aqui, você pode ler o registro correspondente no arquivo de dados
-            // Dependendo da estrutura dos registros, você usaria fread ou outra função
-            // para carregar o dado e processá-lo
-        } else {
-            printf("Chave %ld não encontrada no índice.\n", campo);
-        }
-        cont++;
-    }
-    
-    // Fechar os arquivos e liberar memória
-    fclose(arquivodados);
-    fclose(arquivo_indice);
-    free(atual);
-    free(bcabe);
-}
-
-*/
-
-
-
-
-
-/*/ for (int i = 0; i < 4; i++) {
-        //     campo = converteNome(registro->nome);
-        //     valor.C = campo;
-        //     valor.PR = 1600 + (160 * i); // Calculo do byteoffset com base no índice
-        //     printf("Inserindo: Nome=%s C=%lu PR=%d\n", registro->nome, campo, valor.PR);
-            
-        //     retorno = no_inserir_recursivo(arquivo_indice, raiz, valor, bcabecalho, 0);
-        //     printf("Resultado: ");
-        //     no_print(raiz);
-        //     printf("    PCPR: (%ld %d) %d", retorno.corpo.C, retorno.corpo.PR, retorno.P);
-        //     printf("\n\n");
-        // }
-
-        // Lê todos os registros e imprime
-        printf("\nTodos os registros [%d]:\n",bcabecalho->proxRRNno);
-        for (int rrn = 0; rrn < bcabecalho->proxRRNno; rrn++) {
-            NoArvore *no = no_readbin(arquivo_indice, rrn);
-            printf("RRN = %d | ", rrn);
-            no_print(no);
-        }*/
