@@ -1,7 +1,0 @@
-Nome: tyrannosaurus
-Especie: rex
-Dieta: carnivorous
-Lugar que habitava: USA
-Tamanho: 12.0 m
-Velocidade: 45 km/h
-
