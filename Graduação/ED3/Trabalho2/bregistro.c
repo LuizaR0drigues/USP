@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "registro.h"
-
+#include "funcoesFornecidas.h"
 #define LOTACAO_MAX 4
 
 #define FOLHA '0'
@@ -317,5 +317,16 @@ int buscando_chave(FILE *arquivo_indice, NoArvore *atual, long int campo)
     return -1;
 }
 
+//
+int inserindo_elemento( long int chave, int rrn)
+{
+    
 
+    NoArvore *no = no_criar(true);
+    printf("Inserindo chaves\n");
+    if(no->lotacao != 4)
+    {
+        
+    }
 
+}

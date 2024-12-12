@@ -13,6 +13,8 @@
 //-------------------------------------------------------------------------------------------------------------------------------------
 //                                              COMANDOS REGISTROS
 //-------------------------------------------------------------------------------------------------------------------------------------
+
+//comando responsáveis por puxar os dados do arquivo csv e guardar estes no arquvio binário de acordo com a ordem especificada
 void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
     // ler o arquivo csv (cria a página)
     //abertura do arquivo csv para leitur
@@ -75,6 +77,7 @@ void CREATE_TABLE(char *nomeCSV, char *nomearqbin, Cabecalho *cabecalho){
             fclose(arquivo_binario);
 }   
 
+//comando responsáveis por recuperar os dados do arquivo e imprimir na tela de acordo com a ordem especificada
 void SELECT_TABLE(char *nomearqbin) {
     FILE *arquivo_binario = fopen(nomearqbin, "rb");
     if (arquivo_binario == NULL) {
@@ -156,7 +159,6 @@ int SELECT_WHERE(char *nomearquivo, char *campo, int quant) {
     }
 
     // Itera sobre todos os registros até o final do arquivo
-    // Itera sobre todos os registros até o final do arquivo
     while (!feof(arquivo_binario)) {
        registro = registro_readbin(arquivo_binario);
         if (registro_isValid(registro)) {
@@ -228,7 +230,43 @@ void SEARCH_INDICE(char *arquivo, char *indice, long int campo) {
 }
 
 
-int INSERT_INDICE(char *binario, char *indice)
+void INSERT_INDICE(char *binario, char *indice)
+{
+    FILE *arquivo_dados = fopen(binario, "rb");
+    if (arquivo_dados == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return ;
+    }
+    FILE *arquivo_indice = fopen(indice, "wb+");
+    if (arquivo_indice == NULL) {
+        printf("Falha no processamento do arquivo.\n");
+        return ;
+    }
+    int retorno =0, cont =0;
+    long int chave =0;
+
+    Registro *dino = cria_registro();
+    Cabecalho *c = cabecalho_inicializa();
+    c = cabecalho_readbin(arquivo_dados);
+    fseek(arquivo_dados, 1600, SEEK_SET);
+
+    while(1){
+        
+        
+        dino = registro_readbin(arquivo_dados);
+        if(registro_isValid(dino)==false){ //no positivo, colocamos o ponteiro do disco logo apos o cabecalho
+            fseek (arquivo_dados, 1600+REGISTRO_SIZE*(cont), SEEK_SET);
+            continue;
+        }
+    
+        chave = converteNome(dino->nome);
+        printf(" Inserido o %d elemento \n", cont);
+        printf("chave %s %lu\n", dino->nome, chave);
+        //inserindo_elemento(chave, cont);
+        cont++;
+    }   
+}
+int lINSERT_INDICE(char *binario, char *indice)
 {
    FILE *arquivo_binario = fopen(binario, "rb");
     if (arquivo_binario == NULL) {

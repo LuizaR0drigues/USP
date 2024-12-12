@@ -45,4 +45,5 @@
     PCPR no_inserir_recursivo(FILE *nomebin,NoArvore *atual,CPR valor_inserir, CabecalhoArvore *c,int level);
 
    int buscando_chave(FILE *arquivo_indice,NoArvore *atual, long int campo);
+   int inserindo_elemento( long int chave, int rrn);
 #endif
