@@ -147,3 +147,7 @@ myenv/pyvenv.cfg
 myenv/bin/python3.11
 myenv/bin/python3
 myenv/bin/python
+Graduação/ProcImage/env/bin/activate.fish
+/Graduação/ProcImage/env/bin
+/Graduação/ProcImage/.ipynb_checkpoints
+/Graduação/ProcImage/env
