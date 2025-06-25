@@ -65,6 +65,7 @@ def filter_adapt(img_deg, gama):
     F = F[k:h-k, k:w-k]
 
     return F
+
 #Filtro de ruído 
 def gaussian_filter(k=3, sigma=1.0):
     arx = np.arange((-k//2) + 1.0, (k//2) + 1.0)
@@ -78,6 +79,7 @@ def operador_laplaciano():
     return np.array([[0,-1,  0],
                      [-1, 4, -1],
                      [0, -1, 0]])
+
 #Filtro de Minimos Quadrados Restritos
 def filter_min_quad_rest(sigma, tam_f, img_deg, gama):
     #criando os filtros de degradação(gaussiano) e limitante(laplace)
