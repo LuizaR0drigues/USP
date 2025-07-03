@@ -157,3 +157,7 @@ Graduação/ProcImage/env/bin/activate.fish
 /Graduação/ProcImage/TrabalhoFinal/planet-understanding-the-amazon-from-space
 Graduação/ProcImage/TrabalhoFinal/planet.ipynb
 /Graduação/ProcImage/TrabalhoFinal/testes/multiearth-challenge
+Graduação/ProcImage/TrabalhoFinal/testes/data_preparation.ipynb
+Graduação/ProcImage/TrabalhoFinal/testes/landsat8_train.nc
+Graduação/ProcImage/TrabalhoFinal/testes/deforestation_train.nc
+Graduação/ProcImage/TrabalhoFinal/testes/landsat8_deforestation_segmentation.nc
