@@ -10,7 +10,7 @@ int cria_janela(GLFWwindow** window, int largura, int altura){
     if (!glfwInit()){
         return -1;
     }
-    //Cria uma janela - no modo janela - e seu cntexto OpenGL
+    //Cria uma janela - no modo janela - e seu contexto OpenGL
     
     *window = glfwCreateWindow(largura, altura, "Desenhando retas - met Bresenham", NULL, NULL);
     
@@ -41,7 +41,7 @@ int cria_janela(GLFWwindow** window, int largura, int altura){
 
 
 void desenha_oct1(int x1, int y1, int x2, int y2){
-    int x, y,dx, dy, d, incE, incNE;
+    int x, y, dx, dy, d, incE, incNE;
     //variação em x e y
     dx = x2 - x1;
     dy = y2 - y1;
@@ -50,14 +50,14 @@ void desenha_oct1(int x1, int y1, int x2, int y2){
     //valor inicial da variavel de decisao
     d = 2 * dy - dx;
     incE = 2 * dy;
-    incNE =2 * (dy - dx);
-    x= x1;
+    incNE = 2 * (dy - dx);
+    x = x1;
     y = y1;
 
     //desenha o ponto inicial
     glVertex2i(x, y);
     
-    while( x < x2){
+    while(x < x2){
         if (d <= 0) {
             //escolhe E
             d = d + incE;
@@ -121,7 +121,7 @@ void alg_geral(int x1, int y1, int x2, int y2){
         }
         return;
     }
-    if (dx < 0 ) { // x é negativo
+    if (dx < 0) { // x é negativo
         std::swap(x1,x2);
         std::swap(y1,y2);
         dx = - dx;
