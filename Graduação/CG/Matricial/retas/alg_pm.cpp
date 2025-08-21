@@ -41,12 +41,18 @@ int cria_janela(GLFWwindow** window, int largura, int altura){
 
 
 void desenha_oct1(int x1, int y1, int x2, int y2){
-    int x, y, dx, dy, d, incE, incNE;
+    int x, y, dx, dy, d, incE, incNE, incY = 1;
+
     //variação em x e y
     dx = x2 - x1;
     dy = y2 - y1;
 
-    
+    if(dy < 0)
+    {
+        incY = -1;
+        dy *= -1;
+    }
+
     //valor inicial da variavel de decisao
     d = 2 * dy - dx;
     incE = 2 * dy;
@@ -55,19 +61,60 @@ void desenha_oct1(int x1, int y1, int x2, int y2){
     y = y1;
 
     //desenha o ponto inicial
-    glVertex2i(x, y);
+    glVertex2i(x1, y1);
+
     
     while(x < x2){
         if (d <= 0) {
             //escolhe E
-            d = d + incE;
-            x = x + 1; //anda 1u em X
-
-            }
-        else { //escolhe NE
-            d = d + incNE;
-            y = y + 1;
+            d += incE;
+            x++; //anda 1u em X
         }
+        else { //escolhe NE
+            d += incNE;
+            x++;
+            y += incY;
+        }
+
+        glVertex2i(x, y);
+    }
+}
+
+void desenha_oct2(int x1, int y1, int x2, int y2){
+    int x, y, dx, dy, d, incE, incNE, incX = 1;
+
+    //variação em x e y
+    dx = x2 - x1;
+    dy = y2 - y1;
+
+    if(dx < 0)
+    {
+        incX = -1;
+        dx *= -1;
+    }
+
+    //valor inicial da variavel de decisao
+    d = 2 * dx - dy;
+    incE = 2 * dx;
+    incNE = 2 * (dx - dy);
+    x = x1;
+    y = y1;
+
+    //desenha o ponto inicial
+    glVertex2i(x1, y1);
+
+    while(y < y2){
+        if (d <= 0) {
+            //escolhe E
+            d += incE;
+            y++; //anda 1u em X
+        }
+        else { //escolhe NE
+            d += incNE;
+            x += incX;
+            y++;
+        }
+
         glVertex2i(x, y);
     }
 }
@@ -76,6 +123,11 @@ void alg_geral(int x1, int y1, int x2, int y2){
     //variação
     int dx = x2 - x1;
     int dy = y2 - y1;
+    
+    if (x1 == x2 && y1 == y2){ //um ponto no plano
+        glVertex2i(x1, y1);
+        return;
+    }
 
     if (dx  == 0){ //reta vertical
         if (y1 > y2){
@@ -87,6 +139,7 @@ void alg_geral(int x1, int y1, int x2, int y2){
         }
         return;
     }
+
     if (dy  == 0){ //reta horizontal
         if (x1 > x2){
             std::swap(x1, x2);
@@ -97,59 +150,45 @@ void alg_geral(int x1, int y1, int x2, int y2){
         }
         return;
     }
+
     if (abs(dy) == abs(dx)){ //retas de 45 e 135
-        int inc_x, inc_y;
-        if( x2 > x1)
+        int inc_x = 1, inc_y = 1;
+        if(x2 < x1)
         {
-            inc_x = 1;
-        }
-        else{
             inc_x = -1;
         }
-        if(y2 > y1){
-            inc_y = 1;
-        }
-        else{
+        if(y2 < y1){
             inc_y = -1;
         }
-        int aux_x = x1;
-        int aux_y = y1;
+
         for(int i = 0; i <= abs(dx); i++){
-            glVertex2i(aux_x, aux_y);
-            aux_x += inc_x;
-            aux_y+= inc_y;
+            glVertex2i(x1, y1);
+            x1 += inc_x;
+            y1+= inc_y;
         }
         return;
     }
-    if (dx < 0) { // x é negativo
-        std::swap(x1,x2);
-        std::swap(y1,y2);
-        dx = - dx;
-        dy = -dy;
-    }
-    dx = x2 - x1;
-    dy = y2 - y1;
 
-    if (dy >= 0){ // oct 1 e 2
-        if (dy <= dx){ // primeiro octante 0 < a <= 1
-            desenha_oct1(x1, y1, x2, y2);
-        
-        }
-        else{ // a > 1
-            desenha_oct1(y1, x1, y2,x2); //refletimos os pontos sobre a identidade
-        }
+    float m = (float)dy/(float)dx;
     
-    }
-    else{ //dy < 0 
-        if(-dy <= dx){ // inclinação entre -1 < a < 0 _> reflexao sobre o eixo x
-            desenha_oct1(x1, -y1, x2, -y2);
+    if (m <= 1 && m >= -1)
+    {
+        if (dx >= 0){
+            desenha_oct1(x1, y1, x2, y2);
         }
-        else{ // a < -1 -> refletimos sobre a segunda identidade y = -x
-            desenha_oct1(y1, -x1, y2, -x2); //refeltimo o segundo octante
+        else{
+            desenha_oct1(x2, y2, x1, y1);
         }
-
     }
-
+    else
+    {
+        if (dy >= 0){
+            desenha_oct2(x1, y1, x2, y2);
+        }
+        else{
+            desenha_oct2(x2, y2, x1, y1);
+        }
+    }
 }
 int main(){
     int  x1, x2;
@@ -157,7 +196,7 @@ int main(){
      
     int altura = 600;
     int largura = 800;
-    std::cin >> x1 >> y1 >> x2 >> y2;
+    //std::cin >> x1 >> y1 >> x2 >> y2;
    
    
     //criando a janela
@@ -167,24 +206,56 @@ int main(){
         std::cerr << "erro ao criar a janela" << std::endl;
         return -1;
     }
+    //renderizando
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    //pixel vermelho
+    glPointSize(3.0f);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    
+    glBegin(GL_POINTS);
+    
+    //Eixos
+    glColor3f(1.0f, 1.0f, 1.0f);
+    alg_geral(800, 300, 0, 300);
+    alg_geral(400, 600, 400, 0);
+
+    //45 graus
+    glColor3f(1.0f, 0.0f, 0.0f);
+    alg_geral(400, 300, 500, 400);
+    alg_geral(400, 300, 500, 200);
+    alg_geral(400, 300, 300, 400);
+    alg_geral(400, 300, 300, 200);
+
+    //Primeiro quadrante
+    glColor3f(0.0f, 1.0f, 0.0f);
+    alg_geral(400, 300, 500, 350);
+    alg_geral(400, 300, 500, 450);
+
+    //Segundo quadrante
+    glColor3f(0.0f, 0.0f, 1.0f);
+    alg_geral(400, 300, 300, 350);
+    alg_geral(400, 300, 300, 450);
+
+    //Terceiro quadrante
+    glColor3f(1.0f, 1.0f, 0.0f);
+    alg_geral(400, 300, 300, 250);
+    alg_geral(400, 300, 300, 150);
+
+    //Quarto quadrante
+    glColor3f(0.0f, 1.0f, 1.0f);
+    alg_geral(400, 300, 500, 250);
+    alg_geral(400, 300, 500, 150);
+    
+    glEnd();
+    //troca os buffer de cor para exibição correta
+    glfwSwapBuffers(window);
+
     
     //loop principal
     while(!glfwWindowShouldClose(window))
     {
-        //renderizando
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        //pixel vermelho
-         glPointSize(3.0f);
-         glColor3f(1.0f, 0.0f, 0.0f);
-         
-         glBegin(GL_POINTS);
-         
-         alg_geral(x1, y1, x2, y2);
-         glEnd();
-        //troca os buffer de cor para exibição correta
-        glfwSwapBuffers(window);
-
+        
         //escuta eventos: mouse, teclado, fechar janela e etc
         glfwPollEvents();
     }
