@@ -65,14 +65,14 @@ void MidPointCircleInt(int r, int x_meio_tela, int y_meio_tela){
         }
         x++;
         
-        glVertex2i(y + x_meio_tela, x + y_meio_tela); //1º Octante
+        /*glVertex2i(y + x_meio_tela, x + y_meio_tela); //1º Octante
         glVertex2i(x + x_meio_tela, y + y_meio_tela); //2º Octante
         glVertex2i(-x + x_meio_tela, y + y_meio_tela); //3º Octante
         glVertex2i(-y + x_meio_tela, x + y_meio_tela); //4º Octante
         glVertex2i(-y + x_meio_tela, -x + y_meio_tela); //5º Octante
         glVertex2i(-x + x_meio_tela, -y + y_meio_tela); //6º Octante
         glVertex2i(x + x_meio_tela, -y + y_meio_tela); //7º Octante
-        glVertex2i(y + x_meio_tela, -x + y_meio_tela); //8º Octante
+        glVertex2i(y + x_meio_tela, -x + y_meio_tela); //8º Octante*/
     }
 }
 
@@ -85,14 +85,14 @@ void CirculoPorTrigonometria(int r, int x_meio_tela, int y_meio_tela)
         ang = std::asin((float)y/(float)r);
         x = r * std::cos(ang);
 
-        glVertex2i(x + x_meio_tela, y + y_meio_tela); //1º Octante
+        /*glVertex2i(x + x_meio_tela, y + y_meio_tela); //1º Octante
         glVertex2i(y + x_meio_tela, x + y_meio_tela); //2º Octante
         glVertex2i(-y + x_meio_tela, x + y_meio_tela); //3º Octante
         glVertex2i(-x + x_meio_tela, y + y_meio_tela); //4º Octante
         glVertex2i(-x + x_meio_tela, -y + y_meio_tela); //5º Octante
         glVertex2i(-y + x_meio_tela, -x + y_meio_tela); //6º Octante
         glVertex2i(y + x_meio_tela, -x + y_meio_tela); //7º Octante
-        glVertex2i(x + x_meio_tela, -y + y_meio_tela); //8º Octante
+        glVertex2i(x + x_meio_tela, -y + y_meio_tela); //8º Octante*/
 
         y++;
     }
@@ -136,27 +136,24 @@ int main(){
     glColor3f(1.0f, 0.0f, 0.0f);
     
     glBegin(GL_POINTS);
-    int qtd = 10000;
-    int soma_inc = 0;
-    int soma_trig = 0;
+    int qtd = 100000;
+    float soma_inc = 0;
+    float soma_trig = 0;
     for (int i=0; i < nroVal; i++){
         const auto tempo_iinc_0 = std::chrono::high_resolution_clock::now(); //inicio 
-
-        for(int j = 0; j < qtd; j++)
-        {   //std::cout <<"I: "<< i << std::endl;
+        for(int j = 0; j < qtd; j++){
             MidPointCircleInt(raios[i], largura/2, altura/2);
         }
-
         const auto tempo_iinc_1 = std::chrono::high_resolution_clock::now(); //final 
-        tempos[0][i] = (float)std::chrono::duration_cast<std::chrono::microseconds>(tempo_iinc_1 -tempo_iinc_0).count()/(float)qtd; 
+        tempos[0][i] = (float)std::chrono::duration_cast<std::chrono::microseconds>(tempo_iinc_1 -tempo_iinc_0).count(); 
 
         const auto tempo_trig_0 = std::chrono::high_resolution_clock::now(); //inicio 
-        for(int i = 0; i < nroVal; i++){
+        for(int j = 0; j < qtd; j++){
             CirculoPorTrigonometria(raios[i], largura/2, altura/2);
         }
         const auto tempo_trig_1 = std::chrono::high_resolution_clock::now(); //final 
-        tempos[1][i] = (float)std::chrono::duration_cast<std::chrono::microseconds>(tempo_trig_1 -tempo_trig_0).count()/(float)qtd; 
-        std::cout <<"Tempo Inc: " << tempos[0][i] << " - Tempo trig: " << tempos[1][i] << " - Raio: " << raios[i] << std::endl;
+        tempos[1][i] = (float)std::chrono::duration_cast<std::chrono::microseconds>(tempo_trig_1 -tempo_trig_0).count(); 
+        std::cout <<"Tempo total Inc: " << tempos[0][i] << " us - Tempo total trig: " << tempos[1][i] << " us - Raio: " << raios[i] << std::endl;
 
         //acumuladores 
         soma_inc += tempos[0][i];
@@ -164,13 +161,13 @@ int main(){
     }
     glEnd();
 
-    std::cout <<"Soma dos tempos totais para " << qtd << " repetições \n";
+    std::cout <<"Soma dos tempos totais para " << qtd << " repetições (us) \n";
     std::cout<< soma_inc << " e  "<<  soma_trig << std::endl;
-    float med_inc  = (float)soma_inc /(float)qtd;
-    float med_trig = (float)soma_trig/(float)qtd;
+    float med_inc  = (float)soma_inc /(float)(qtd * nroVal);
+    float med_trig = (float)soma_trig/(float)(qtd * nroVal);
 
-    std::cout << "Tempo Médio Incremental: " << med_inc << std::endl;
-    std::cout << "Tempo Médio Trigonometrico: "<< med_trig << std::endl;
+    std::cout << "Tempo Médio Incremental: " << med_inc << " us" << std::endl;
+    std::cout << "Tempo Médio Trigonometrico: "<< med_trig << " us" << std::endl;
 
     //troca os buffer de cor para exibição correta
     glfwSwapBuffers(window);

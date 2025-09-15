@@ -39,7 +39,7 @@ int cria_janela(GLFWwindow** window, int largura, int altura){
     return 0;
 }
 
-
+//O eixo X é dominante, i. e., para retas mais horizontais
 void desenha_oct1(int x1, int y1, int x2, int y2){
     int x, y, dx, dy, d, incE, incNE, incY = 1;
 
@@ -79,7 +79,7 @@ void desenha_oct1(int x1, int y1, int x2, int y2){
         glVertex2i(x, y);
     }
 }
-
+//EIxo Y é o dominante, i.e., retas mais verticiais.
 void desenha_oct2(int x1, int y1, int x2, int y2){
     int x, y, dx, dy, d, incE, incNE, incX = 1;
 
@@ -265,3 +265,5 @@ int main(){
     return 0;
 }
 
+
+// g++ alg_pm.cpp $(pkg-config --libs --cflags glfw3) -lGL
