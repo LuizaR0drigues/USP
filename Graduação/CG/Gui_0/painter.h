@@ -8,9 +8,7 @@
 class Painter  {
 
 public:
-    Painter(int largura = 800, int altura = 800);
-
-
+    Painter(int largura = 800, int altura = 600);
 
     void draw_point(int x, int y, QColor color = Qt::darkMagenta);
     void draw_line(int x1, int y1, int x2, int y2, QColor color);

@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="home">
      <widget class="QWidget" name="layoutWidget">
@@ -223,8 +223,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QLabel" name="myFrame">
       <property name="geometry">
        <rect>
-        <x>90</x>
-        <y>10</y>
+        <x>110</x>
+        <y>40</y>
         <width>681</width>
         <height>341</height>
        </rect>

@@ -25,14 +25,11 @@ void Painter::draw_line(int x1, int y1, int x2, int y2, QColor color){
     float x = x1;
     float y = y1;
 
-
-
     for(int i = 0; i<=step; i++){
         draw_point(x, y, color);
         x += inc_x;
         y += inc_y;
     }
-
 
 }
 

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "painter.h"
 #include <QMouseEvent>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -35,5 +36,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     Painter painter;
+    QVector<QPoint> vertices;
 };
 #endif // MAINWINDOW_H

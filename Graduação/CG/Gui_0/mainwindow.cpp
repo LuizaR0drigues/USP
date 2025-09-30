@@ -4,14 +4,12 @@
 #include <QDebug>
 #include <QMouseEvent>
 
-int verticeX [50];
-int verticeY[50];
-int verticeIndex = 0;
+
 QColor cor = Qt::red;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , painter(800, 800)
+    , painter(800, 600)
 
 {
     ui->setupUi(this);
@@ -24,7 +22,10 @@ MainWindow::MainWindow(QWidget *parent)
     //conectando os botoes com suas funções
     connect(ui->pushButton_3, &QPushButton::clicked, this, &MainWindow::on_pushButton_clicked);
     connect(ui->pushButton_4, &QPushButton::clicked, this, &QMainWindow::close);
-    connect(ui->button_apagar, &QPushButton::clicked, [this](){painter.clear(); ui->myFrame->setPixmap(QPixmap::fromImage(painter.getImage())); });
+    connect(ui->button_apagar, &QPushButton::clicked, [this](){painter.clear();
+        vertices.clear();
+         ui->myFrame->setPixmap(QPixmap::fromImage(painter.getImage()));
+    });
     //cores
     connect(ui->toolButton, &QPushButton::clicked, this, &MainWindow::orange_clicked);
     connect(ui->toolButton_2, &QPushButton::clicked, this, &MainWindow::yellow_clicked);
@@ -39,13 +40,6 @@ MainWindow::~MainWindow()
 }
 void MainWindow::on_pushButton_clicked() {
     ui->stackedWidget->setCurrentIndex(1); // vai para a próxima tela
-}
-void MainWindow::on_draw_clicked() {
-    // desenha uma linha laranja
-    painter.draw_line(100, 100, 200, 200, QColor(255,165,0));
-
-    // atualiza o QLabel
-    ui->myFrame->setPixmap(QPixmap::fromImage(painter.getImage()));
 }
 
 void MainWindow::on_reset_clicked() {
@@ -75,24 +69,34 @@ void MainWindow::black_clicked(){
 }
 
 void MainWindow::mousePressEvent(QMouseEvent* event){
+
+
+    if(!ui->myFrame->geometry().contains(event->pos())){ //o movimento esta fora do frame
+        QMainWindow::mousePressEvent(event);//saimos do movimeno atual
+        return;
+    }
+
     QPoint pos = ui->myFrame->mapFromParent(event->pos());
     int x_pos = pos.x();
     int y_pos = pos.y();
+    QPoint ponto (x_pos, y_pos);
 
-    if( event ->button() ==Qt::RightButton && verticeIndex >0){
+    if (x_pos < 0 || x_pos >= 800 || y_pos < 0 || y_pos >= 600){
+        qDebug() << "Coordenadas fora do limite do frame!";
+        return;
+    }
+    if( event ->button() ==Qt::RightButton && !vertices.isEmpty()){
         //fecha o poligono
-        painter.alg_geral(verticeX[verticeIndex-1], verticeY[verticeIndex-1], verticeX[0],verticeY[0], cor);
-        verticeIndex = 0; //começa um novo poligono
+        painter.draw_line(vertices.last().x(), vertices.last().y(), vertices.first().x(),vertices.first().y(), cor);
+        vertices.clear(); //começa um novo poligono
     }
     else{
-        if(verticeIndex > 0 ){
-            painter.alg_geral(verticeX[verticeIndex-1], verticeY[verticeIndex-1], x_pos, y_pos, cor);
+        if(!vertices.isEmpty()){
+            painter.draw_line(vertices.last().x(), vertices.last().y(), ponto.x(),ponto.y(), cor);
         }
 
-            verticeX[verticeIndex] = x_pos;
-            verticeY[verticeIndex] = y_pos;
-            verticeIndex++;
-            //desenha uma dos lados do poligono
+           vertices.append(ponto);
+
             qDebug()<<"Click: " << x_pos << y_pos;
     }
 
