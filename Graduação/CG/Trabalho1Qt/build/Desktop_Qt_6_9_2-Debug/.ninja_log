@@ -1,0 +1,75 @@
+# ninja log v6
+760	8063	1759195521100786764	CMakeFiles/Gui_0.dir/painter.cpp.o	a76503e217031b5e
+4335	4920	1759201212899101743	Gui_0	946d4d65802f029
+549	6677	1759200081586976534	CMakeFiles/Gui_0.dir/Gui_0_autogen/mocs_compilation.cpp.o	1f3c5cd07ca597fc
+6	41	1759201208570129323	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+41	4335	1759201208605129098	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+550	6307	1759200081587976554	CMakeFiles/Gui_0.dir/main.cpp.o	d9d099b53357a8dd
+6	41	1759201208570129323	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+6	41	1759201208570129323	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+6	41	1759201208570129323	Gui_0_autogen/timestamp	bf0662eac5610671
+5	14	1759113647207125958	CMakeFiles/clean.additional	20e895d2f882e62a
+14	20	1759113647216125916	clean	3e306cfabb085a78
+5	489	1759201962701728753	Gui_0_autogen/timestamp	bf0662eac5610671
+5	489	1759201962701728753	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+5	489	1759201962701728753	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+5	489	1759201962701728753	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+489	6317	1759201962713728790	CMakeFiles/Gui_0.dir/Gui_0_autogen/mocs_compilation.cpp.o	1f3c5cd07ca597fc
+489	6542	1759201962714969624	CMakeFiles/Gui_0.dir/main.cpp.o	d9d099b53357a8dd
+498	6966	1759201962722728818	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+507	6980	1759201962731728846	CMakeFiles/Gui_0.dir/painter.cpp.o	a76503e217031b5e
+6980	7651	1759201969204749034	Gui_0	946d4d65802f029
+9	483	1759202514082235259	Gui_0_autogen/timestamp	bf0662eac5610671
+9	483	1759202514082235259	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+9	483	1759202514082235259	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+9	483	1759202514082235259	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+485	4993	1759202514098236672	CMakeFiles/Gui_0.dir/Gui_0_autogen/mocs_compilation.cpp.o	1f3c5cd07ca597fc
+488	5163	1759202514101236937	CMakeFiles/Gui_0.dir/main.cpp.o	d9d099b53357a8dd
+7	34	1759202561312254898	Gui_0_autogen/timestamp	bf0662eac5610671
+7	34	1759202561312254898	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+7	34	1759202561312254898	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+7	34	1759202561312254898	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+6	48	1759202642064468172	Gui_0_autogen/timestamp	bf0662eac5610671
+6	48	1759202642064468172	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+6	48	1759202642064468172	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+6	48	1759202642064468172	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+48	4351	1759202642106471202	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+4351	4881	1759202646409780869	Gui_0	946d4d65802f029
+9	43	1759202874822670979	Gui_0_autogen/timestamp	bf0662eac5610671
+9	43	1759202874822670979	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+9	43	1759202874822670979	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+9	43	1759202874822670979	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+43	3806	1759202874856672727	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+3806	4434	1759202878619865665	Gui_0	946d4d65802f029
+8	539	1759203155253756457	Gui_0_autogen/timestamp	bf0662eac5610671
+8	539	1759203155253756457	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+8	539	1759203155253756457	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+8	539	1759203155253756457	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+547	5246	1759203155286757651	CMakeFiles/Gui_0.dir/painter.cpp.o	a76503e217031b5e
+540	5451	1759203155279757397	CMakeFiles/Gui_0.dir/Gui_0_autogen/mocs_compilation.cpp.o	1f3c5cd07ca597fc
+542	5774	1759203155281757470	CMakeFiles/Gui_0.dir/main.cpp.o	d9d099b53357a8dd
+542	6625	1759203155282433078	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+6625	7128	1759203161364976750	Gui_0	946d4d65802f029
+5	17	1759203212992779470	CMakeFiles/clean.additional	20e895d2f882e62a
+18	23	1759203213005779912	clean	3e306cfabb085a78
+6	350	1759203213367792193	Gui_0_autogen/timestamp	bf0662eac5610671
+6	350	1759203213367792193	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+6	350	1759203213367792193	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+6	350	1759203213367792193	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+350	3919	1759203213375792465	CMakeFiles/Gui_0.dir/Gui_0_autogen/mocs_compilation.cpp.o	1f3c5cd07ca597fc
+350	3990	1759203213376568673	CMakeFiles/Gui_0.dir/main.cpp.o	d9d099b53357a8dd
+350	4024	1759203213376989450	CMakeFiles/Gui_0.dir/painter.cpp.o	a76503e217031b5e
+350	4716	1759203213376769207	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+4716	5168	1759203217741940266	Gui_0	946d4d65802f029
+22	61	1759203288999259269	Gui_0_autogen/timestamp	bf0662eac5610671
+22	61	1759203288999259269	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+22	61	1759203288999259269	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+22	61	1759203288999259269	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+61	2759	1759203289038260492	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+2759	3257	1759203291736345015	Gui_0	946d4d65802f029
+9	39	1759204227817536528	Gui_0_autogen/timestamp	bf0662eac5610671
+9	39	1759204227817536528	Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+9	39	1759204227817536528	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/timestamp	bf0662eac5610671
+9	39	1759204227817536528	/home/leftlu/Área de trabalho/USP/Graduação/CG/Gui_0/build/Desktop_Qt_6_9_2-Debug/Gui_0_autogen/mocs_compilation.cpp	bf0662eac5610671
+39	4400	1759204227847537064	CMakeFiles/Gui_0.dir/mainwindow.cpp.o	78d0aeee70c75062
+4400	5023	1759204232208614955	Gui_0	946d4d65802f029
