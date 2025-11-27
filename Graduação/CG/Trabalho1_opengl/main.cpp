@@ -9,9 +9,6 @@
 #include "include/glad/glad.h"
 #include <GL/freeglut.h>
 
-//REMOVER DEPOIS, APENAS PARA TESTE
-#include <random>
-#include <chrono>
 
 using namespace std;
 
