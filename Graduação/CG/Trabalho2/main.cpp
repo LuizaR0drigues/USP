@@ -5,10 +5,6 @@
 #include <cmath>
 #include <algorithm>
 #include <utility>
-
-#include "include/glad/glad.h"
-#include <GL/freeglut.h>
-
 #include <iostream>
 #include <vector>
 #include <array>
@@ -19,24 +15,34 @@
 
 #include "include/glad/glad.h"
 #include <GL/freeglut.h>
+//objetos3d
+#include "cubo.h"
+#include "esfera.h"
+#include "piramide.h"
 
+#include "camera.h"//camera
 using namespace std;
 
-#define ORTO 1
-#define PERSPEC 2
+#define MODO_ORTO false
+#define MODO_PERSPEC true
 
 // variaveis de cor e linha
 float cor_R = 1.0f, cor_G = 1.0f, cor_B = 1.0f;
 float tamanho_linha = 1.0f;
 
 // variaves pra definir a janela
-const float ORTHO_MIN_X = -400, ORTHO_MAX_X = 400;
-const float ORTHO_MIN_Y = -200, ORTHO_MAX_Y = 200;
-const int WINDOW_W = 800, WINDOW_H = 400;
+const int WINDOW_W =  800,  WINDOW_H = 400;
+int largura_atual = WINDOW_W;
+int altura_atual = WINDOW_H;
+//Camera 
+Camera camera;
 
-// modes de projecao
 
-int modo_proj = PERSPEC;
+
+//objetos 3d
+Cubo cubo;
+Esfera esfera;
+Piramide piramide;
 
 struct Ponto
 {
@@ -416,9 +422,9 @@ Ponto converte_coords(int x_mouse, int y_mouse)
     int w_janela = glutGet(GLUT_WINDOW_WIDTH);
     int h_janela = glutGet(GLUT_WINDOW_HEIGHT);
 
-    x_w = ((float)x_mouse / w_janela) * (ORTHO_MAX_X - ORTHO_MIN_X) + ORTHO_MIN_X;
+    //x_w = ((float)x_mouse / w_janela) * (ORTHO_MAX_X - ORTHO_MIN_X) + ORTHO_MIN_X;
 
-    y_w = ((float)(h_janela - y_mouse) / h_janela) * (ORTHO_MAX_Y - ORTHO_MIN_Y) + ORTHO_MIN_Y;
+    //y_w = ((float)(h_janela - y_mouse) / h_janela) * (ORTHO_MAX_Y - ORTHO_MIN_Y) + ORTHO_MIN_Y;
 
     return {x_w, y_w};
 }
@@ -484,92 +490,8 @@ float tx = 0.0, ty = 0.0, tz = 0.0;
 float rx = 0.0, ry = 0.0;
 float scale = 1.0;
 
-// desenho 3d
-void drawCube()
-{
- 
-    float vertices[8][3] = {
-        {-0.5f, -0.5f, -0.5f},
-        {0.5f, -0.5f, -0.5f},
-        {0.5f, 0.5f, -0.5f},
-        {-0.5f, 0.5f, -0.5f},
-        {-0.5f, -0.5f, 0.5f},
-        {0.5f, -0.5f, 0.5f},
-        {0.5f, 0.5f, 0.5f},
-        {-0.5f, 0.5f, 0.5f}
-    };
-    int faces[6][4]=  {
-        {0,1,2,3},
-        {4,5,6,7},
-        {0,1,5,4},
-        {2,3,7,6},
-        {1,2,6,5},
-        {0,3,7,4}
-    };
-    float colors[6][3] = {
-        {1.0f,0.0f,0.0f},
-        {0.0f,1.0f,0.0f},
-        {0.0f,0.0f,1.0f},
-        {0.0f,1.0f,1.0f},
-        {1.0f,0.0f,1.0f},
-        {1.0f,0.1f,0.0f}
-    };
-    glBegin(GL_QUADS);
-    for (const auto& face : faces){
-        for(int vertexIndx : face){
-            glColor3fv(colors[vertexIndx]);
-            glVertex3fv(vertices[vertexIndx]);
-        }
-    }
 
 
-    glEnd();
-}
-void drawPiramide(Color cor)
-{
-
-    // base quadrada
-    glBegin(GL_QUADS);
-    glColor3f(1.0f, 0.0f, 1.0f);
-    glVertex3f(-0.5f, -0.5f, 0.5f);
-    glVertex3f(0.5f, -0.5f, 0.5f);
-    glVertex3f(0.5f, -0.5f, -0.5f);
-    glVertex3f(-0.5f, -0.5f, -0.5f);
-    glEnd();
-
-    // faces
-    glBegin(GL_TRIANGLES);
-
-    // Frente
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.5f, 0.0f);
-    glVertex3f(-0.5f, -0.5f, 0.5f);
-    glVertex3f(0.5f, -0.5f, 0.5f);
-
-    // direita
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, 0.5f, 0.0f);
-    glVertex3f(0.5f, -0.5f, 0.5f);
-    glVertex3f(0.5f, -0.5f, -0.5f);
-
-    // tras
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 0.5f, 0.0f);
-    glVertex3f(0.5f, -0.5f, -0.5f);
-    glVertex3f(-0.5f, -0.5f, -0.5f);
-
-    // esquerda
-    glColor3f(1.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 0.5f, 0.0f);
-    glVertex3f(-0.5f, -0.5f, -0.5f);
-    glVertex3f(-0.5f, -0.5f, 0.5f);
-
-    glEnd();
-}
-
-void esfere(){
-
-} 
 void teclas_especiais(int key, int x, int y)
 {
     float step = 0.1;
@@ -695,10 +617,13 @@ void display_extrusao()
 }
 void display_3d()
 {
+    cubo.init();
+    esfera.init(5, 20, 20);
+    piramide.init();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
     glLoadIdentity();
 
-    // cam (olhoX, olhoY, olhoZ, alvoX, alvoY, alvoZ, upX, upY, upZ)
+    // cam (posicX, posicY, posicZ, alvoX, alvoY, alvoZ, upX, upY, upZ)
     gluLookAt(0, 0, 20.0, 0.0, 0., 0.0, 0, 1, 0);
 
     //Aplicando transformações
@@ -711,43 +636,22 @@ void display_3d()
     if (g_vertices.size() >= 3)
     {
         glColor3f(cor_preenc.r, cor_preenc.g, cor_preenc.b);
-        drawCube();
+        piramide.draw(0.0f, 0.0f, 0.0f);
+        cubo.draw(5,5,0);
+        esfera.draw(10,10,0);
     }
     glutSwapBuffers();
 }
-void configuraProjec()
-{
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glEnable(GL_DEPTH_TEST);         // profundidade
-    
 
-    int w = glutGet(GLUT_WINDOW_WIDTH);
-    int h = glutGet(GLUT_WINDOW_HEIGHT);
-    float aspecto = (float)w / h;
+void reshape(int w, int h){
+    largura_atual = w;
+    altura_atual = h;
+    //atualiza
+    glViewport(0,0, w, h);
 
-    if (modo_proj == ORTO)
-    {
-        // projecao ortografica
-        float tam = 10.0f;       // tamanho da caixa de visualização
-        glClearColor(0.0, 0.0, 1.0f, 1); // plano de fundo
-
-        if (WINDOW_W >= WINDOW_H) // largura domina
-            glOrtho(-tam * aspecto, tam * aspecto, -tam, tam, 0.1, 100.0);
-        else // altura domina
-            glOrtho(-tam, tam, -tam / aspecto, tam / aspecto, 0.1, 100.0);
-    }
-    else
-    {
-        // projeção perspectiva
-        glClearColor(0.5, 0.0, 1.0f, 1); // plano de fundo
-        gluPerspective(45, (float)WINDOW_W / WINDOW_H, 0.1, 100.0);
-        glMatrixMode(GL_MODELVIEW);
-    }
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    //atualiza a projecao
+    camera.modo_projecao(w, h);
 }
-
 enum menu_opcoes
 {
     COR_VERM,
@@ -828,12 +732,13 @@ void processa_menu(int opcao)
         break;
     //modos de projecao 
     case Orto:
-        modo_proj = ORTO;
-        configuraProjec();
+        camera.setProejcao(MODO_ORTO);
+        camera.modo_projecao(largura_atual, altura_atual);
+        
         break;
     case Perspec:
-        modo_proj = PERSPEC;
-        configuraProjec();
+        camera.setProejcao(MODO_PERSPEC);
+        camera.modo_projecao(largura_atual, altura_atual);
         break;
 
     case LIMPAR_TELA:
@@ -848,10 +753,14 @@ void processa_menu(int opcao)
 }
 int main(int argc, char **argv)
 {
+    
     glutInit(&argc, argv);
     glutInitWindowSize(WINDOW_W, WINDOW_H);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-    glutCreateWindow("Poligonos 3D");
+    glutCreateWindow("Pol²igonos 3D");
+
+    //Configuração inicial da camera
+    camera.init(WINDOW_W, WINDOW_H, Perspec);
 
     if (!gladLoadGLLoader((GLADloadproc)glutGetProcAddress))
     {
@@ -881,6 +790,7 @@ int main(int argc, char **argv)
     glutAddMenuEntry("Media", LINHA_MED);
     glutAddMenuEntry("Grossa", LINHA_GROSSA);
 
+    //Menu que lida com as porjeções
     int menuProjec = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Orto", Orto);
     glutAddMenuEntry("Perspec", Perspec);
@@ -896,9 +806,7 @@ int main(int argc, char **argv)
 
     // mouse
     glutMouseFunc(gerenciaMouse);
-
-    configuraProjec();
-
+    glutReshapeFunc(reshape);
     glutDisplayFunc(display_3d);
     glutMainLoop();
     return 0;
