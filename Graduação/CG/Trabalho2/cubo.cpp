@@ -65,6 +65,7 @@ void Cubo::draw(float x, float y, float z)
             glVertex3fv(vertices[vertexIdx]);
         }
     }
-    glPopMatrix();
     glEnd();
+    glPopMatrix();
+    
 }
