@@ -485,50 +485,43 @@ float rx = 0.0, ry = 0.0;
 float scale = 1.0;
 
 // desenho 3d
-void drawCube(Color cor)
+void drawCube()
 {
+ 
+    float vertices[8][3] = {
+        {-0.5f, -0.5f, -0.5f},
+        {0.5f, -0.5f, -0.5f},
+        {0.5f, 0.5f, -0.5f},
+        {-0.5f, 0.5f, -0.5f},
+        {-0.5f, -0.5f, 0.5f},
+        {0.5f, -0.5f, 0.5f},
+        {0.5f, 0.5f, 0.5f},
+        {-0.5f, 0.5f, 0.5f}
+    };
+    int faces[6][4]=  {
+        {0,1,2,3},
+        {4,5,6,7},
+        {0,1,5,4},
+        {2,3,7,6},
+        {1,2,6,5},
+        {0,3,7,4}
+    };
+    float colors[6][3] = {
+        {1.0f,0.0f,0.0f},
+        {0.0f,1.0f,0.0f},
+        {0.0f,0.0f,1.0f},
+        {0.0f,1.0f,1.0f},
+        {1.0f,0.0f,1.0f},
+        {1.0f,0.1f,0.0f}
+    };
     glBegin(GL_QUADS);
+    for (const auto& face : faces){
+        for(int vertexIndx : face){
+            glColor3fv(colors[vertexIndx]);
+            glVertex3fv(vertices[vertexIndx]);
+        }
+    }
 
-    // Frente
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(-0.5, -0.5, 0.5);
-    glVertex3f(-0.5, 0.5, 0.5);
-    glVertex3f(0.5, 0.5, 0.5);
-    glVertex3f(0.5, -0.5, 0.5);
-
-    // Trás
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(-0.5, -0.5, -0.5);
-    glVertex3f(-0.5, 0.5, -0.5);
-    glVertex3f(0.5, 0.5, -0.5);
-    glVertex3f(0.5, -0.5, -0.5);
-
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(-0.5, 0.5, -0.5);
-    glVertex3f(-0.5, 0.5, 0.5);
-    glVertex3f(0.5, 0.5, 0.5);
-    glVertex3f(0.5, 0.5, -0.5);
-
-    // Baixo
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glVertex3f(-0.5, -0.5, -0.5);
-    glVertex3f(-0.5, -0.5, 0.5);
-    glVertex3f(0.5, -0.5, 0.5);
-    glVertex3f(0.5, -0.5, -0.5);
-
-    // Direita
-    glColor3f(1.0f, 0.0f, 1.0f);
-    glVertex3f(0.5, -0.5, -0.5);
-    glVertex3f(0.5, -0.5, 0.5);
-    glVertex3f(0.5, 0.5, 0.5);
-    glVertex3f(0.5, 0.5, -0.5);
-
-    // Esquerda
-    glColor3f(0.0f, 1.0f, 1.0f);
-    glVertex3f(-0.5, -0.5, -0.5);
-    glVertex3f(-0.5, -0.5, 0.5);
-    glVertex3f(-0.5, 0.5, 0.5);
-    glVertex3f(-0.5, 0.5, -0.5);
 
     glEnd();
 }
@@ -574,6 +567,9 @@ void drawPiramide(Color cor)
     glEnd();
 }
 
+void esfere(){
+
+} 
 void teclas_especiais(int key, int x, int y)
 {
     float step = 0.1;
@@ -683,7 +679,7 @@ void display_extrusao()
     // cam (olhoX, olhoY, olhoZ, alvoX, alvoY, alvoZ, upX, upY, upZ)
     gluLookAt(0, 0, 20.0, 0.0, 0., 0.0, 0, 1, 0);
 
-    // Aplicando transformações
+    //Aplicando transformações
     glTranslatef(tx, ty, 0);
 
     glRotatef(rx, 1, 0, 0);        // rotaciona eixo x
@@ -692,9 +688,30 @@ void display_extrusao()
     // drawPiramide(cor_preenc);
     if (g_vertices.size() >= 3)
     {
-        // Talvez você queira definir uma cor antes
         glColor3f(cor_preenc.r, cor_preenc.g, cor_preenc.b);
         extrusao_poligonos();
+    }
+    glutSwapBuffers();
+}
+void display_3d()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
+    glLoadIdentity();
+
+    // cam (olhoX, olhoY, olhoZ, alvoX, alvoY, alvoZ, upX, upY, upZ)
+    gluLookAt(0, 0, 20.0, 0.0, 0., 0.0, 0, 1, 0);
+
+    //Aplicando transformações
+    glTranslatef(tx, ty, 0);
+
+    glRotatef(rx, 1, 0, 0);        // rotaciona eixo x
+    glRotatef(ry, 0, 1, 0);        // rotacao eixo y
+    glScalef(scale, scale, scale); // escala
+    // drawPiramide(cor_preenc);
+    if (g_vertices.size() >= 3)
+    {
+        glColor3f(cor_preenc.r, cor_preenc.g, cor_preenc.b);
+        drawCube();
     }
     glutSwapBuffers();
 }
@@ -882,7 +899,7 @@ int main(int argc, char **argv)
 
     configuraProjec();
 
-    glutDisplayFunc(display_extrusao);
+    glutDisplayFunc(display_3d);
     glutMainLoop();
     return 0;
 }
