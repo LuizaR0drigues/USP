@@ -446,8 +446,6 @@ void gerenciaMouse(int button, int state, int x, int y)
 
 void display()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
-
     // Define cor baseada nas variáveis globais do menu
     Color corAtual = {cor_R, cor_G, cor_B};
     Color corLinha = cor_contorno;
@@ -493,7 +491,7 @@ void display()
 void extrusao_poligonos()
 {
     // definindo uma altura padrao
-    float h = 5.0f;
+    float h = 10.0f;
 
     glBegin(GL_POLYGON);
 
@@ -563,12 +561,7 @@ void reshape(int w, int h){
     //atualiza a projecao
     camera.modo_projecao(w, h);
 }
-enum objtos{
-    MD_EXTRUSAO, //extrusao
-    MD_DESENHO,//trabalho 1
-    MD_OBJT //objetos 3d
-};
-objtos modo_atual = MD_OBJT;
+
 enum menu_opcoes
 {
     COR_VERM,
@@ -590,8 +583,12 @@ enum menu_opcoes
     Perspec ,
     VER_OBJT_3D,
     VER_OBJT_2D,
-    VER_EXTRUSAO
+    VER_EXTRUSAO,
+    MD_EXTRUSAO, //extrusao
+    MD_DESENHO,//trabalho 1
+    MD_OBJT //objetos 3d
 };
+menu_opcoes modo_atual = MD_DESENHO;
 
 void processa_menu(int opcao)
 {
@@ -685,13 +682,21 @@ void display_principal(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
     glLoadIdentity();
 
-    //inicializo os objtos
-    cubo.init(5);//tamanho 10
-    esfera.init(2, 20, 20); //raio = 10
-    piramide.init();
     
-    if(modo_atual != MD_DESENHO)
-    {
+    if(modo_atual == MD_DESENHO)
+    {   
+        //modo 2D
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+
+        glOrtho(ORTHO_MIN_X, ORTHO_MAX_X, ORTHO_MIN_Y, ORTHO_MAX_Y, -1.0,1.0);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    }
+    else{
+        //parametros 3d 
+        camera.modo_projecao(largura_atual, altura_atual);
         camera.aplica_paramtero();
     }
 
@@ -710,19 +715,20 @@ void display_principal(){
         cubo.draw(0,0,0);
         esfera.draw(4,4,4);
         piramide.draw(6,6,6);
-        
+
         glPopMatrix();
         break;
     case MD_EXTRUSAO:
+        
         if(g_vertices.size() >= 3){
             glPushMatrix();
-            
+            float scale_objt = scale * 0.005f;
             //TG nos objtos
-            glPushMatrix();
             glTranslatef(tx, ty, 0);
             glRotatef(rxo, 1,0,0);
-            glRotatef(ryo, 0,0, 0);
-            glScalef(scale, scale, scale);
+            glRotatef(ryo, 0,1, 0);
+            glRotatef(rzo, 0,0, 1);
+            glScalef(scale_objt, scale_objt, scale_objt);
 
             extrusao_poligonos();
             glPopMatrix();
@@ -747,7 +753,8 @@ void callback_teclado(unsigned char key, int x, int y){
     if (key == 'w' || key == 'W' || 
         key == 's' || key == 'S' || 
         key == 'a' || key == 'A' || 
-        key == 'd' || key == 'D' || '+' || '-')
+        key == 'd' || key == 'D' ||
+        key == '+' || key == '-')
     {
         camera.teclado(key, x, y);
     }
@@ -810,6 +817,11 @@ int main(int argc, char **argv)
     //Configuração inicial da camera
     camera.init(WINDOW_W, WINDOW_H, Perspec);
 
+    //inicializo os objtos
+    cubo.init(5);//tamanho 10
+    esfera.init(2, 20, 20); //raio = 10
+    piramide.init();
+
     if (!gladLoadGLLoader((GLADloadproc)glutGetProcAddress))
     {
         cout << "Erro ao carregar GLAD" << endl;
@@ -819,8 +831,7 @@ int main(int argc, char **argv)
     glutKeyboardFunc(callback_teclado);
     glutSpecialFunc(callback_teclasespeciais);
     
-    
-    
+
     //menu de desenho 
     //cores
     int subCor = glutCreateMenu(processa_menu);
@@ -850,9 +861,9 @@ int main(int argc, char **argv)
     
     // Menus
     int subModos = glutCreateMenu(processa_menu);
-    glutAddMenuEntry("Modo Desenho", MD_DESENHO);
-    glutAddMenuEntry("Modo Extrusao", MD_EXTRUSAO);
-    glutAddMenuEntry("Modo OBJETOS 3D", MD_OBJT);
+    glutAddMenuEntry("Modo Desenho", VER_OBJT_2D);
+    glutAddMenuEntry("Modo Extrusao", VER_EXTRUSAO);
+    glutAddMenuEntry("Modo OBJETOS 3D", VER_OBJT_3D);
 
     //tronco
     //menu de desenho
