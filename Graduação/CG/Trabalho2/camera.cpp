@@ -21,7 +21,7 @@ void Camera::init(int width, int height, bool modo)
     modo_perspec = modo; // true=prespectiva e false = orto
 }
 
-void Camera::teclas_especiais(int key)
+void Camera::teclas_especiais(int key, int x, int y)
 { // movimentação de translação da camera[(baixo/cima) e (esquerda/direita)]
     switch (key)
     {
@@ -44,7 +44,7 @@ void Camera::teclas_especiais(int key)
     glutPostRedisplay();
 }
 
-void Camera::teclado(unsigned char key)
+void Camera::teclado(unsigned char key, int x, int y)
 {
     // Rotação WASD
     switch (key)
@@ -113,11 +113,7 @@ void Camera::processa_mouse(float window, float xpos, float ypos)
         rx = -89.0;
     }
 
-    glm::vec3 front;
-    front.x = cos(glm::radians(ry)) * cos(glm::radians(rx));
-    front.y = sin(glm::radians(rx));
-    front.z = sin(glm::radians(ry)) * cos(glm::radians(rx));
-    camera_front = glm::normalize(front);
+    
 }
 
 void Camera::setProejcao(bool NovoModo){
@@ -157,6 +153,11 @@ void Camera::modo_projecao(int width, int height)
 
 void Camera::aplica_paramtero()
 {
+    glm::vec3 front;
+    front.x = cos(glm::radians(ry)) * cos(glm::radians(rx));
+    front.y = sin(glm::radians(rx));
+    front.z = sin(glm::radians(ry)) * cos(glm::radians(rx));
+    camera_front = glm::normalize(front);
 
     glm::vec3 alvo = camera_posic + camera_front;
 

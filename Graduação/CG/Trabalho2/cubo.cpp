@@ -3,17 +3,18 @@
 
 
 Cubo::Cubo(){}
-void Cubo::init(){
+void Cubo::init(int tam){
+    float h = tam/2;
     //vertices
     float v[8][3] = {
-        {-0.5f, -0.5f, -0.5f},
-        {0.5f, -0.5f, -0.5f},
-        {0.5f, 0.5f, -0.5f},
-        {-0.5f, 0.5f, -0.5f},
-        {-0.5f, -0.5f, 0.5f},
-        {0.5f, -0.5f, 0.5f},
-        {0.5f, 0.5f, 0.5f},
-        {-0.5f, 0.5f, 0.5f}
+        {-h, -h, -h},
+        {h, -h, -h},
+        {h, h, -h},
+        {-h, h, -h},
+        {-h, -h, h},
+        {h, -h, h},
+        {h, h, h},
+        {-h, h, h}
     };
     //faces
     int f[6][4]=  {

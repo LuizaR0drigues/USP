@@ -14,8 +14,8 @@ class Camera{
     Camera();
     void init(int width, int height,  bool modo);
     void modo_projecao(int width, int height);
-    void teclado(unsigned char key);
-    void teclas_especiais(int key);
+    void teclado(unsigned char key, int x, int y);
+    void teclas_especiais(int key, int x, int y);
     void processa_mouse(float window, float xpos, float ypos);
     void aplica_paramtero();
 

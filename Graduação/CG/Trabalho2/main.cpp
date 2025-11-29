@@ -25,6 +25,13 @@ using namespace std;
 
 #define MODO_ORTO false
 #define MODO_PERSPEC true
+//objetos e Camera 
+Camera camera;
+
+//objetos 3d
+Cubo cubo;
+Esfera esfera;
+Piramide piramide;
 
 // variaveis de cor e linha
 float cor_R = 1.0f, cor_G = 1.0f, cor_B = 1.0f;
@@ -32,17 +39,15 @@ float tamanho_linha = 1.0f;
 
 // variaves pra definir a janela
 const int WINDOW_W =  800,  WINDOW_H = 400;
+const float ORTHO_MIN_X = -400, ORTHO_MAX_X = 400;
+const float ORTHO_MIN_Y = -200, ORTHO_MAX_Y = 200;
 int largura_atual = WINDOW_W;
 int altura_atual = WINDOW_H;
-//Camera 
-Camera camera;
 
-
-
-//objetos 3d
-Cubo cubo;
-Esfera esfera;
-Piramide piramide;
+// Transformações Geomtericas NO OBJETO 3D
+float tx = 0.0, ty = 0.0, tz = 0.0;
+float rxo = 0.0, ryo = 0.0, rzo = 0.0;
+float scale = 1.0;
 
 struct Ponto
 {
@@ -422,9 +427,8 @@ Ponto converte_coords(int x_mouse, int y_mouse)
     int w_janela = glutGet(GLUT_WINDOW_WIDTH);
     int h_janela = glutGet(GLUT_WINDOW_HEIGHT);
 
-    //x_w = ((float)x_mouse / w_janela) * (ORTHO_MAX_X - ORTHO_MIN_X) + ORTHO_MIN_X;
-
-    //y_w = ((float)(h_janela - y_mouse) / h_janela) * (ORTHO_MAX_Y - ORTHO_MIN_Y) + ORTHO_MIN_Y;
+    x_w = ((float)x_mouse / w_janela) * (ORTHO_MAX_X - ORTHO_MIN_X) + ORTHO_MIN_X;
+    y_w = ((float)(h_janela - y_mouse) / h_janela) * (ORTHO_MAX_Y - ORTHO_MIN_Y) + ORTHO_MIN_Y;
 
     return {x_w, y_w};
 }
@@ -485,71 +489,6 @@ void display()
     glFlush();
 }
 
-// Transformações Geomtericas
-float tx = 0.0, ty = 0.0, tz = 0.0;
-float rx = 0.0, ry = 0.0;
-float scale = 1.0;
-
-
-
-void teclas_especiais(int key, int x, int y)
-{
-    float step = 0.1;
-    switch (key)
-    {
-    case GLUT_KEY_UP:
-        ty += step;
-        break;
-    case GLUT_KEY_DOWN:
-        ty -= step;
-        break;
-    case GLUT_KEY_LEFT:
-        tx -= step;
-        break;
-    case GLUT_KEY_RIGHT:
-        tx += step;
-        break;
-    default:
-        break;
-    }
-
-    glutPostRedisplay();
-}
-
-void teclado(unsigned char key, int x, int y)
-{
-
-    // Rotação WASD
-    switch (key)
-    {
-    case 'w':
-    case 'W':
-        rx += 5;
-        break;
-    case 's':
-    case 'S':
-        rx -= 5;
-        break;
-    case 'a':
-    case 'A':
-        ry += 5;
-        break;
-    case 'd':
-    case 'D':
-        ry -= 5;
-        break;
-
-    case '+':
-        scale += 0.1f;
-        break;
-    case '-':
-        if (scale > 0.2f)
-            scale -= 0.1f;
-        break;
-    }
-    glutPostRedisplay();
-}
-
 // realizando a extrusão dos poligonos
 void extrusao_poligonos()
 {
@@ -599,13 +538,13 @@ void display_extrusao()
     glLoadIdentity();
 
     // cam (olhoX, olhoY, olhoZ, alvoX, alvoY, alvoZ, upX, upY, upZ)
-    gluLookAt(0, 0, 20.0, 0.0, 0., 0.0, 0, 1, 0);
+    camera.aplica_paramtero();
 
     //Aplicando transformações
     glTranslatef(tx, ty, 0);
-
-    glRotatef(rx, 1, 0, 0);        // rotaciona eixo x
-    glRotatef(ry, 0, 1, 0);        // rotacao eixo y
+    glRotatef(rxo, 1, 0, 0);        // rotaciona eixo x
+    glRotatef(ryo, 0, 1, 0);        // rotacao eixo y
+    glRotatef(rzo, 0, 0, 1);        // rotacao eixo z
     glScalef(scale, scale, scale); // escala
     // drawPiramide(cor_preenc);
     if (g_vertices.size() >= 3)
@@ -615,34 +554,6 @@ void display_extrusao()
     }
     glutSwapBuffers();
 }
-void display_3d()
-{
-    cubo.init();
-    esfera.init(5, 20, 20);
-    piramide.init();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
-    glLoadIdentity();
-
-    // cam (posicX, posicY, posicZ, alvoX, alvoY, alvoZ, upX, upY, upZ)
-    gluLookAt(0, 0, 20.0, 0.0, 0., 0.0, 0, 1, 0);
-
-    //Aplicando transformações
-    glTranslatef(tx, ty, 0);
-
-    glRotatef(rx, 1, 0, 0);        // rotaciona eixo x
-    glRotatef(ry, 0, 1, 0);        // rotacao eixo y
-    glScalef(scale, scale, scale); // escala
-    // drawPiramide(cor_preenc);
-    if (g_vertices.size() >= 3)
-    {
-        glColor3f(cor_preenc.r, cor_preenc.g, cor_preenc.b);
-        piramide.draw(0.0f, 0.0f, 0.0f);
-        cubo.draw(5,5,0);
-        esfera.draw(10,10,0);
-    }
-    glutSwapBuffers();
-}
-
 void reshape(int w, int h){
     largura_atual = w;
     altura_atual = h;
@@ -652,6 +563,12 @@ void reshape(int w, int h){
     //atualiza a projecao
     camera.modo_projecao(w, h);
 }
+enum objtos{
+    MD_EXTRUSAO, //extrusao
+    MD_DESENHO,//trabalho 1
+    MD_OBJT //objetos 3d
+};
+objtos modo_atual = MD_OBJT;
 enum menu_opcoes
 {
     COR_VERM,
@@ -670,7 +587,10 @@ enum menu_opcoes
     LIMPAR_TELA,
     SAIR,
     Orto ,
-    Perspec 
+    Perspec ,
+    VER_OBJT_3D,
+    VER_OBJT_2D,
+    VER_EXTRUSAO
 };
 
 void processa_menu(int opcao)
@@ -740,7 +660,16 @@ void processa_menu(int opcao)
         camera.setProejcao(MODO_PERSPEC);
         camera.modo_projecao(largura_atual, altura_atual);
         break;
-
+    
+    case VER_EXTRUSAO:
+        modo_atual= MD_EXTRUSAO;
+        break;
+    case VER_OBJT_2D:
+        modo_atual = MD_DESENHO;
+        break;
+    case VER_OBJT_3D:
+        modo_atual = MD_OBJT;
+        break;
     case LIMPAR_TELA:
         g_vertices.clear();
         break;
@@ -751,14 +680,133 @@ void processa_menu(int opcao)
     // redesenha a tela
     glutPostRedisplay();
 }
+
+void display_principal(){
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
+    glLoadIdentity();
+
+    //inicializo os objtos
+    cubo.init(5);//tamanho 10
+    esfera.init(2, 20, 20); //raio = 10
+    piramide.init();
+    
+    if(modo_atual != MD_DESENHO)
+    {
+        camera.aplica_paramtero();
+    }
+
+    switch (modo_atual)
+    {
+    case MD_OBJT:
+        //TG nos objtos
+        glPushMatrix();
+        glTranslatef(tx, ty, 0);
+        glRotatef(rxo, 1,0,0);
+        glRotatef(ryo, 0,1, 0);
+        glRotatef(rzo, 0,0, 1);
+        glScalef(scale, scale, scale);
+
+        //desenho dos objtos
+        cubo.draw(0,0,0);
+        esfera.draw(4,4,4);
+        piramide.draw(6,6,6);
+        
+        glPopMatrix();
+        break;
+    case MD_EXTRUSAO:
+        if(g_vertices.size() >= 3){
+            glPushMatrix();
+            
+            //TG nos objtos
+            glPushMatrix();
+            glTranslatef(tx, ty, 0);
+            glRotatef(rxo, 1,0,0);
+            glRotatef(ryo, 0,0, 0);
+            glScalef(scale, scale, scale);
+
+            extrusao_poligonos();
+            glPopMatrix();
+        }
+        break;
+    case MD_DESENHO:
+        display();
+        break;
+    }
+
+    glutSwapBuffers();
+}
+
+void callback_teclasespeciais(int key, int x, int y){
+    
+    camera.teclas_especiais(key, x, y);
+    
+}
+
+void callback_teclado(unsigned char key, int x, int y){
+    //teclas que controlam a camera
+    if (key == 'w' || key == 'W' || 
+        key == 's' || key == 'S' || 
+        key == 'a' || key == 'A' || 
+        key == 'd' || key == 'D' || '+' || '-')
+    {
+        camera.teclado(key, x, y);
+    }
+    //teclas que controlam os objetos 
+    float step = 0.1;
+    // Rotação zxcvrf
+    switch (key)
+    {
+    case 'z': case 'Z':
+        rxo += 5;
+        break;
+    case 'x': case 'X':
+        rxo -= 5;
+        break;
+    case 'c':case 'C':
+        ryo += 5;
+        break;
+    case 'v':case 'V':
+        ryo -= 5;
+        break;
+    case 'f': case 'F':
+        rzo += 5;
+        break;
+    case 'r': case 'R':
+        rzo -= 5;
+        break;
+
+    //translação
+    case 'g':case 'G':
+        ty += step;
+        break;
+    case 'h': case 'H':
+        ty -= step;
+        break;
+    case 'j': case 'J':
+        tx -= step;
+        break;
+    case 'k': case 'K':
+        tx += step;
+
+    //zoom bn
+    case 'b': case 'B':
+        scale += 0.1f;
+        break;
+    case 'n':case 'N':
+        if (scale > 0.2f)
+            scale -= 0.1f;
+        break;
+    }
+    glutPostRedisplay();
+}
 int main(int argc, char **argv)
 {
     
     glutInit(&argc, argv);
     glutInitWindowSize(WINDOW_W, WINDOW_H);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-    glutCreateWindow("Pol²igonos 3D");
-
+    glutCreateWindow("Poligonos 3D");
+    
     //Configuração inicial da camera
     camera.init(WINDOW_W, WINDOW_H, Perspec);
 
@@ -768,38 +816,56 @@ int main(int argc, char **argv)
         return -1;
     }
     // leitura do teclado e setas
-    glutKeyboardFunc(teclado);
-    glutSpecialFunc(teclas_especiais);
-    // Menus
-    int menuCor = glutCreateMenu(processa_menu);
+    glutKeyboardFunc(callback_teclado);
+    glutSpecialFunc(callback_teclasespeciais);
+    
+    
+    
+    //menu de desenho 
+    //cores
+    int subCor = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Vermelho", COR_VERM);
     glutAddMenuEntry("Verde", COR_VERD);
     glutAddMenuEntry("Azul", COR_AZUL);
     glutAddMenuEntry("Amatelo", COR_AMARELO);
     glutAddMenuEntry("Branco", COR_BRANCA);
-
-    int menuContorno = glutCreateMenu(processa_menu);
+    //contorno
+    int subContorno = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Vermelho", CONTORNO_VERM);
     glutAddMenuEntry("Verde", CONTORNO_VERD);
     glutAddMenuEntry("Azul", CONTORNO_AZUL);
     glutAddMenuEntry("Amatelo", CONTORNO_AMARELO);
     glutAddMenuEntry("Branco", CONTORNO_BRANCA);
-
-    int menuLinha = glutCreateMenu(processa_menu);
+    //linhas
+    int subLinha = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Fina", LINHA_FINA);
     glutAddMenuEntry("Media", LINHA_MED);
     glutAddMenuEntry("Grossa", LINHA_GROSSA);
 
     //Menu que lida com as porjeções
-    int menuProjec = glutCreateMenu(processa_menu);
+    int subProjec = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Orto", Orto);
     glutAddMenuEntry("Perspec", Perspec);
 
+    
+    // Menus
+    int subModos = glutCreateMenu(processa_menu);
+    glutAddMenuEntry("Modo Desenho", MD_DESENHO);
+    glutAddMenuEntry("Modo Extrusao", MD_EXTRUSAO);
+    glutAddMenuEntry("Modo OBJETOS 3D", MD_OBJT);
+
+    //tronco
+    //menu de desenho
     glutCreateMenu(processa_menu);
-    glutAddSubMenu("Projecao", menuProjec);
-    glutAddSubMenu("Cor", menuCor);
-    glutAddSubMenu("Cotorno", menuContorno);
-    glutAddSubMenu("Linha", menuLinha);
+   
+    glutAddSubMenu("Modos", subModos);
+    glutAddSubMenu("Projecao", subProjec);
+
+    glutAddMenuEntry("*** Estilos ***", -1);
+    glutAddSubMenu("Cor de Preenchimento", subCor);
+    glutAddSubMenu("Cor de Contorno", subContorno);
+    glutAddSubMenu("Espessura de linha", subLinha);
+
     glutAddMenuEntry("LIMPAR TELA", LIMPAR_TELA); //
     glutAddMenuEntry("Sair", SAIR);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
@@ -807,7 +873,8 @@ int main(int argc, char **argv)
     // mouse
     glutMouseFunc(gerenciaMouse);
     glutReshapeFunc(reshape);
-    glutDisplayFunc(display_3d);
+    //seleciona os modos
+    glutDisplayFunc(display_principal);
     glutMainLoop();
     return 0;
 }

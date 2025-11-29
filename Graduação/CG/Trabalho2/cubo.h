@@ -10,7 +10,7 @@ class Cubo
 public:
     Cubo();
    
-    void init(); //inicializa
+    void init(int tam); //inicializa
     void draw(float x, float y, float z); //desenha na tela
 
 private:
