@@ -122,7 +122,7 @@ void Camera::setProejcao(bool NovoModo){
 void Camera::modo_projecao(int width, int height)
 {
 
-    float aspecto = (float)width / height;
+    float aspecto = (float)width / (float)height;
 
     // matriz de projecao
     glMatrixMode(GL_PROJECTION);
@@ -138,13 +138,13 @@ void Camera::modo_projecao(int width, int height)
     else
     {
         // projecao ortografica
-        float tam = 10.0f;                  // tamanho da caixa de visualização
+        float tam = 20.0f;                  // tamanho da caixa de visualização
         glClearColor(0.0, 0.0, 0.5f, 0.5f); // plano de fundo
 
         if (width >= height) // largura domina
-            glOrtho(-tam * aspecto, tam * aspecto, -tam, tam, 0.1, 100.0);
+            glOrtho(-tam * aspecto, tam * aspecto, -tam, tam, -100.0f, 100.0f);
         else // altura domina
-            glOrtho(-tam, tam, -tam / aspecto, tam / aspecto, 0.1, 100.0);
+            glOrtho(-tam, tam, -tam / aspecto, tam / aspecto, -100.0f, 100.0f);
     }
 
     glMatrixMode(GL_MODELVIEW);

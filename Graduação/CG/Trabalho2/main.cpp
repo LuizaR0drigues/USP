@@ -496,6 +496,7 @@ void extrusao_poligonos()
     glBegin(GL_POLYGON);
 
     // desenhando a base
+    glColor3f(cor_R, cor_G, cor_B);
     for (auto base : g_vertices)
         glVertex3f(base.x, base.y, 0.0f);
     glEnd();
@@ -525,33 +526,12 @@ void extrusao_poligonos()
 
     // desenhando o topo
     glBegin(GL_POLYGON);
-    glColor3f(1.0f, 1.0f, 1.0f);
+    glColor3f(cor_R, cor_G, cor_B);
     for (auto topo : g_vertices)
         glVertex3f(topo.x, topo.y, h);
     glEnd();
 }
-void display_extrusao()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
-    glLoadIdentity();
 
-    // cam (olhoX, olhoY, olhoZ, alvoX, alvoY, alvoZ, upX, upY, upZ)
-    camera.aplica_paramtero();
-
-    //Aplicando transformações
-    glTranslatef(tx, ty, 0);
-    glRotatef(rxo, 1, 0, 0);        // rotaciona eixo x
-    glRotatef(ryo, 0, 1, 0);        // rotacao eixo y
-    glRotatef(rzo, 0, 0, 1);        // rotacao eixo z
-    glScalef(scale, scale, scale); // escala
-    // drawPiramide(cor_preenc);
-    if (g_vertices.size() >= 3)
-    {
-        glColor3f(cor_preenc.r, cor_preenc.g, cor_preenc.b);
-        extrusao_poligonos();
-    }
-    glutSwapBuffers();
-}
 void reshape(int w, int h){
     largura_atual = w;
     altura_atual = h;
