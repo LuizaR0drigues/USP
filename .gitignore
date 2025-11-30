@@ -176,3 +176,7 @@ Graduação/bin
 Graduação/lib
 Graduação/pyvenv.cfg
 Graduação/lib64
+*.idx
+*.idx
+Graduação/CG/Trabalho1Qt/build
+
