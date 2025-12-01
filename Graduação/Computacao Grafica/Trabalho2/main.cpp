@@ -666,13 +666,15 @@ void configura_luz_pontual(int id_luz, GLfloat* posicao, GLfloat* cor_luz, float
     GLfloat pos_w[] = {posicao[0], posicao[1], posicao[2], 1.0f};
     //cor difusa/especular
     GLfloat cor_dw[] = {cor_luz[0]*intensidade, cor_luz[1]*intensidade, cor_luz[2]*intensidade, 1.0f};
+    GLfloat cor_sw[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};//cor especular
+
     //cor ambiente
     GLfloat cor_aw[] = {cor_luz[0]*intensidade*0.2f, cor_luz[1]*intensidade*0.2f, cor_luz[2]*intensidade*0.2f, 1.0f};
     
     //configura a luz difusa, especular e a posicao
     glLightfv(id_luz, GL_POSITION, pos_w);
     glLightfv(id_luz, GL_DIFFUSE, cor_dw);
-    glLightfv(id_luz, GL_SPECULAR, cor_dw);
+    glLightfv(id_luz, GL_SPECULAR, cor_sw);
     glLightfv(id_luz, GL_AMBIENT, cor_aw);
 
 
@@ -708,26 +710,26 @@ void desenha_esfera(GLfloat* posicao, GLfloat* cor_luz){
 void desenha_linha_luz(GLfloat* direcao){
     glPushMatrix();
     glTranslatef(0, 0, 0);
-    glEnable(GL_LINE_STIPPLE); //ativa o pontilhado
-    glLineStipple(1, 0x1C47);//define o padrao do pontilhado
+   
     glBegin(GL_LINES);
 
     glVertex3f(0,0,0);
     glVertex3f(direcao[0], direcao[1], direcao[2]);
     glEnd();
     glPopMatrix();
-    glDisable(GL_LINE_STIPPLE);
-
+    
 }
 void configura_luz_direcional(int Id_direcional, GLfloat* direcao, GLfloat* cor_luz, float intens){
     GLfloat direcional[] = {direcao[0], direcao[1], direcao[2], 0.0f}; //a 4dimensao indica ao GL que é uma luz direcional
     GLfloat cor_dw[] = {cor_luz[0]*intens, cor_luz[1]*intens, cor_luz[2]*intens, 1.0f};//cor difusa
-   //cor ambiente
+    GLfloat cor_sw[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};//cor especular
+
+    //cor ambiente
     GLfloat cor_aw[] = {cor_luz[0]*intens*0.2f, cor_luz[1]*intens*0.2f, cor_luz[2]*intens*0.2f, 1.0f};
     
     glLightfv(Id_direcional, GL_POSITION, direcional);
     glLightfv(Id_direcional, GL_DIFFUSE, cor_dw);
-    glLightfv(Id_direcional, GL_SPECULAR, cor_dw);
+    glLightfv(Id_direcional, GL_SPECULAR, cor_sw);
     glLightfv(Id_direcional, GL_AMBIENT, cor_aw);
 
     //fatores de atenuação da luz -- precisamo deixar tudo constante/zerado neste tipo de luz
@@ -738,6 +740,39 @@ void configura_luz_direcional(int Id_direcional, GLfloat* direcao, GLfloat* cor_
     glEnable(Id_direcional);
 
 }
+
+void configura_luz_spot(int Id_spot, GLfloat* posicao,GLfloat* direcao, GLfloat* cor_luz, float intens, float cutoff, float expoente){
+    GLfloat posic_w[] = {posicao[0], posicao[1], posicao[2], 1.0f}; //a 4dimensao indica ao GL que é uma luz direcional
+    GLfloat cor_dw[] = {cor_luz[0]*intens, cor_luz[1]*intens, cor_luz[2]*intens, 1.0f};//cor difusa
+    GLfloat cor_sw[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};//cor especular
+   
+    glLightfv(Id_spot, GL_POSITION, posic_w);
+
+    glLightfv(Id_spot, GL_SPOT_DIRECTION,direcao);
+
+    glLightfv(Id_spot, GL_DIFFUSE, cor_dw);
+    glLightfv(Id_spot, GL_SPECULAR, cor_sw);
+    
+    glLightf(Id_spot, GL_SPOT_CUTOFF, cutoff);//angulo de abertura
+    glLightf(Id_spot, GL_SPOT_EXPONENT, expoente);//foco
+
+    //fatores de atenuação da luz -- precisamo deixar tudo constante/zerado neste tipo de luz
+    glLightf(Id_spot, GL_CONSTANT_ATTENUATION, 0.0f);
+    glLightf(Id_spot, GL_LINEAR_ATTENUATION, 0.1f);
+    glLightf(Id_spot, GL_QUADRATIC_ATTENUATION, 0.01f);
+
+    glEnable(Id_spot);
+
+    desenha_esfera(posicao, cor_luz);
+    glPushMatrix();
+    glTranslatef(posicao[0],posicao[1], posicao[2]);
+
+    glBegin(GL_LINES);
+        glVertex3f(0,0,0);
+        glVertex3f(direcao[0],direcao[1], direcao[2]);
+    glEnd();
+    glPopMatrix();
+}
 void display_principal(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
     glLoadIdentity();
@@ -745,6 +780,9 @@ void display_principal(){
     GLfloat cor_amb[3] = {0.5, 0.5, 0.5};
     GLfloat pos[3] = {0,10,0};
     GLfloat cor_luz[3] = {1.0f, 1.0f,1.0f};
+    GLfloat pos_spot[3] = {0,5,15};
+    GLfloat direcao_spot[3] = {1,-0.2, -1};
+    GLfloat cor_spot[3] = {0.5f, 0.0f,0.5f};
     if(modo_atual == MD_DESENHO)
     {   
         //modo 2D
@@ -773,8 +811,9 @@ void display_principal(){
         glColorMaterial(GL_FRONT, GL_DIFFUSE);
 
         //configura luz
-        configura_luz_direcional(GL_LIGHT5, pos,cor_luz, 1.0f );
-        desenha_linha_luz(pos);
+        //configura_luz_direcional(GL_LIGHT5, pos,cor_luz, 1.0f );
+        //desenha_linha_luz(pos);
+        configura_luz_spot(GL_LIGHT6, pos_spot, direcao_spot, cor_spot,100.0f,  50.0f, 20.0f);
         //TG nos objtos
         glPushMatrix();
         glTranslatef(tx, ty, 0);
