@@ -19,7 +19,7 @@
 #include "cubo.h"
 #include "esfera.h"
 #include "piramide.h"
-
+#include "iluminacao.h"
 #include "camera.h"//camera
 using namespace std;
 
@@ -27,7 +27,9 @@ using namespace std;
 #define MODO_PERSPEC true
 //objetos e Camera 
 Camera camera;
-
+Luz luz0;//direcional
+Luz luz1; //pontual
+Luz luz2; //spot
 //objetos 3d
 Cubo cubo;
 Esfera esfera;
@@ -572,7 +574,21 @@ enum menu_opcoes
     PHONG
 };
 menu_opcoes modo_atual = MD_DESENHO;
+ 
+void recupera_dados(GLfloat* pos_obs, GLfloat* pos_fonte){
+    
+    for(int i=0; i<3; i++){
+        cout << "Digite a posicao do observador(x, y, z): " << endl;
+        cin >> pos_obs[i];
+        
+    }
 
+    for(int i=0; i<3; i++){
+        cout << "Digite a posicao da FOnte de Luz(x, y, z): " << endl;
+        cin >> pos_fonte[i];
+        
+    }
+}
 void processa_menu(int opcao)
 {
     switch (opcao)
@@ -619,7 +635,7 @@ void processa_menu(int opcao)
     case CONTORNO_AMARELO:
         cor_contorno = {1.0f, 1.0f, 0.0f};
         break;
-
+    
     // opcoes de linha
     case LINHA_FINA:
         tamanho_linha = 1.0f;
@@ -650,6 +666,18 @@ void processa_menu(int opcao)
     case VER_OBJT_3D:
         modo_atual = MD_OBJT;
         break;
+
+    case GOURAUD:
+        //calcula a cor em cada vértice e interpola (mistura) os pixels no meio
+        glShadeModel(GL_SMOOTH);
+        break;
+    case FLAT:
+        //pega a cor de um único vértice e pinta a face inteira com aquela cor sólida.
+        glShadeModel(GL_FLAT);
+        break;
+    case PHONG:
+        
+        break;
     case LIMPAR_TELA:
         g_vertices.clear();
         break;
@@ -661,118 +689,7 @@ void processa_menu(int opcao)
     glutPostRedisplay();
 }
 
-void configura_luz_pontual(int id_luz, GLfloat* posicao, GLfloat* cor_luz, float intensidade ){
-    //aplicando coord homogenea
-    GLfloat pos_w[] = {posicao[0], posicao[1], posicao[2], 1.0f};
-    //cor difusa/especular
-    GLfloat cor_dw[] = {cor_luz[0]*intensidade, cor_luz[1]*intensidade, cor_luz[2]*intensidade, 1.0f};
-    GLfloat cor_sw[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};//cor especular
 
-    //cor ambiente
-    GLfloat cor_aw[] = {cor_luz[0]*intensidade*0.2f, cor_luz[1]*intensidade*0.2f, cor_luz[2]*intensidade*0.2f, 1.0f};
-    
-    //configura a luz difusa, especular e a posicao
-    glLightfv(id_luz, GL_POSITION, pos_w);
-    glLightfv(id_luz, GL_DIFFUSE, cor_dw);
-    glLightfv(id_luz, GL_SPECULAR, cor_sw);
-    glLightfv(id_luz, GL_AMBIENT, cor_aw);
-
-
-
-    //fatores de atenuação da luz
-    glLightf(id_luz, GL_CONSTANT_ATTENUATION, 1.0f);
-    glLightf(id_luz, GL_LINEAR_ATTENUATION, 0.1f);
-    glLightf(id_luz, GL_QUADRATIC_ATTENUATION, 0.01f);
-
-    glEnable(id_luz);
-}
-void desenha_esfera(GLfloat* posicao, GLfloat* cor_luz){
-    glPushMatrix();
-    glTranslatef(posicao[0], posicao[1], posicao[2]);
-
-    GLfloat brilho_esf = 20;
-    GLfloat cor_w[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};
-
-    //luz que interage com o objt
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, cor_w);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, cor_w);
-    glMaterialfv(GL_FRONT, GL_AMBIENT, cor_w);
-    glMaterialf(GL_FRONT, GL_SHININESS, brilho_esf);
-
-    //Um objeto quádrico é uma ed que armazena informações sobre como desenhar superfícies curvas simples no espaço 3D. 
-    GLUquadric* quadric =  gluNewQuadric();//precisar ser global no futuro
-    gluSphere(quadric,0.5, 32, 32);
-
-    glPopMatrix();
-    gluDeleteQuadric(quadric);
-
-}
-void desenha_linha_luz(GLfloat* direcao){
-    glPushMatrix();
-    glTranslatef(0, 0, 0);
-   
-    glBegin(GL_LINES);
-
-    glVertex3f(0,0,0);
-    glVertex3f(direcao[0], direcao[1], direcao[2]);
-    glEnd();
-    glPopMatrix();
-    
-}
-void configura_luz_direcional(int Id_direcional, GLfloat* direcao, GLfloat* cor_luz, float intens){
-    GLfloat direcional[] = {direcao[0], direcao[1], direcao[2], 0.0f}; //a 4dimensao indica ao GL que é uma luz direcional
-    GLfloat cor_dw[] = {cor_luz[0]*intens, cor_luz[1]*intens, cor_luz[2]*intens, 1.0f};//cor difusa
-    GLfloat cor_sw[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};//cor especular
-
-    //cor ambiente
-    GLfloat cor_aw[] = {cor_luz[0]*intens*0.2f, cor_luz[1]*intens*0.2f, cor_luz[2]*intens*0.2f, 1.0f};
-    
-    glLightfv(Id_direcional, GL_POSITION, direcional);
-    glLightfv(Id_direcional, GL_DIFFUSE, cor_dw);
-    glLightfv(Id_direcional, GL_SPECULAR, cor_sw);
-    glLightfv(Id_direcional, GL_AMBIENT, cor_aw);
-
-    //fatores de atenuação da luz -- precisamo deixar tudo constante/zerado neste tipo de luz
-    glLightf(Id_direcional, GL_CONSTANT_ATTENUATION, 1.0f);
-    glLightf(Id_direcional, GL_LINEAR_ATTENUATION, 0.0f);
-    glLightf(Id_direcional, GL_QUADRATIC_ATTENUATION, 0.0f);
-
-    glEnable(Id_direcional);
-
-}
-
-void configura_luz_spot(int Id_spot, GLfloat* posicao,GLfloat* direcao, GLfloat* cor_luz, float intens, float cutoff, float expoente){
-    GLfloat posic_w[] = {posicao[0], posicao[1], posicao[2], 1.0f}; //a 4dimensao indica ao GL que é uma luz direcional
-    GLfloat cor_dw[] = {cor_luz[0]*intens, cor_luz[1]*intens, cor_luz[2]*intens, 1.0f};//cor difusa
-    GLfloat cor_sw[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};//cor especular
-   
-    glLightfv(Id_spot, GL_POSITION, posic_w);
-
-    glLightfv(Id_spot, GL_SPOT_DIRECTION,direcao);
-
-    glLightfv(Id_spot, GL_DIFFUSE, cor_dw);
-    glLightfv(Id_spot, GL_SPECULAR, cor_sw);
-    
-    glLightf(Id_spot, GL_SPOT_CUTOFF, cutoff);//angulo de abertura
-    glLightf(Id_spot, GL_SPOT_EXPONENT, expoente);//foco
-
-    //fatores de atenuação da luz -- precisamo deixar tudo constante/zerado neste tipo de luz
-    glLightf(Id_spot, GL_CONSTANT_ATTENUATION, 0.0f);
-    glLightf(Id_spot, GL_LINEAR_ATTENUATION, 0.1f);
-    glLightf(Id_spot, GL_QUADRATIC_ATTENUATION, 0.01f);
-
-    glEnable(Id_spot);
-
-    desenha_esfera(posicao, cor_luz);
-    glPushMatrix();
-    glTranslatef(posicao[0],posicao[1], posicao[2]);
-
-    glBegin(GL_LINES);
-        glVertex3f(0,0,0);
-        glVertex3f(direcao[0],direcao[1], direcao[2]);
-    glEnd();
-    glPopMatrix();
-}
 void display_principal(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
     glLoadIdentity();
@@ -810,10 +727,15 @@ void display_principal(){
         glEnable(GL_COLOR_MATERIAL);
         glColorMaterial(GL_FRONT, GL_DIFFUSE);
 
-        //configura luz
-        //configura_luz_direcional(GL_LIGHT5, pos,cor_luz, 1.0f );
-        //desenha_linha_luz(pos);
-        configura_luz_spot(GL_LIGHT6, pos_spot, direcao_spot, cor_spot,100.0f,  50.0f, 20.0f);
+        //desenhando as luzes
+        luz0.atualizar(); 
+        luz0.desenha();  
+
+        luz1.atualizar();
+        luz1.desenha(); 
+
+        luz2.atualizar();
+        luz2.desenha();
         //TG nos objtos
         glPushMatrix();
         glTranslatef(tx, ty, 0);
@@ -940,6 +862,26 @@ int main(int argc, char **argv)
 
     //Configuração inicial da camera
     camera.init(WINDOW_W, WINDOW_H, Perspec);
+    
+    luz0.init(GL_LIGHT0, DIRECIONAL);//sol
+    luz0.set_posicao(15.0f, 10.0f, 10.0f);
+    luz0.set_cor(1.0f, 0.95f, 0.8f);
+    luz0.set_intensidade(0.8f); 
+    luz0.ligar();
+
+    luz1.init(GL_LIGHT1, PONTUAL);//luz azul
+    luz1.set_posicao(-10.0f, 10.0f, 0.0f);
+    luz1.set_cor(0.2f, 0.2f, 1.0f);
+    luz1.set_intensidade(0.6f);
+    luz1.ligar();
+
+    luz2.init(GL_LIGHT2, SPOT);//luz magenta
+    luz2.set_posicao(1.0f, 7.0f, 0.0f);
+    luz2.set_cor(1.0f, 0.0f, 1.0f); 
+    luz2.set_direcao(0.0f, -1.0f, 0.0f); //aponta para baixo
+    luz2.set_Spot_configuracao(25.0f, 2.0f);
+    luz2.set_intensidade(1.0f);
+    luz2.ligar();
 
     //inicializo os objtos
     cubo.init(5);//tamanho 5
@@ -994,6 +936,7 @@ int main(int argc, char **argv)
    
     glutAddSubMenu("Modos", subModos);
     glutAddSubMenu("Projecao", subProjec);
+    glutAddSubMenu("Met Iluminacao", subLuz);
 
     glutAddMenuEntry("*** Estilos ***", -1);
     glutAddSubMenu("Cor de Preenchimento", subCor);

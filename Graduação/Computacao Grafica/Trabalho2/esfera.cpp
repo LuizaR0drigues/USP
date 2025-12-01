@@ -7,7 +7,6 @@ Esfera::Esfera(){
     stacks = 20;
 
 }
-
 void Esfera::init(float Inputraio, int Inputfatias, int Inputstacks){
     this->raio = Inputraio;
     this->fatias = Inputfatias;
@@ -41,10 +40,10 @@ void Esfera::draw(float xe, float ye, float ze){
 
             glColor3f((float)j/fatias, (float)i/fatias, 1.0f - (float)(i/fatias));
 
-            glNormal3f(x*zr0, y*zr0, z0);//iluminação
+            glNormal3f(x*zr0, y*zr0, z0);//iluminação --nromal
             glVertex3f(x * zr0*raio, y * zr0*raio, z0*raio);
 
-            glNormal3f(x*zr1, y*zr1, z1);//iluminação
+            glNormal3f(x*zr1, y*zr1, z1);//iluminação -- normal
             glVertex3f(x * zr1*raio, y * zr1*raio, z1*raio);
 
         }

@@ -132,14 +132,14 @@ void Camera::modo_projecao(int width, int height)
     if (this->modo_perspec)
     {
         // projeção perspectiva
-        glClearColor(0.5, 0.0, 0.5f, 0.5f); // plano de fundo
+        glClearColor(0.1, 0.0, 0.1f, 0.5f); // plano de fundo
         gluPerspective(45.0f, aspecto, 0.1f, 100.0f);
     }
     else
     {
         // projecao ortografica
         float tam = 20.0f;                  // tamanho da caixa de visualização
-        glClearColor(0.0, 0.0, 0.5f, 0.5f); // plano de fundo
+        glClearColor(0.0, 0.0, 0.1f, 0.1f); // plano de fundo
 
         if (width >= height) // largura domina
             glOrtho(-tam * aspecto, tam * aspecto, -tam, tam, -100.0f, 100.0f);

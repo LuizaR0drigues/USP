@@ -18,5 +18,8 @@ private:
     float vertices[4][3];
     int faces[4][3];
     float colors[4][3];
+    GLfloat nromal[3];
+
+    void calcula_normal(GLfloat* v1, GLfloat* v2, GLfloat* v3, GLfloat* saida);
 };
 #endif
