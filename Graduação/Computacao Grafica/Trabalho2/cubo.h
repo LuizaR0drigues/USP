@@ -18,5 +18,7 @@ private:
     float vertices[8][3];
     int faces[6][4];
     float colors[6][3];
+    float normais[6][3];
+    float cor[3];
 };
 #endif

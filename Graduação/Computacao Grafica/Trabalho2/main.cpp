@@ -47,7 +47,7 @@ int altura_atual = WINDOW_H;
 // Transformações Geomtericas NO OBJETO 3D
 float tx = 0.0, ty = 0.0, tz = 0.0;
 float rxo = 0.0, ryo = 0.0, rzo = 0.0;
-float scale = 1.0;
+float scaleo = 1.0;
 
 struct Ponto
 {
@@ -566,7 +566,10 @@ enum menu_opcoes
     VER_EXTRUSAO,
     MD_EXTRUSAO, //extrusao
     MD_DESENHO,//trabalho 1
-    MD_OBJT //objetos 3d
+    MD_OBJT,//objetos 3d
+    GOURAUD,
+    FLAT,
+    PHONG
 };
 menu_opcoes modo_atual = MD_DESENHO;
 
@@ -658,11 +661,90 @@ void processa_menu(int opcao)
     glutPostRedisplay();
 }
 
+void configura_luz_pontual(int id_luz, GLfloat* posicao, GLfloat* cor_luz, float intensidade ){
+    //aplicando coord homogenea
+    GLfloat pos_w[] = {posicao[0], posicao[1], posicao[2], 1.0f};
+    //cor difusa/especular
+    GLfloat cor_dw[] = {cor_luz[0]*intensidade, cor_luz[1]*intensidade, cor_luz[2]*intensidade, 1.0f};
+    //cor ambiente
+    GLfloat cor_aw[] = {cor_luz[0]*intensidade*0.2f, cor_luz[1]*intensidade*0.2f, cor_luz[2]*intensidade*0.2f, 1.0f};
+    
+    //configura a luz difusa, especular e a posicao
+    glLightfv(id_luz, GL_POSITION, pos_w);
+    glLightfv(id_luz, GL_DIFFUSE, cor_dw);
+    glLightfv(id_luz, GL_SPECULAR, cor_dw);
+    glLightfv(id_luz, GL_AMBIENT, cor_aw);
+
+
+
+    //fatores de atenuação da luz
+    glLightf(id_luz, GL_CONSTANT_ATTENUATION, 1.0f);
+    glLightf(id_luz, GL_LINEAR_ATTENUATION, 0.1f);
+    glLightf(id_luz, GL_QUADRATIC_ATTENUATION, 0.01f);
+
+    glEnable(id_luz);
+}
+void desenha_esfera(GLfloat* posicao, GLfloat* cor_luz){
+    glPushMatrix();
+    glTranslatef(posicao[0], posicao[1], posicao[2]);
+
+    GLfloat brilho_esf = 20;
+    GLfloat cor_w[] = {cor_luz[0], cor_luz[1], cor_luz[2], 1.0f};
+
+    //luz que interage com o objt
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, cor_w);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, cor_w);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, cor_w);
+    glMaterialf(GL_FRONT, GL_SHININESS, brilho_esf);
+
+    //Um objeto quádrico é uma ed que armazena informações sobre como desenhar superfícies curvas simples no espaço 3D. 
+    GLUquadric* quadric =  gluNewQuadric();//precisar ser global no futuro
+    gluSphere(quadric,0.5, 32, 32);
+
+    glPopMatrix();
+    gluDeleteQuadric(quadric);
+
+}
+void desenha_linha_luz(GLfloat* direcao){
+    glPushMatrix();
+    glTranslatef(0, 0, 0);
+    glEnable(GL_LINE_STIPPLE); //ativa o pontilhado
+    glLineStipple(1, 0x1C47);//define o padrao do pontilhado
+    glBegin(GL_LINES);
+
+    glVertex3f(0,0,0);
+    glVertex3f(direcao[0], direcao[1], direcao[2]);
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_LINE_STIPPLE);
+
+}
+void configura_luz_direcional(int Id_direcional, GLfloat* direcao, GLfloat* cor_luz, float intens){
+    GLfloat direcional[] = {direcao[0], direcao[1], direcao[2], 0.0f}; //a 4dimensao indica ao GL que é uma luz direcional
+    GLfloat cor_dw[] = {cor_luz[0]*intens, cor_luz[1]*intens, cor_luz[2]*intens, 1.0f};//cor difusa
+   //cor ambiente
+    GLfloat cor_aw[] = {cor_luz[0]*intens*0.2f, cor_luz[1]*intens*0.2f, cor_luz[2]*intens*0.2f, 1.0f};
+    
+    glLightfv(Id_direcional, GL_POSITION, direcional);
+    glLightfv(Id_direcional, GL_DIFFUSE, cor_dw);
+    glLightfv(Id_direcional, GL_SPECULAR, cor_dw);
+    glLightfv(Id_direcional, GL_AMBIENT, cor_aw);
+
+    //fatores de atenuação da luz -- precisamo deixar tudo constante/zerado neste tipo de luz
+    glLightf(Id_direcional, GL_CONSTANT_ATTENUATION, 1.0f);
+    glLightf(Id_direcional, GL_LINEAR_ATTENUATION, 0.0f);
+    glLightf(Id_direcional, GL_QUADRATIC_ATTENUATION, 0.0f);
+
+    glEnable(Id_direcional);
+
+}
 void display_principal(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
     glLoadIdentity();
 
-    
+    GLfloat cor_amb[3] = {0.5, 0.5, 0.5};
+    GLfloat pos[3] = {0,10,0};
+    GLfloat cor_luz[3] = {1.0f, 1.0f,1.0f};
     if(modo_atual == MD_DESENHO)
     {   
         //modo 2D
@@ -683,26 +765,39 @@ void display_principal(){
     switch (modo_atual)
     {
     case MD_OBJT:
+        //ILUMINAÇÂO
+        //modo iluminação
+        glEnable(GL_LIGHTING);//ativa o modo iluminação
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_COLOR_MATERIAL);
+        glColorMaterial(GL_FRONT, GL_DIFFUSE);
+
+        //configura luz
+        configura_luz_direcional(GL_LIGHT5, pos,cor_luz, 1.0f );
+        desenha_linha_luz(pos);
         //TG nos objtos
         glPushMatrix();
         glTranslatef(tx, ty, 0);
         glRotatef(rxo, 1,0,0);
         glRotatef(ryo, 0,1, 0);
         glRotatef(rzo, 0,0, 1);
-        glScalef(scale, scale, scale);
+        glScalef(scaleo, scaleo, scaleo);
 
         //desenho dos objtos
         cubo.draw(0,0,0);
         esfera.draw(4,4,4);
         piramide.draw(6,6,6);
-
+        
+        //objeto pr=e-definifo
+        glTranslatef(7, 1, 0);
+        glutSolidCylinder(2, 2, 20, 20);
         glPopMatrix();
         break;
     case MD_EXTRUSAO:
         
         if(g_vertices.size() >= 3){
             glPushMatrix();
-            float scale_objt = scale * 0.005f;
+            float scale_objt = scaleo * 0.005f;
             //TG nos objtos
             glTranslatef(tx, ty, 0);
             glRotatef(rxo, 1,0,0);
@@ -774,14 +869,14 @@ void callback_teclado(unsigned char key, int x, int y){
         break;
     case 'k': case 'K':
         tx += step;
-
+        break;
     //zoom bn
     case 'b': case 'B':
-        scale += 0.1f;
+        scaleo += 0.1f;
         break;
     case 'n':case 'N':
-        if (scale > 0.2f)
-            scale -= 0.1f;
+        if (scaleo > 0.2f)
+            scaleo -= 0.1f;
         break;
     }
     glutPostRedisplay();
@@ -794,24 +889,29 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutCreateWindow("Poligonos 3D");
     
-    //Configuração inicial da camera
-    camera.init(WINDOW_W, WINDOW_H, Perspec);
-
-    //inicializo os objtos
-    cubo.init(5);//tamanho 10
-    esfera.init(2, 20, 20); //raio = 10
-    piramide.init();
-
+    
     if (!gladLoadGLLoader((GLADloadproc)glutGetProcAddress))
     {
         cout << "Erro ao carregar GLAD" << endl;
         return -1;
     }
+    //habilitações globais
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_NORMALIZE);//lida com a normalização apesar do tamanho do objetos
+
+    //Configuração inicial da camera
+    camera.init(WINDOW_W, WINDOW_H, Perspec);
+
+    //inicializo os objtos
+    cubo.init(5);//tamanho 5
+    esfera.init(1, 20, 20); //raio = 10
+    piramide.init(2); //tamanho 5
+
+    
     // leitura do teclado e setas
     glutKeyboardFunc(callback_teclado);
     glutSpecialFunc(callback_teclasespeciais);
     
-
     //menu de desenho 
     //cores
     int subCor = glutCreateMenu(processa_menu);
@@ -838,6 +938,10 @@ int main(int argc, char **argv)
     glutAddMenuEntry("Orto", Orto);
     glutAddMenuEntry("Perspec", Perspec);
 
+    int subLuz = glutCreateMenu(processa_menu);
+    glutAddMenuEntry("Gouraud", GOURAUD);
+    glutAddMenuEntry("Flat", FLAT);
+    glutAddMenuEntry("Phong", PHONG);
     
     // Menus
     int subModos = glutCreateMenu(processa_menu);

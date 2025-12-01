@@ -3,12 +3,12 @@
 
 Piramide::Piramide(){}
 
-void Piramide::init(){
+void Piramide::init(int tam){
     int v[4][3] ={
-        {1,1,1},
-        {-1,-1,1},
-        {-1,1,-1},
-        {1,-1,-1}
+        {tam,tam,tam},
+        {-tam,-tam,tam},
+        {-tam,tam,-tam},
+        {tam,-tam,-tam}
     };
 
     int f[4][3]={
