@@ -30,7 +30,36 @@ private:
     bool ligada;
     float intensidade;
 
-    void desenha_esfera();
+    void desenha_esfera(){
+        glPushMatrix();
+        glTranslatef(posicao[0], posicao[1], posicao[2]);
+        
+        GLfloat material_cor[] = {cor[0], cor[1], cor[2], 1.0f};
+        glMaterialfv(GL_FRONT, GL_EMISSION, material_cor); // parecer que brilha
+        
+        //Se for direcional ou spot, desenha linha
+        if(tipo != PONTUAL) {
+            glEnable(GL_LINE_STIPPLE);
+            glLineStipple(1, 0xF0F0);
+            glBegin(GL_LINES);
+            glVertex3f(0,0,0);
+            //linha apontando a direção
+            glVertex3f(direcao[0]*2, direcao[1]*2, direcao[2]*2); 
+            glEnd();
+            glDisable(GL_LINE_STIPPLE);
+        }
+
+        //Esfera pequena
+        GLUquadric* q = gluNewQuadric();
+        gluSphere(q, 0.3, 10, 10);
+        gluDeleteQuadric(q);
+        
+        // Reseta emissão para preto (para não afetar outros objetos)
+        GLfloat sem_cor[] = {0,0,0,1};
+        glMaterialfv(GL_FRONT, GL_EMISSION, sem_cor);
+
+        glPopMatrix();
+    };
 
 public:
 
