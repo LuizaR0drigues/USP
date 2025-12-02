@@ -87,9 +87,12 @@ vector<vector<Vertices>> Esfera::gera_malhas(float raio, int stacks, int slices)
             v.nx = x0 * zr0;
             v.ny = y0 * zr0;
             v.nz = z0;
+
             v.x = v.nx * raio;
-            v.y = v.y * raio;
-            v.z = v.z * raio;
+            v.y = v.ny * raio;
+            v.z = v.nz * raio;
+
+            v.vx = v.x; v.vy = v.y; v.vz = v.z; 
             quad.push_back(v);
 
             //vertice 2
@@ -97,8 +100,9 @@ vector<vector<Vertices>> Esfera::gera_malhas(float raio, int stacks, int slices)
             v.ny = y1 * zr0;
             v.nz = z0;
             v.x = v.nx * raio;
-            v.y = v.y * raio;
-            v.z = v.z * raio;
+            v.y = v.ny * raio;
+            v.z = v.nz * raio;
+            v.vx = v.x; v.vy = v.y; v.vz = v.z;
             quad.push_back(v);
 
             //vertice 3
@@ -108,6 +112,7 @@ vector<vector<Vertices>> Esfera::gera_malhas(float raio, int stacks, int slices)
             v.x = v.nx * raio; 
             v.y = v.ny * raio; 
             v.z = v.nz * raio;
+            v.vx = v.x; v.vy = v.y; v.vz = v.z;
             quad.push_back(v);
 
             //vertice 4
@@ -117,6 +122,8 @@ vector<vector<Vertices>> Esfera::gera_malhas(float raio, int stacks, int slices)
             v.x = v.nx * raio; 
             v.y = v.ny * raio; 
             v.z = v.nz * raio;
+
+            v.vx = v.x; v.vy = v.y; v.vz = v.z;
             quad.push_back(v);
 
             todas_faces.push_back(quad);

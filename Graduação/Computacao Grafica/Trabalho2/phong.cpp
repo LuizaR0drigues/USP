@@ -271,7 +271,7 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
                 glm::vec3 cam_norm = glm::normalize(cam);
 
                 // produto escalar
-                float prod = glm::dot(normalizado, luz_norm);
+                float prod = abs(glm::dot(normalizado, luz_norm));
 
                 // Variáveis de intensidade
                 float fatorDifuso = 0.0f;
@@ -288,7 +288,7 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
                     float RprodV = glm::dot(reflexo, cam_norm);
                     if (RprodV > 0.0f)
                     {
-                        fatorEspecular = pow(RprodV, 10.0f); // define brilho
+                        fatorEspecular = pow(RprodV, 4.0f); // define brilho
                     }
                 }
                 // euqações de luz

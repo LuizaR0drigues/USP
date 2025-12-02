@@ -27,6 +27,7 @@ using namespace std;
 
 #define MODO_ORTO false
 #define MODO_PERSPEC true
+
 // objetos e Camera
 Camera camera;
 Luz luz0; // direcional
@@ -56,7 +57,7 @@ float ks = 1.0f;
 // Transformações Geomtericas NO OBJETO 3D
 float tx = 0.0, ty = 0.0, tz = 0.0;
 float rxo = 0.0, ryo = 0.0, rzo = 0.0;
-float scaleo = 1.0;
+float scaleo = 2.0;
 
 struct Ponto
 {
@@ -624,23 +625,23 @@ void configura_phong()
     glm::vec3 luz_mundo = glm::vec3(15.0f, 10.0f, 10.0f);
     glm::vec4 luz_view = view * glm::vec4(luz_mundo, 1.0f);
     float luz_view_pos[3] = {luz_view.x, luz_view.y, luz_view.z};
-
-    // Phong comeca com luz em view-space e camera na origem
+    //float luz_view_pos[3] = {0.0f, 0.0f, 0.0f}; //POSICAO DA FONTE DE LUZ
+    //  Phong comeca com luz em view-space e camera na origem
     float camera_view_pos[3] = {0.0f, 0.0f, 0.0f};
 
     phong_cor.init(luz_view_pos, nullptr, camera_view_pos);
 
     // trasnformacoes do objeto
     glm::mat4 model_matrix = glm::mat4(1.0f);
-    model_matrix = glm::translate(model_matrix, glm::vec3(tx, ty, 0));
+    model_matrix = glm::translate(model_matrix, glm::vec3(tx, ty, tz));
     model_matrix = glm::rotate(model_matrix, glm::radians(rxo), glm::vec3(1, 0, 0));
     model_matrix = glm::rotate(model_matrix, glm::radians(ryo), glm::vec3(0, 1, 0));
     model_matrix = glm::rotate(model_matrix, glm::radians(rzo), glm::vec3(0, 0, 1));
-    model_matrix = glm::scale(model_matrix, glm::vec3(scaleo, scaleo, scaleo));
-
+    model_matrix = glm::scale(model_matrix, glm::vec3(scaleo , scaleo , scaleo ));
+    
     glm::mat4 m_cubo = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
-    glm::mat4 m_piramide = glm::translate(model_matrix, glm::vec3(4.0f, 4.0f, 4.0f));
-    glm::mat4 m_esf = glm::translate(model_matrix, glm::vec3(6.0f, 6.0f, 6.0f));
+    glm::mat4 m_piramide = glm::translate(model_matrix, glm::vec3(4.0f, 0.0f, 0.0f));
+    glm::mat4 m_esf = glm::translate(model_matrix, glm::vec3(-4.0f, 0.0f, 0.0f));
 
     // guarda as novas coords
     vector<vector<Vertices>> nw_coord_cubo, nw_coord_esf, nw_coords_pi;
@@ -684,6 +685,8 @@ void configura_phong()
     glPushMatrix();
     glLoadIdentity();
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     auto rasteriza = [&](auto &lista)
     {
         for (auto &face : lista)
@@ -890,8 +893,8 @@ void display_principal()
 
         // desenho dos objtos
         cubo.draw(0, 0, 0);
-        esfera.draw(4, 4, 4);
-        piramide.draw(6, 6, 6);
+        esfera.draw(-4.0f, 0.0f, 0.0f);
+        piramide.draw(4, 4, 0);
 
         // objeto pr=e-definifo
         glTranslatef(7, 1, 0);
@@ -926,22 +929,12 @@ void display_principal()
         glScalef(scaleo, scaleo, scaleo);
 
         cubo.draw(0, 0, 0);
-        esfera.draw(4, 4, 4);
-        piramide.draw(6, 6, 6);
+        esfera.draw(-4.0f, 0, 0);
+        piramide.draw(6, 0, 0);
         glPopMatrix();
         break;
 
     case PHONG:
-        glDisable(GL_LIGHTING);
-        glDisable(GL_COLOR_MATERIAL);
-        // TG
-        glPushMatrix();
-        glTranslatef(tx, ty, 0);
-        glRotatef(rxo, 1, 0, 0);
-        glRotatef(ryo, 0, 1, 0);
-        glRotatef(rzo, 0, 0, 1);
-        glScalef(scaleo, scaleo, scaleo);
-
         configura_phong();
 
         glPopMatrix();
@@ -1068,13 +1061,13 @@ int main(int argc, char **argv)
     luz2.set_intensidade(1.0f);
 
     // inicializo os objtos
-    cubo.init(5);           // tamanho 5
-    esfera.init(1, 20, 20); // raio = 10
-    piramide.init(2);       // tamanho 5
+    cubo.init(5);           // tamanho
+    esfera.init(2, 40, 40); // raio
+    piramide.init(2);       // tamanho
 
     // gerando as malhas
     malha_cubo = cubo.gera_malhas(5.0f);
-    malha_esfera = esfera.gera_malhas(1.0f, 20, 20);
+    malha_esfera = esfera.gera_malhas(2.0f, 40, 40);
     malha_piramide = piramide.gera_malhas();
 
     // leitura do teclado e setas
