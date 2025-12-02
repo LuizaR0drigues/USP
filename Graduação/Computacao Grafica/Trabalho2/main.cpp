@@ -622,11 +622,12 @@ void configura_phong()
 
     // conversao de luzes
     glm::vec3 luz_mundo = glm::vec3(15.0f, 10.0f, 10.0f);
-    glm::vec3 luz_view = view * glm::vec4(luz_mundo, 1.0f);
+    glm::vec4 luz_view = view * glm::vec4(luz_mundo, 1.0f);
     float luz_view_pos[3] = {luz_view.x, luz_view.y, luz_view.z};
 
     // Phong comeca com luz em view-space e camera na origem
     float camera_view_pos[3] = {0.0f, 0.0f, 0.0f};
+
     phong_cor.init(luz_view_pos, nullptr, camera_view_pos);
 
     // trasnformacoes do objeto
@@ -637,38 +638,41 @@ void configura_phong()
     model_matrix = glm::rotate(model_matrix, glm::radians(rzo), glm::vec3(0, 0, 1));
     model_matrix = glm::scale(model_matrix, glm::vec3(scaleo, scaleo, scaleo));
 
-    auto aplica_tg = [&](Vertices v)
-    {
-        glm::vec4 p = model_matrix * glm::vec4(v.x, v.y, v.z, 1.0f);
-        v.x = p.x;
-        v.y = p.y;
-        v.z = p.z;
-        return v;
-    };
+    glm::mat4 m_cubo = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
+    glm::mat4 m_piramide = glm::translate(model_matrix, glm::vec3(4.0f, 4.0f, 4.0f));
+    glm::mat4 m_esf = glm::translate(model_matrix, glm::vec3(6.0f, 6.0f, 6.0f));
 
-    
+    // guarda as novas coords
     vector<vector<Vertices>> nw_coord_cubo, nw_coord_esf, nw_coords_pi;
 
     // transforma para a atela
-    auto processa = [&](auto &malha, auto &saida)
+    auto processa = [&](auto &malha, auto &saida, glm::mat4 matriz_indi)
     {
         for (auto &face : malha)
         {
             vector<Vertices> aux;
             for (auto &v : face)
             {
-                Vertices v_ndc = (camera.transf_coord_tela(v, largura_atual, altura_atual, model_matrix));
+                // calcula a posicao da camera
+                glm::vec4 p_view = view * matriz_indi * glm::vec4(v.x, v.y, v.z, 1.0f);
+                // ássa para a tela
+                Vertices v_ndc = (camera.transf_coord_tela(v, largura_atual, altura_atual, matriz_indi));
                 Vertices v_pixel = camera.toPixel(v_ndc, largura_atual, altura_atual);
 
-                cout << "Y tela: " << v_pixel.y << endl;
+                // guarda a posicap view
+                v_pixel.vx = p_view.x;
+                v_pixel.vy = p_view.y;
+                v_pixel.vz = p_view.z;
+
+                // cout << "Y tela: " << v_pixel.y << endl;
                 aux.push_back(v_pixel);
             }
             saida.push_back(move(aux));
         }
     };
-    processa(malha_cubo, nw_coord_cubo);
-    processa(malha_piramide, nw_coords_pi);
-    processa(malha_esfera, nw_coord_esf);
+    processa(malha_cubo, nw_coord_cubo, m_cubo);
+    processa(malha_piramide, nw_coords_pi, m_piramide);
+    processa(malha_esfera, nw_coord_esf, m_esf);
 
     // loop de desenhp em 2D
     glMatrixMode(GL_PROJECTION);
@@ -687,7 +691,8 @@ void configura_phong()
             ET_phong *et = phong_cor.CriaET(face);
             if (!et || et->nroNiveis <= 0)
                 std::cout << "Face ignorada: ET vazio\n";
-            if (et )
+
+            if (et)
             {
                 phong_cor.scan_line(et, cor_atual, ka, kd, ks, cor_amb, cor_difusa, cor_espc);
                 delete[] et->lista;
@@ -695,7 +700,7 @@ void configura_phong()
             }
         }
     };
-    
+
     rasteriza(nw_coord_cubo);
     rasteriza(nw_coords_pi);
     rasteriza(nw_coord_esf);
@@ -1063,7 +1068,7 @@ int main(int argc, char **argv)
     luz2.set_intensidade(1.0f);
 
     // inicializo os objtos
-    cubo.init(5); // tamanho 5
+    cubo.init(5);           // tamanho 5
     esfera.init(1, 20, 20); // raio = 10
     piramide.init(2);       // tamanho 5
 
@@ -1071,7 +1076,7 @@ int main(int argc, char **argv)
     malha_cubo = cubo.gera_malhas(5.0f);
     malha_esfera = esfera.gera_malhas(1.0f, 20, 20);
     malha_piramide = piramide.gera_malhas();
-    
+
     // leitura do teclado e setas
     glutKeyboardFunc(callback_teclado);
     glutSpecialFunc(callback_teclasespeciais);

@@ -27,6 +27,9 @@ struct DadosET_phong
 
     Vertices nMin; //normal atual
     Vertices incN;
+
+    Vertices pViewMin;
+    Vertices incPView;
 };
 
 struct ET_phong

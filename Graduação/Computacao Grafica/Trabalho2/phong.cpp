@@ -29,17 +29,18 @@ void Phong::init(float *pos_luz, float *norms, float *pos_camera)
         this->posicao.nz = norms[2];
     }
     // posicao da camera
-    if(pos_camera != nullptr)
+    if (pos_camera != nullptr)
     {
         this->pos_cam.x = pos_camera[0];
         this->pos_cam.y = pos_camera[1];
         this->pos_cam.z = pos_camera[2];
     }
-    else{
+    else
+    {
         this->pos_cam.x = this->pos_cam.y = 0.0f;
         this->pos_cam.z = 1.0f;
     }
-    
+
     // inicialmente, branca
     this->cor_final.r = 1.0f;
     this->cor_final.g = 1.0f;
@@ -50,7 +51,7 @@ void Phong::OrdenaPorX(vector<DadosET_phong> *nivel)
     sort(nivel->begin(), nivel->end(),
          [](const DadosET_phong &a, const DadosET_phong &b)
          {
-             return a.zMin < b.zMin;
+             return a.xMin < b.xMin;
          });
 }
 
@@ -118,6 +119,16 @@ ET_phong *Phong::CriaET(vector<Vertices> vertices)
         float dny = ver2.ny - ver1.ny;
         float dnz = ver2.nz - ver1.nz;
 
+        // dados de interpolação
+        float dvx = ver2.vx - ver1.vx;
+        float dvy = ver2.vy - ver1.vy;
+        float dvz = ver2.vz - ver1.vz;
+
+        Vertices incView;
+        incView.vx = dvx / dy;
+        incView.vy = dvy / dy;
+        incView.vz = dvz / dy;
+
         Vertices incNorms;
         incNorms.x = dnx / dy;
         incNorms.y = dny / dy;
@@ -130,7 +141,11 @@ ET_phong *Phong::CriaET(vector<Vertices> vertices)
         novo_dado.IncX = incX;
         novo_dado.zMin = ver1.z;
         novo_dado.incZ = z_inc;
-
+        // inicializa com o vertice 1
+        novo_dado.pViewMin.x = ver1.vx;
+        novo_dado.pViewMin.y = ver1.vy;
+        novo_dado.pViewMin.z = ver1.vz;
+        novo_dado.incPView = incView;
         // normal inicial eh a do vertice de baixo
         novo_dado.nMin.x = ver1.nx;
         novo_dado.nMin.y = ver1.ny;
@@ -155,7 +170,7 @@ ET_phong *Phong::CriaET(vector<Vertices> vertices)
 void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, float ks, Cor_phong cor_amb, Cor_phong cor_difusa, Cor_phong cor_espc)
 {
     if (!listaET || listaET->nroNiveis <= 0 || listaET->lista == nullptr)
-    return;
+        return;
 
     // define cor
     glColor3f(cor.r, cor.g, cor.b);
@@ -184,6 +199,10 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
             listaAET[j].nMin.nx += listaAET[j].incN.nx;
             listaAET[j].nMin.ny += listaAET[j].incN.ny;
             listaAET[j].nMin.nz += listaAET[j].incN.nz;
+
+            listaAET[j].pViewMin.x += listaAET[j].incPView.vx;
+            listaAET[j].pViewMin.y += listaAET[j].incPView.vy;
+            listaAET[j].pViewMin.z += listaAET[j].incPView.vz;
         }
         // Move todos os dados do nível pra lista AET
         listaAET.insert(listaAET.end(),
@@ -194,7 +213,7 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
         // Reordena a lista
         OrdenaPorX(&listaAET);
 
-        for (int j = 0; j+1 <(int)listaAET.size(); j += 2)
+        for (int j = 0; j + 1 < (int)listaAET.size(); j += 2)
         {
             DadosET_phong esquerda = listaAET[j];
             DadosET_phong direita = listaAET[j + 1];
@@ -207,18 +226,27 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
             float dnx = direita.nMin.nx - esquerda.nMin.nx;
             float dny = direita.nMin.ny - esquerda.nMin.ny;
             float dnz = direita.nMin.nz - esquerda.nMin.nz;
+            float dvx = direita.pViewMin.x - esquerda.pViewMin.x;
+            float dvy = direita.pViewMin.y - esquerda.pViewMin.y;
+            float dvz = direita.pViewMin.z - esquerda.pViewMin.z;
 
             // incrementos horizontais
             float stepZ = dz / dx;
             float stepNx = dnx / dx;
             float stepNy = dny / dx;
             float stepNz = dnz / dx;
+            float stepVx = dvx / dx;
+            float stepVy = dvy / dx;
+            float stepVz = dvz / dx;
 
             // acumuladores
             float acu_Z = esquerda.zMin;
             float acu_Nx = esquerda.nMin.nx;
             float acu_Ny = esquerda.nMin.ny;
             float acu_Nz = esquerda.nMin.nz;
+            float acu_vx = esquerda.pViewMin.x;
+            float acu_vy = esquerda.pViewMin.y;
+            float acu_vz = esquerda.pViewMin.z;
 
             for (int x = (int)esquerda.xMin; x < (int)direita.xMin; x++)
             {
@@ -227,17 +255,17 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
                 glm::vec3 normalizado = glm::normalize(vetor_n);
 
                 // calculo da iluminacao (destino - origem)
-                float lx = posicao.x - x;
-                float ly = posicao.y - yNivel;
-                float lz = posicao.z - acu_Z;
+                float lx = posicao.x - acu_vx;
+                float ly = posicao.y - acu_vy;
+                float lz = posicao.z - acu_vz;
 
                 glm::vec3 luz = {lx, ly, lz};
                 glm::vec3 luz_norm = glm::normalize(luz);
 
                 // vetor visao/cam
-                float vx = pos_cam.x - x;
-                float vy = pos_cam.y - yNivel;
-                float vz = pos_cam.z - acu_Z;
+                float vx = 0.0f - acu_vx;
+                float vy = 0.0f - acu_vy;
+                float vz = 0.0f - acu_vz;
 
                 glm::vec3 cam = {vx, vy, vz};
                 glm::vec3 cam_norm = glm::normalize(cam);
@@ -265,18 +293,18 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
                 }
                 // euqações de luz
                 // componente do ambiente
-                float rfinal = ka * cor_amb.r;
-                float gfinal = ka * cor_amb.g;
-                float bfinal = ka * cor_amb.b;
+                float rfinal = ka * cor_amb.r * cor.r;
+                float gfinal = ka * cor_amb.g * cor.g;
+                float bfinal = ka * cor_amb.b * cor.b;
 
-                //componente difusa
-                rfinal += kd * fatorDifuso * cor_difusa.r;
-                gfinal += kd * fatorDifuso * cor_difusa.g;
-                bfinal += kd * fatorDifuso * cor_difusa.b;
+                // componente difusa
+                rfinal += kd * fatorDifuso * cor_difusa.r * cor.r;
+                gfinal += kd * fatorDifuso * cor_difusa.g * cor.g;
+                bfinal += kd * fatorDifuso * cor_difusa.b * cor.b;
                 // componente especular
-                rfinal += ks * fatorEspecular * cor_espc.r;
-                gfinal += ks * fatorEspecular * cor_espc.g;
-                bfinal += ks * fatorEspecular * cor_espc.b;
+                rfinal += ks * fatorEspecular * cor_espc.r ;
+                gfinal += ks * fatorEspecular * cor_espc.g ;
+                bfinal += ks * fatorEspecular * cor_espc.b ;
 
                 // limita entre 0 e 1
                 if (rfinal > 1.0f)
@@ -295,9 +323,11 @@ void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, floa
                 acu_Nx += stepNx;
                 acu_Ny += stepNy;
                 acu_Nz += stepNz;
+                acu_vx += stepVx;
+                acu_vy += stepVy;
+                acu_vz += stepVz;
             }
         }
     }
     glEnd();
 }
-
