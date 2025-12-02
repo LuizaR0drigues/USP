@@ -167,7 +167,7 @@ void Camera::aplica_paramtero()
               camera_up.x, camera_up.y, camera_up.z);         // define onde é "cima"
 }
 
-Vertices Camera::transf_coord_tela(const Vertices v, int largura, int altura){
+Vertices Camera::transf_coord_tela(const Vertices v, int largura, int altura, glm::mat4 model_matriz){
     Vertices saida;
 
     //Matriz View
@@ -203,7 +203,7 @@ Vertices Camera::transf_coord_tela(const Vertices v, int largura, int altura){
     glm::mat4 model(1.0f);
     glm::vec4 p_world(v.x, v.y, v.z, 1.0f);
     //transformação
-    glm::vec4 viewP=  view * model * p_world;
+    glm::vec4 viewP=  view * model_matriz * p_world;
     glm::vec4 corte = proj * viewP;
 
     if(corte.w != 0.0f){
@@ -217,7 +217,7 @@ Vertices Camera::transf_coord_tela(const Vertices v, int largura, int altura){
 
     glm::vec3 N(v.nx, v.ny, v.nz);
 
-    glm::mat3 normalMatriz = glm::transpose(glm::inverse(glm::mat3(view * model)));
+    glm::mat3 normalMatriz = glm::transpose(glm::inverse(glm::mat3(view * model_matriz)));
     glm::vec3 n2 = glm::normalize(normalMatriz * N);
 
     saida.nx = n2.x;

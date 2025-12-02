@@ -603,7 +603,6 @@ void recupera_dados(GLfloat *pos_obs, GLfloat *pos_fonte)
 
 void configura_phong()
 {
-
     glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
 
@@ -647,10 +646,7 @@ void configura_phong()
         return v;
     };
 
-    // gerando as malhas
-    malha_cubo = cubo.gera_malhas(5.0f);
-    malha_esfera = esfera.gera_malhas(1.0f, 20, 20);
-    malha_piramide = piramide.gera_malhas();
+    
     vector<vector<Vertices>> nw_coord_cubo, nw_coord_esf, nw_coords_pi;
 
     // transforma para a atela
@@ -661,8 +657,11 @@ void configura_phong()
             vector<Vertices> aux;
             for (auto &v : face)
             {
-                Vertices v_aux = aplica_tg(v);
-                aux.push_back(camera.transf_coord_tela(v_aux, largura_atual, altura_atual));
+                Vertices v_ndc = (camera.transf_coord_tela(v, largura_atual, altura_atual, model_matrix));
+                Vertices v_pixel = camera.toPixel(v_ndc, largura_atual, altura_atual);
+
+                cout << "Y tela: " << v_pixel.y << endl;
+                aux.push_back(v_pixel);
             }
             saida.push_back(move(aux));
         }
@@ -787,12 +786,14 @@ void processa_menu(int opcao)
 
     case GOURAUD:
         modo_atual = GOURAUD;
+        flag = LUZES;
         glEnable(GL_LIGHTING);
         glShadeModel(GL_SMOOTH);
         break;
     case FLAT:
         // pega a cor de um único vértice e pinta a face inteira com aquela cor sólida.
         modo_atual = FLAT;
+        flag = LUZES;
         glEnable(GL_LIGHTING);
         glShadeModel(GL_FLAT);
         break;
@@ -1063,10 +1064,14 @@ int main(int argc, char **argv)
 
     // inicializo os objtos
     cubo.init(5); // tamanho 5
-
     esfera.init(1, 20, 20); // raio = 10
     piramide.init(2);       // tamanho 5
 
+    // gerando as malhas
+    malha_cubo = cubo.gera_malhas(5.0f);
+    malha_esfera = esfera.gera_malhas(1.0f, 20, 20);
+    malha_piramide = piramide.gera_malhas();
+    
     // leitura do teclado e setas
     glutKeyboardFunc(callback_teclado);
     glutSpecialFunc(callback_teclasespeciais);

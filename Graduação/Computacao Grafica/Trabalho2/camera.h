@@ -20,7 +20,7 @@ class Camera{
     void teclas_especiais(int key, int x, int y);
     void processa_mouse(float window, float xpos, float ypos);
     void aplica_paramtero();
-    Vertices transf_coord_tela(const Vertices V, int largura, int altura);
+    Vertices transf_coord_tela(const Vertices V, int largura, int altura, glm::mat4 model_matriz);
     Vertices toPixel(const Vertices v, int largura, int altura);
     void setProejcao(bool NovoModo);
     glm::vec3 getCameraPosicao();
