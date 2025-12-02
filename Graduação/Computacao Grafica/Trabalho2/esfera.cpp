@@ -1,6 +1,9 @@
 #include "esfera.h"
 #include <iostream>
 #include <cmath>
+
+float pi = M_PI;
+
 Esfera::Esfera(){
     raio = 5.0f;
     fatias = 20;
@@ -18,7 +21,7 @@ void Esfera::draw(float xe, float ye, float ze){
     glPushMatrix();
     glTranslatef(xe,ye,ze);
 
-    float pi = M_PI;
+    
     
     for (int i = 0; i< stacks; i++){
         //latitudes da esfera
@@ -51,4 +54,76 @@ void Esfera::draw(float xe, float ye, float ze){
     }
 
     glPopMatrix();
+}
+
+vector<vector<Vertices>> Esfera::gera_malhas(float raio, int stacks, int slices) {
+    vector<vector<Vertices>> todas_faces;
+
+    for (int i = 0; i< stacks; i++){
+        //latitudes da esfera
+        float lat0 = pi * (-0.5f + ((float) i)/stacks );
+        float z0 = sin(lat0);
+        float zr0 = cos(lat0);
+
+        float lat1 = pi * (-0.5f + ((float) (i+1))/stacks );
+        float z1 = sin(lat1);
+        float zr1 = cos(lat1);
+
+        //desenhando a fatia
+        for(int j =0; j< fatias+1; j++)
+        {
+            float long0 = 2*pi * (float)(j) /fatias;
+            float long1 = 2*pi * (float)(j+1) /fatias;
+
+            float x0 = cos(long0);
+            float y0 = sin(long0);
+
+            float x1 = cos(long1);
+            float y1 = sin(long1);
+            vector<Vertices> quad;
+            Vertices v;
+
+            //vertice1
+            v.nx = x0 * zr0;
+            v.ny = y0 * zr0;
+            v.nz = z0;
+            v.x = v.nx * raio;
+            v.y = v.y * raio;
+            v.z = v.z * raio;
+            quad.push_back(v);
+
+            //vertice 2
+            v.nx = x1 * zr0;
+            v.ny = y1 * zr0;
+            v.nz = z0;
+            v.x = v.nx * raio;
+            v.y = v.y * raio;
+            v.z = v.z * raio;
+            quad.push_back(v);
+
+            //vertice 3
+            v.nx = x1 * zr1; 
+            v.ny = y1 * zr1; 
+            v.nz = z1;
+            v.x = v.nx * raio; 
+            v.y = v.ny * raio; 
+            v.z = v.nz * raio;
+            quad.push_back(v);
+
+            //vertice 4
+            v.nx = x0 * zr1; 
+            v.ny = y0 * zr1; 
+            v.nz = z1;
+            v.x = v.nx * raio; 
+            v.y = v.ny * raio; 
+            v.z = v.nz * raio;
+            quad.push_back(v);
+
+            todas_faces.push_back(quad);
+            
+
+        }
+        
+    }
+    return todas_faces;
 }

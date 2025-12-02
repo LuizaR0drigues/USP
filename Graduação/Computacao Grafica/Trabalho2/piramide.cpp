@@ -1,6 +1,5 @@
 #include "piramide.h"
 #include <iostream>
-#include <cmath>
 
 Piramide::Piramide() {}
 
@@ -55,6 +54,54 @@ void Piramide::calcula_normal(GLfloat *v1, GLfloat *v2, GLfloat *v3, GLfloat *sa
         saida[2] /= len;
     }
 }
+void Piramide::calcNormalFace(Vertices v1, Vertices v2, Vertices v3, float& nx, float& ny, float& nz) {
+    // Vetores U (v2 - v1) e V (v3 - v1)
+    float ux = v2.x - v1.x; float uy = v2.y - v1.y; float uz = v2.z - v1.z;
+    float vx = v3.x - v1.x; float vy = v3.y - v1.y; float vz = v3.z - v1.z;
+
+    // Produto Vetorial
+    nx = (uy * vz) - (uz * vy);
+    ny = (uz * vx) - (ux * vz);
+    nz = (ux * vy) - (uy * vx);
+
+    // Normalização
+    float len = sqrt(nx * nx + ny * ny + nz * nz);
+    if (len > 0.0f) { nx /= len; ny /= len; nz /= len; }
+}
+ vector<vector<Vertices>> Piramide::gera_malhas(float t, float altura){
+    vector<vector<Vertices>> todas_faces;
+    Vertices v0, v1, v2;
+    vector<Vertices> face_atual;
+    for(int i=0; i<4; i++){
+
+        int idx0 = faces[i][0];
+        int idx1 = faces[i][1];
+        int idx2 = faces[i][2];
+
+        v0.x = vertices[idx0][0];
+        v0.y = vertices[idx0][1];
+        v0.z = vertices[idx0][2];
+
+        v1.x = vertices[idx1][0];
+        v1.y = vertices[idx1][1];
+        v1.z = vertices[idx1][2];
+
+        v2.x = vertices[idx2][0];
+        v2.y = vertices[idx2][1];
+        v2.z = vertices[idx2][2];
+
+        float nx, ny, nz;
+        calcNormalFace(v0, v1, v2, nx, ny, nz);
+
+        face_atual.push_back({v0.x, v0.y, v0.z, nx, ny, nz});
+        face_atual.push_back({v1.x, v1.y, v1.z, nx, ny, nz});
+        face_atual.push_back({v2.x, v2.y, v2.z, nx, ny, nz});
+        todas_faces.push_back(face_atual);
+        
+    }
+    return todas_faces;
+
+ }
 
 void Piramide::draw(float x, float y, float z)
 {
@@ -78,6 +125,7 @@ void Piramide::draw(float x, float y, float z)
 
         GLfloat normal[3];
         calcula_normal(v0, v1, v2, normal);
+
         //realiza o desenho, cor e normal
         glNormal3fv(normal);
         glColor3fv(colors[i]);

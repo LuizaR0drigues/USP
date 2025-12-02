@@ -1,9 +1,11 @@
 #ifndef CUBO_H
 #define CUBO_H
 
+#include "phong.h"
+#include <vector>
 #include "include/glad/glad.h"
 #include <GL/freeglut.h>
-
+using namespace std;
 class Cubo
 {
 
@@ -12,6 +14,7 @@ public:
    
     void init(int tam); //inicializa
     void draw(float x, float y, float z); //desenha na tela
+    vector<vector<Vertices>> gera_malhas(float tamanho);
 
 private:
 

@@ -3,7 +3,10 @@
 
 #include "include/glad/glad.h"
 #include <GL/freeglut.h>
+#include <vector>
+#include "phong.h"
 
+using namespace std;
 
 class Esfera
 {
@@ -13,6 +16,7 @@ public:
    
     void init(float raio, int fatias, int stacks); //inicializa
     void draw(float x, float y, float z); //desenha na tela
+    vector<vector<Vertices>> gera_malhas(float raio, int fatias, int stacks);
 
 private:
 

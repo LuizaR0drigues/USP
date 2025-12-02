@@ -69,7 +69,57 @@ void Cubo::init(int tam)
    
     
 }
+//funcao que vai auxiliar no metodo de phong
+vector<vector<Vertices>> Cubo::gera_malhas(float tamanho){
+    
+    vector<vector<Vertices>> todasFaces;
+    float t = tamanho / 2.0f; // 't' é a distância do centro até a borda
 
+    vector<Vertices> frente;
+    frente.push_back({ -t, -t,  t,   0.0f, 0.0f, 1.0f }); // Inferior Esq
+    frente.push_back({  t, -t,  t,   0.0f, 0.0f, 1.0f }); // Inferior Dir
+    frente.push_back({  t,  t,  t,   0.0f, 0.0f, 1.0f }); // Superior Dir
+    frente.push_back({ -t,  t,  t,   0.0f, 0.0f, 1.0f }); // Superior Esq
+    todasFaces.push_back(frente);
+
+    vector<Vertices> direita;
+    direita.push_back({  t, -t,  t,   1.0f, 0.0f, 0.0f }); // Frente Baixo
+    direita.push_back({  t, -t, -t,   1.0f, 0.0f, 0.0f }); // Tras Baixo
+    direita.push_back({  t,  t, -t,   1.0f, 0.0f, 0.0f }); // Tras Cima
+    direita.push_back({  t,  t,  t,   1.0f, 0.0f, 0.0f }); // Frente Cima
+    todasFaces.push_back(direita);
+
+    vector<Vertices> tras;
+    tras.push_back({  t, -t, -t,   0.0f, 0.0f, -1.0f }); // Inferior Dir (visto de tras)
+    tras.push_back({ -t, -t, -t,   0.0f, 0.0f, -1.0f }); // Inferior Esq
+    tras.push_back({ -t,  t, -t,   0.0f, 0.0f, -1.0f }); // Superior Esq
+    tras.push_back({  t,  t, -t,   0.0f, 0.0f, -1.0f }); // Superior Dir
+    todasFaces.push_back(tras);
+
+    vector<Vertices> esquerda;
+    esquerda.push_back({ -t, -t, -t,  -1.0f, 0.0f, 0.0f }); // Tras Baixo
+    esquerda.push_back({ -t, -t,  t,  -1.0f, 0.0f, 0.0f }); // Frente Baixo
+    esquerda.push_back({ -t,  t,  t,  -1.0f, 0.0f, 0.0f }); // Frente Cima
+    esquerda.push_back({ -t,  t, -t,  -1.0f, 0.0f, 0.0f }); // Tras Cima
+    todasFaces.push_back(esquerda);
+
+    vector<Vertices> topo;
+    topo.push_back({ -t,  t,  t,   0.0f, 1.0f, 0.0f }); // Frente Esq
+    topo.push_back({  t,  t,  t,   0.0f, 1.0f, 0.0f }); // Frente Dir
+    topo.push_back({  t,  t, -t,   0.0f, 1.0f, 0.0f }); // Tras Dir
+    topo.push_back({ -t,  t, -t,   0.0f, 1.0f, 0.0f }); // Tras Esq
+    todasFaces.push_back(topo);
+
+    vector<Vertices> base;
+    base.push_back({ -t, -t, -t,   0.0f, -1.0f, 0.0f }); // Tras Esq
+    base.push_back({  t, -t, -t,   0.0f, -1.0f, 0.0f }); // Tras Dir
+    base.push_back({  t, -t,  t,   0.0f, -1.0f, 0.0f }); // Frente Dir
+    base.push_back({ -t, -t,  t,   0.0f, -1.0f, 0.0f }); // Frente Esq
+    todasFaces.push_back(base);
+
+    return todasFaces;
+
+}
 void Cubo::draw(float x, float y, float z)
 {
     glPushMatrix();
