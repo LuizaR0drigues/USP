@@ -21,6 +21,7 @@
 #include "piramide.h"
 #include "iluminacao.h"
 #include "camera.h"//camera
+#include "phong.h"
 using namespace std;
 
 #define MODO_ORTO false
@@ -30,6 +31,7 @@ Camera camera;
 Luz luz0;//direcional
 Luz luz1; //pontual
 Luz luz2; //spot
+Phong phong_cor;
 //objetos 3d
 Cubo cubo;
 Esfera esfera;
@@ -676,7 +678,7 @@ void processa_menu(int opcao)
         glShadeModel(GL_FLAT);
         break;
     case PHONG:
-        
+        phong_cor.init();
         break;
     case LIMPAR_TELA:
         g_vertices.clear();

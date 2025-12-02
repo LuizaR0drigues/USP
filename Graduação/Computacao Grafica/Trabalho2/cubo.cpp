@@ -79,10 +79,10 @@ void Cubo::draw(float x, float y, float z)
     for (int i = 0; i < 6; i++)
     {
         glColor3fv(colors[i]); // define a cor por face
+        glNormal3fv(normais[i]);//normal por face
         for (int j = 0; j < 4; j++)
         { // realiza o desenho das 4 vertices de cada face
             int vertexIdx = faces[i][j];
-            glNormal3fv(normais[vertexIdx]);
             glVertex3fv(vertices[vertexIdx]);
         }
     }

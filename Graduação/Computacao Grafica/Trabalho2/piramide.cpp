@@ -77,7 +77,7 @@ void Piramide::draw(float x, float y, float z)
         float* v2 = vertices[Idx2];
 
         GLfloat normal[3];
-        calcula_normal(v0, v1, v2, nromal);
+        calcula_normal(v0, v1, v2, normal);
         //realiza o desenho, cor e normal
         glNormal3fv(normal);
         glColor3fv(colors[i]);
