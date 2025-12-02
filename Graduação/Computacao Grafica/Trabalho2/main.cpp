@@ -15,39 +15,44 @@
 
 #include "include/glad/glad.h"
 #include <GL/freeglut.h>
-//objetos3d
+// objetos3d
 #include "cubo.h"
 #include "esfera.h"
 #include "piramide.h"
 #include "iluminacao.h"
-#include "camera.h"//camera
+#include "vertices.h"
+#include "camera.h" //camera
 #include "phong.h"
 using namespace std;
 
 #define MODO_ORTO false
 #define MODO_PERSPEC true
-//objetos e Camera 
+// objetos e Camera
 Camera camera;
-Luz luz0;//direcional
-Luz luz1; //pontual
-Luz luz2; //spot
+Luz luz0; // direcional
+Luz luz1; // pontual
+Luz luz2; // spot
 Phong phong_cor;
-//objetos 3d
+// objetos 3d
 Cubo cubo;
 Esfera esfera;
 Piramide piramide;
-
+vector<vector<Vertices>> malha_cubo, malha_esfera, malha_piramide;
 // variaveis de cor e linha
 float cor_R = 1.0f, cor_G = 1.0f, cor_B = 1.0f;
 float tamanho_linha = 1.0f;
 
 // variaves pra definir a janela
-const int WINDOW_W =  800,  WINDOW_H = 400;
+const int WINDOW_W = 800, WINDOW_H = 400;
 const float ORTHO_MIN_X = -400, ORTHO_MAX_X = 400;
 const float ORTHO_MIN_Y = -200, ORTHO_MAX_Y = 200;
 int largura_atual = WINDOW_W;
 int altura_atual = WINDOW_H;
 
+// fatores de iluminação
+float ka = 0.5f;
+float kd = 0.8f;
+float ks = 1.0f;
 // Transformações Geomtericas NO OBJETO 3D
 float tx = 0.0, ty = 0.0, tz = 0.0;
 float rxo = 0.0, ryo = 0.0, rzo = 0.0;
@@ -536,13 +541,14 @@ void extrusao_poligonos()
     glEnd();
 }
 
-void reshape(int w, int h){
+void reshape(int w, int h)
+{
     largura_atual = w;
     altura_atual = h;
-    //atualiza
-    glViewport(0,0, w, h);
+    // atualiza
+    glViewport(0, 0, w, h);
 
-    //atualiza a projecao
+    // atualiza a projecao
     camera.modo_projecao(w, h);
 }
 
@@ -563,33 +569,143 @@ enum menu_opcoes
     LINHA_GROSSA,
     LIMPAR_TELA,
     SAIR,
-    Orto ,
-    Perspec ,
+    Orto,
+    Perspec,
     VER_OBJT_3D,
     VER_OBJT_2D,
     VER_EXTRUSAO,
-    MD_EXTRUSAO, //extrusao
-    MD_DESENHO,//trabalho 1
-    MD_OBJT,//objetos 3d
+    MD_EXTRUSAO, // extrusao
+    MD_DESENHO,  // trabalho 1
+    MD_OBJT,     // objetos 3d
     GOURAUD,
     FLAT,
-    PHONG
+    PHONG,
+    LUZES,
+    ESCURO
 };
 menu_opcoes modo_atual = MD_DESENHO;
- 
-void recupera_dados(GLfloat* pos_obs, GLfloat* pos_fonte){
-    
-    for(int i=0; i<3; i++){
+menu_opcoes flag = ESCURO;
+void recupera_dados(GLfloat *pos_obs, GLfloat *pos_fonte)
+{
+
+    for (int i = 0; i < 3; i++)
+    {
         cout << "Digite a posicao do observador(x, y, z): " << endl;
         cin >> pos_obs[i];
-        
     }
 
-    for(int i=0; i<3; i++){
+    for (int i = 0; i < 3; i++)
+    {
         cout << "Digite a posicao da FOnte de Luz(x, y, z): " << endl;
         cin >> pos_fonte[i];
-        
     }
+}
+
+void configura_phong()
+{
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+
+    Cor_phong cor_atual = {1.0f, 0.0f, 0.0f};
+    // Cor_phong cor_base = {1.0f, 0.0f, 0.0f};   // Objeto Vermelho
+    Cor_phong cor_amb = {0.2f, 0.2f, 0.2f};    // Luz Ambiente (Cinza escuro)
+    Cor_phong cor_difusa = {1.0f, 1.0f, 1.0f}; // Luz Difusa (Branca)
+    Cor_phong cor_espc = {1.0f, 1.0f, 1.0f};   // Luz Especular (Brilho Branco)
+
+    // matrizes da camera
+    glm::vec3 cam_posi = camera.getCameraPosicao();
+    glm::vec3 cam_front = camera.getCameraFronte();
+    glm::vec3 cam_up = camera.getCameraUP();
+
+    glm::vec3 alvo = cam_posi + cam_front;
+    glm::mat4 view = glm::lookAt(cam_posi, alvo, cam_up);
+
+    // conversao de luzes
+    glm::vec3 luz_mundo = glm::vec3(15.0f, 10.0f, 10.0f);
+    glm::vec3 luz_view = view * glm::vec4(luz_mundo, 1.0f);
+    float luz_view_pos[3] = {luz_view.x, luz_view.y, luz_view.z};
+
+    // Phong comeca com luz em view-space e camera na origem
+    float camera_view_pos[3] = {0.0f, 0.0f, 0.0f};
+    phong_cor.init(luz_view_pos, nullptr, camera_view_pos);
+
+    // trasnformacoes do objeto
+    glm::mat4 model_matrix = glm::mat4(1.0f);
+    model_matrix = glm::translate(model_matrix, glm::vec3(tx, ty, 0));
+    model_matrix = glm::rotate(model_matrix, glm::radians(rxo), glm::vec3(1, 0, 0));
+    model_matrix = glm::rotate(model_matrix, glm::radians(ryo), glm::vec3(0, 1, 0));
+    model_matrix = glm::rotate(model_matrix, glm::radians(rzo), glm::vec3(0, 0, 1));
+    model_matrix = glm::scale(model_matrix, glm::vec3(scaleo, scaleo, scaleo));
+
+    auto aplica_tg = [&](Vertices v)
+    {
+        glm::vec4 p = model_matrix * glm::vec4(v.x, v.y, v.z, 1.0f);
+        v.x = p.x;
+        v.y = p.y;
+        v.z = p.z;
+        return v;
+    };
+
+    // gerando as malhas
+    malha_cubo = cubo.gera_malhas(5.0f);
+    malha_esfera = esfera.gera_malhas(1.0f, 20, 20);
+    malha_piramide = piramide.gera_malhas();
+    vector<vector<Vertices>> nw_coord_cubo, nw_coord_esf, nw_coords_pi;
+
+    // transforma para a atela
+    auto processa = [&](auto &malha, auto &saida)
+    {
+        for (auto &face : malha)
+        {
+            vector<Vertices> aux;
+            for (auto &v : face)
+            {
+                Vertices v_aux = aplica_tg(v);
+                aux.push_back(camera.transf_coord_tela(v_aux, largura_atual, altura_atual));
+            }
+            saida.push_back(move(aux));
+        }
+    };
+    processa(malha_cubo, nw_coord_cubo);
+    processa(malha_piramide, nw_coords_pi);
+    processa(malha_esfera, nw_coord_esf);
+
+    // loop de desenhp em 2D
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0.0, largura_atual, 0.0, altura_atual, -1.0, 1.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    auto rasteriza = [&](auto &lista)
+    {
+        for (auto &face : lista)
+        {
+            ET_phong *et = phong_cor.CriaET(face);
+            if (!et || et->nroNiveis <= 0)
+                std::cout << "Face ignorada: ET vazio\n";
+            if (et )
+            {
+                phong_cor.scan_line(et, cor_atual, ka, kd, ks, cor_amb, cor_difusa, cor_espc);
+                delete[] et->lista;
+                delete et;
+            }
+        }
+    };
+    
+    rasteriza(nw_coord_cubo);
+    rasteriza(nw_coords_pi);
+    rasteriza(nw_coord_esf);
+
+    // Restaura matrizes
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
 }
 void processa_menu(int opcao)
 {
@@ -637,7 +753,7 @@ void processa_menu(int opcao)
     case CONTORNO_AMARELO:
         cor_contorno = {1.0f, 1.0f, 0.0f};
         break;
-    
+
     // opcoes de linha
     case LINHA_FINA:
         tamanho_linha = 1.0f;
@@ -648,19 +764,19 @@ void processa_menu(int opcao)
     case LINHA_GROSSA:
         tamanho_linha = 5.0f;
         break;
-    //modos de projecao 
+    // modos de projecao
     case Orto:
         camera.setProejcao(MODO_ORTO);
         camera.modo_projecao(largura_atual, altura_atual);
-        
+
         break;
     case Perspec:
         camera.setProejcao(MODO_PERSPEC);
         camera.modo_projecao(largura_atual, altura_atual);
         break;
-    
+
     case VER_EXTRUSAO:
-        modo_atual= MD_EXTRUSAO;
+        modo_atual = MD_EXTRUSAO;
         break;
     case VER_OBJT_2D:
         modo_atual = MD_DESENHO;
@@ -670,15 +786,21 @@ void processa_menu(int opcao)
         break;
 
     case GOURAUD:
-        //calcula a cor em cada vértice e interpola (mistura) os pixels no meio
+        modo_atual = GOURAUD;
+        glEnable(GL_LIGHTING);
         glShadeModel(GL_SMOOTH);
         break;
     case FLAT:
-        //pega a cor de um único vértice e pinta a face inteira com aquela cor sólida.
+        // pega a cor de um único vértice e pinta a face inteira com aquela cor sólida.
+        modo_atual = FLAT;
+        glEnable(GL_LIGHTING);
         glShadeModel(GL_FLAT);
         break;
     case PHONG:
-        phong_cor.init();
+        modo_atual = PHONG;
+        break;
+    case LUZES:
+        flag = LUZES;
         break;
     case LIMPAR_TELA:
         g_vertices.clear();
@@ -690,87 +812,133 @@ void processa_menu(int opcao)
     // redesenha a tela
     glutPostRedisplay();
 }
+void controla_luzes(menu_opcoes flag)
+{
+    if (flag == LUZES)
+    {
+        // liga
+        glEnable(GL_LIGHTING);
+        glEnable(GL_COLOR_MATERIAL);
+        glColorMaterial(GL_FRONT, GL_DIFFUSE);
+        // desenhando as luzes
+        luz0.ligar();
+        luz1.ligar();
+        luz2.ligar();
 
+        luz0.desenha();
+        luz1.desenha();
+        luz2.desenha();
 
-void display_principal(){
+        luz0.atualizar();
+        luz1.atualizar();
+        luz2.atualizar();
+    }
+    else
+    {
+        glDisable(GL_LIGHTING);
+        luz0.desligar();
+        luz1.desligar();
+        luz2.desligar();
+    }
+}
+void display_principal()
+{
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
     glLoadIdentity();
 
     GLfloat cor_amb[3] = {0.5, 0.5, 0.5};
-    GLfloat pos[3] = {0,10,0};
-    GLfloat cor_luz[3] = {1.0f, 1.0f,1.0f};
-    GLfloat pos_spot[3] = {0,5,15};
-    GLfloat direcao_spot[3] = {1,-0.2, -1};
-    GLfloat cor_spot[3] = {0.5f, 0.0f,0.5f};
-    if(modo_atual == MD_DESENHO)
-    {   
-        //modo 2D
+    GLfloat pos[3] = {0, 10, 0};
+    GLfloat cor_luz[3] = {1.0f, 1.0f, 1.0f};
+    GLfloat pos_spot[3] = {0, 5, 15};
+    GLfloat direcao_spot[3] = {1, -0.2, -1};
+    GLfloat cor_spot[3] = {0.5f, 0.0f, 0.5f};
+    if (modo_atual == MD_DESENHO)
+    {
+        // modo 2D
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
 
-        glOrtho(ORTHO_MIN_X, ORTHO_MAX_X, ORTHO_MIN_Y, ORTHO_MAX_Y, -1.0,1.0);
+        glOrtho(ORTHO_MIN_X, ORTHO_MAX_X, ORTHO_MIN_Y, ORTHO_MAX_Y, -1.0, 1.0);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
     }
-    else{
-        //parametros 3d 
+    else
+    {
+        // parametros 3d
         camera.modo_projecao(largura_atual, altura_atual);
         camera.aplica_paramtero();
+        // controla_luzes(flag);
     }
 
     switch (modo_atual)
     {
     case MD_OBJT:
-        //ILUMINAÇÂO
-        //modo iluminação
-        glEnable(GL_LIGHTING);//ativa o modo iluminação
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_COLOR_MATERIAL);
-        glColorMaterial(GL_FRONT, GL_DIFFUSE);
-
-        //desenhando as luzes
-        luz0.atualizar(); 
-        luz0.desenha();  
-
-        luz1.atualizar();
-        luz1.desenha(); 
-
-        luz2.atualizar();
-        luz2.desenha();
-        //TG nos objtos
+        // TG nos objtos
         glPushMatrix();
         glTranslatef(tx, ty, 0);
-        glRotatef(rxo, 1,0,0);
-        glRotatef(ryo, 0,1, 0);
-        glRotatef(rzo, 0,0, 1);
+        glRotatef(rxo, 1, 0, 0);
+        glRotatef(ryo, 0, 1, 0);
+        glRotatef(rzo, 0, 0, 1);
         glScalef(scaleo, scaleo, scaleo);
 
-        //desenho dos objtos
-        cubo.draw(0,0,0);
-        esfera.draw(4,4,4);
-        piramide.draw(6,6,6);
-        
-        //objeto pr=e-definifo
+        // desenho dos objtos
+        cubo.draw(0, 0, 0);
+        esfera.draw(4, 4, 4);
+        piramide.draw(6, 6, 6);
+
+        // objeto pr=e-definifo
         glTranslatef(7, 1, 0);
         glutSolidCylinder(2, 2, 20, 20);
         glPopMatrix();
         break;
     case MD_EXTRUSAO:
-        
-        if(g_vertices.size() >= 3){
+
+        if (g_vertices.size() >= 3)
+        {
             glPushMatrix();
             float scale_objt = scaleo * 0.005f;
-            //TG nos objtos
+            // TG nos objtos
             glTranslatef(tx, ty, 0);
-            glRotatef(rxo, 1,0,0);
-            glRotatef(ryo, 0,1, 0);
-            glRotatef(rzo, 0,0, 1);
+            glRotatef(rxo, 1, 0, 0);
+            glRotatef(ryo, 0, 1, 0);
+            glRotatef(rzo, 0, 0, 1);
             glScalef(scale_objt, scale_objt, scale_objt);
 
             extrusao_poligonos();
             glPopMatrix();
         }
+        break;
+    case FLAT:
+    case GOURAUD:
+        controla_luzes(flag); // liga luzes normais
+        glPushMatrix();
+        glTranslatef(tx, ty, 0);
+        glRotatef(rxo, 1, 0, 0);
+        glRotatef(ryo, 0, 1, 0);
+        glRotatef(rzo, 0, 0, 1);
+        glScalef(scaleo, scaleo, scaleo);
+
+        cubo.draw(0, 0, 0);
+        esfera.draw(4, 4, 4);
+        piramide.draw(6, 6, 6);
+        glPopMatrix();
+        break;
+
+    case PHONG:
+        glDisable(GL_LIGHTING);
+        glDisable(GL_COLOR_MATERIAL);
+        // TG
+        glPushMatrix();
+        glTranslatef(tx, ty, 0);
+        glRotatef(rxo, 1, 0, 0);
+        glRotatef(ryo, 0, 1, 0);
+        glRotatef(rzo, 0, 0, 1);
+        glScalef(scaleo, scaleo, scaleo);
+
+        configura_phong();
+
+        glPopMatrix();
         break;
     case MD_DESENHO:
         display();
@@ -780,64 +948,77 @@ void display_principal(){
     glutSwapBuffers();
 }
 
-void callback_teclasespeciais(int key, int x, int y){
-    
+void callback_teclasespeciais(int key, int x, int y)
+{
+
     camera.teclas_especiais(key, x, y);
-    
 }
 
-void callback_teclado(unsigned char key, int x, int y){
-    //teclas que controlam a camera
-    if (key == 'w' || key == 'W' || 
-        key == 's' || key == 'S' || 
-        key == 'a' || key == 'A' || 
+void callback_teclado(unsigned char key, int x, int y)
+{
+    // teclas que controlam a camera
+    if (key == 'w' || key == 'W' ||
+        key == 's' || key == 'S' ||
+        key == 'a' || key == 'A' ||
         key == 'd' || key == 'D' ||
         key == '+' || key == '-')
     {
         camera.teclado(key, x, y);
     }
-    //teclas que controlam os objetos 
+    // teclas que controlam os objetos
     float step = 0.1;
     // Rotação zxcvrf
     switch (key)
     {
-    case 'z': case 'Z':
+    case 'z':
+    case 'Z':
         rxo += 5;
         break;
-    case 'x': case 'X':
+    case 'x':
+    case 'X':
         rxo -= 5;
         break;
-    case 'c':case 'C':
+    case 'c':
+    case 'C':
         ryo += 5;
         break;
-    case 'v':case 'V':
+    case 'v':
+    case 'V':
         ryo -= 5;
         break;
-    case 'f': case 'F':
+    case 'f':
+    case 'F':
         rzo += 5;
         break;
-    case 'r': case 'R':
+    case 'r':
+    case 'R':
         rzo -= 5;
         break;
 
-    //translação
-    case 'g':case 'G':
+    // translação
+    case 'g':
+    case 'G':
         ty += step;
         break;
-    case 'h': case 'H':
+    case 'h':
+    case 'H':
         ty -= step;
         break;
-    case 'j': case 'J':
+    case 'j':
+    case 'J':
         tx -= step;
         break;
-    case 'k': case 'K':
+    case 'k':
+    case 'K':
         tx += step;
         break;
-    //zoom bn
-    case 'b': case 'B':
+    // zoom bn
+    case 'b':
+    case 'B':
         scaleo += 0.1f;
         break;
-    case 'n':case 'N':
+    case 'n':
+    case 'N':
         if (scaleo > 0.2f)
             scaleo -= 0.1f;
         break;
@@ -846,77 +1027,72 @@ void callback_teclado(unsigned char key, int x, int y){
 }
 int main(int argc, char **argv)
 {
-    
+
     glutInit(&argc, argv);
     glutInitWindowSize(WINDOW_W, WINDOW_H);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutCreateWindow("Poligonos 3D");
-    
-    
+
     if (!gladLoadGLLoader((GLADloadproc)glutGetProcAddress))
     {
         cout << "Erro ao carregar GLAD" << endl;
         return -1;
     }
-    //habilitações globais
+    // habilitações globais
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_NORMALIZE);//lida com a normalização apesar do tamanho do objetos
+    glEnable(GL_NORMALIZE); // lida com a normalização apesar do tamanho do objetos
 
-    //Configuração inicial da camera
+    // Configuração inicial da camera
     camera.init(WINDOW_W, WINDOW_H, Perspec);
-    
-    luz0.init(GL_LIGHT0, DIRECIONAL);//sol
+    luz0.init(GL_LIGHT0, DIRECIONAL); // sol
     luz0.set_posicao(15.0f, 10.0f, 10.0f);
     luz0.set_cor(1.0f, 0.95f, 0.8f);
-    luz0.set_intensidade(0.8f); 
-    luz0.ligar();
+    luz0.set_intensidade(0.8f);
 
-    luz1.init(GL_LIGHT1, PONTUAL);//luz azul
+    luz1.init(GL_LIGHT1, PONTUAL); // luz azul
     luz1.set_posicao(-10.0f, 10.0f, 0.0f);
     luz1.set_cor(0.2f, 0.2f, 1.0f);
     luz1.set_intensidade(0.6f);
-    luz1.ligar();
 
-    luz2.init(GL_LIGHT2, SPOT);//luz magenta
+    luz2.init(GL_LIGHT2, SPOT); // luz magenta
     luz2.set_posicao(1.0f, 7.0f, 0.0f);
-    luz2.set_cor(1.0f, 0.0f, 1.0f); 
-    luz2.set_direcao(0.0f, -1.0f, 0.0f); //aponta para baixo
+    luz2.set_cor(1.0f, 0.0f, 1.0f);
+    luz2.set_direcao(0.0f, -1.0f, 0.0f);
     luz2.set_Spot_configuracao(25.0f, 2.0f);
     luz2.set_intensidade(1.0f);
-    luz2.ligar();
 
-    //inicializo os objtos
-    cubo.init(5);//tamanho 5
-    esfera.init(1, 20, 20); //raio = 10
-    piramide.init(2); //tamanho 5
+    // inicializo os objtos
+    cubo.init(5); // tamanho 5
 
-    
+    esfera.init(1, 20, 20); // raio = 10
+    piramide.init(2);       // tamanho 5
+
     // leitura do teclado e setas
     glutKeyboardFunc(callback_teclado);
     glutSpecialFunc(callback_teclasespeciais);
-    
-    //menu de desenho 
-    //cores
+
+    // menu de desenho
+    // cores
     int subCor = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Vermelho", COR_VERM);
     glutAddMenuEntry("Verde", COR_VERD);
     glutAddMenuEntry("Azul", COR_AZUL);
     glutAddMenuEntry("Amatelo", COR_AMARELO);
     glutAddMenuEntry("Branco", COR_BRANCA);
-    //contorno
+    // contorno
     int subContorno = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Vermelho", CONTORNO_VERM);
     glutAddMenuEntry("Verde", CONTORNO_VERD);
     glutAddMenuEntry("Azul", CONTORNO_AZUL);
     glutAddMenuEntry("Amatelo", CONTORNO_AMARELO);
     glutAddMenuEntry("Branco", CONTORNO_BRANCA);
-    //linhas
+    // linhas
     int subLinha = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Fina", LINHA_FINA);
     glutAddMenuEntry("Media", LINHA_MED);
     glutAddMenuEntry("Grossa", LINHA_GROSSA);
 
-    //Menu que lida com as porjeções
+    // Menu que lida com as porjeções
     int subProjec = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Orto", Orto);
     glutAddMenuEntry("Perspec", Perspec);
@@ -925,20 +1101,25 @@ int main(int argc, char **argv)
     glutAddMenuEntry("Gouraud", GOURAUD);
     glutAddMenuEntry("Flat", FLAT);
     glutAddMenuEntry("Phong", PHONG);
-    
+
+    int addLuz = glutCreateMenu(processa_menu);
+    glutAddMenuEntry("Luzes de Phong", LUZES);
+    glutAddMenuEntry("Apagar Luzes ", ESCURO);
+
     // Menus
     int subModos = glutCreateMenu(processa_menu);
     glutAddMenuEntry("Modo Desenho", VER_OBJT_2D);
     glutAddMenuEntry("Modo Extrusao", VER_EXTRUSAO);
     glutAddMenuEntry("Modo OBJETOS 3D", VER_OBJT_3D);
 
-    //tronco
-    //menu de desenho
+    // tronco
+    // menu de desenho
     glutCreateMenu(processa_menu);
-   
+
     glutAddSubMenu("Modos", subModos);
     glutAddSubMenu("Projecao", subProjec);
     glutAddSubMenu("Met Iluminacao", subLuz);
+    glutAddSubMenu("Add Luzes de PHONG", addLuz);
 
     glutAddMenuEntry("*** Estilos ***", -1);
     glutAddSubMenu("Cor de Preenchimento", subCor);
@@ -952,7 +1133,7 @@ int main(int argc, char **argv)
     // mouse
     glutMouseFunc(gerenciaMouse);
     glutReshapeFunc(reshape);
-    //seleciona os modos
+    // seleciona os modos
     glutDisplayFunc(display_principal);
     glutMainLoop();
     return 0;

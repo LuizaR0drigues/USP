@@ -107,5 +107,5 @@ void Luz::ligar(){
 
 void Luz::desligar(){
     ligada = false;
-    atualizar();
+    glDisable(id);
 }

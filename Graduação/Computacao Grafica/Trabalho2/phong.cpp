@@ -1,47 +1,64 @@
 #include "phong.h"
 #include <glm/glm.hpp>
 Phong::Phong() {}
-void Phong::init(float* pos_luz, float* norms, float* pos_camera)
+void Phong::init(float *pos_luz, float *norms, float *pos_camera)
 {
-    this->posicao.x = pos_luz[0];
-    this->posicao.y = pos_luz[1];
-    this->posicao.z = pos_luz[2];
-
+    // posicao da fonte de luz
+    if (pos_luz != nullptr)
+    {
+        this->posicao.x = pos_luz[0];
+        this->posicao.y = pos_luz[1];
+        this->posicao.z = pos_luz[2];
+    }
+    else
+    {
+        this->posicao.x = this->posicao.y = 0.0f;
+        this->posicao.z = 1.0f;
+    }
+    // normais
     if (norms == nullptr)
     {
         this->posicao.nx = 0;
         this->posicao.ny = 0;
         this->posicao.nz = 1;
     }
-    this->posicao.nx = norms[0];
-    this->posicao.ny = norms[1];
-    this->posicao.nz = norms[2];
-
-    this->pos_cam.x = pos_camera[0];
-    this->pos_cam.y = pos_camera[1];
-    this->pos_cam.z = pos_camera[2];
-
-    //adotar o padrao pra camera
-    this->posicao.nx = 0;
-    this->posicao.ny = 0;
-    this->posicao.nz = 1;
-
-    //inicialmente, branca
+    else
+    {
+        this->posicao.nx = norms[0];
+        this->posicao.ny = norms[1];
+        this->posicao.nz = norms[2];
+    }
+    // posicao da camera
+    if(pos_camera != nullptr)
+    {
+        this->pos_cam.x = pos_camera[0];
+        this->pos_cam.y = pos_camera[1];
+        this->pos_cam.z = pos_camera[2];
+    }
+    else{
+        this->pos_cam.x = this->pos_cam.y = 0.0f;
+        this->pos_cam.z = 1.0f;
+    }
+    
+    // inicialmente, branca
     this->cor_final.r = 1.0f;
     this->cor_final.g = 1.0f;
     this->cor_final.b = 1.0f;
 }
-void Phong::OrdenaPorX(vector<DadosET> *nivel)
+void Phong::OrdenaPorX(vector<DadosET_phong> *nivel)
 {
     sort(nivel->begin(), nivel->end(),
-         [](const DadosET &a, const DadosET &b)
+         [](const DadosET_phong &a, const DadosET_phong &b)
          {
              return a.zMin < b.zMin;
          });
 }
 
-ET *Phong::CriaET(vector<Vertices> vertices)
+ET_phong *Phong::CriaET(vector<Vertices> vertices)
 {
+    if (vertices.empty())
+        return nullptr;
+
     float yMin = numeric_limits<float>::max();
     float yMax = numeric_limits<float>::min();
     for (auto &ver : vertices)
@@ -57,10 +74,15 @@ ET *Phong::CriaET(vector<Vertices> vertices)
     int yMaxInt = static_cast<int>(floor(yMax));
     int nroNiveis = yMaxInt - yMinInt;
 
-    ET *listaET = new ET();
+    if (nroNiveis <= 0 || nroNiveis > 5000)
+    {
+        return nullptr;
+    }
+
+    ET_phong *listaET = new ET_phong();
     listaET->yMin = yMinInt;
     listaET->nroNiveis = nroNiveis;
-    listaET->lista = new vector<DadosET>[nroNiveis];
+    listaET->lista = new vector<DadosET_phong>[nroNiveis];
 
     size_t n = vertices.size();
     for (size_t i = 0; i < n; i++)
@@ -73,44 +95,49 @@ ET *Phong::CriaET(vector<Vertices> vertices)
         {
             swap(ver1, ver2);
         }
-        if ((int)ver1.y == (int)ver2.y)//ignora as arestas horizontais
+        if ((int)ver1.y == (int)ver2.y) // ignora as arestas horizontais
         {
             continue;
         }
-        //geometria
+        // geometria
         int indice = ceil(ver1.y) - listaET->yMin;
+
+        if (indice < 0 || indice >= listaET->nroNiveis)
+        {
+            continue; // Se o índice for inválido, pula essa aresta para não travar
+        }
         float dy = ver2.y - ver1.y;
         float dx = ver2.x - ver1.x;
-        float incX =  dx/dy;
+        float incX = dx / dy;
 
-        float dz = ver2.z - ver1.z; //variação em z
-        float z_inc = dz/dy; 
+        float dz = ver2.z - ver1.z; // variação em z
+        float z_inc = dz / dy;
 
-        //diff de normais por linha
+        // diff de normais por linha
         float dnx = ver2.nx - ver1.nx;
         float dny = ver2.ny - ver1.ny;
         float dnz = ver2.nz - ver1.nz;
 
         Vertices incNorms;
-        incNorms.x  =  dnx/dy;
-        incNorms.y  =  dny/dy;
-        incNorms.z  =  dnz/dy;
+        incNorms.x = dnx / dy;
+        incNorms.y = dny / dy;
+        incNorms.z = dnz / dy;
 
-        //preenche a nova et
-        DadosET novo_dado;
+        // preenche a nova et
+        DadosET_phong novo_dado;
         novo_dado.Ymax = ver2.y;
         novo_dado.xMin = ver1.x;
         novo_dado.IncX = incX;
         novo_dado.zMin = ver1.z;
         novo_dado.incZ = z_inc;
 
-        //normal inicial eh a do vertice de baixo
+        // normal inicial eh a do vertice de baixo
         novo_dado.nMin.x = ver1.nx;
         novo_dado.nMin.y = ver1.ny;
         novo_dado.nMin.z = ver1.nz;
         novo_dado.incN = incNorms;
 
-        //adiciona todas as info na lista
+        // adiciona todas as info na lista
         listaET->lista[indice].push_back(novo_dado);
     }
 
@@ -125,16 +152,18 @@ ET *Phong::CriaET(vector<Vertices> vertices)
     return listaET;
 }
 
-void Phong::scan_line(ET *listaET, Cor_phong cor, float ka, float kd, float ks, Cor_phong cor_amb, Cor_phong cor_difusa, Cor_phong cor_espc)
+void Phong::scan_line(ET_phong *listaET, Cor_phong cor, float ka, float kd, float ks, Cor_phong cor_amb, Cor_phong cor_difusa, Cor_phong cor_espc)
 {
+    if (!listaET || listaET->nroNiveis <= 0 || listaET->lista == nullptr)
+    return;
+
     // define cor
     glColor3f(cor.r, cor.g, cor.b);
     glPointSize(1.0f);
 
     // inicializa o desenho
     glBegin(GL_POINTS);
-    float LAMB, LDIF, LESP;
-    vector<DadosET> listaAET;
+    vector<DadosET_phong> listaAET;
     for (int i = 0; i < listaET->nroNiveis; i++)
     {
         int yNivel = i + listaET->yMin;
@@ -150,10 +179,11 @@ void Phong::scan_line(ET *listaET, Cor_phong cor, float ka, float kd, float ks, 
             }
 
             listaAET[j].xMin += listaAET[j].IncX;
-            listaAET[j].zMin +=  listaAET[j].incZ;
-            listaAET[j].incN.nx +=  listaAET[j].incN.nx;
-            listaAET[j].incN.ny +=  listaAET[j].incN.ny;
-            listaAET[j].incN.nz +=  listaAET[j].incN.nz;
+            listaAET[j].zMin += listaAET[j].incZ;
+
+            listaAET[j].nMin.nx += listaAET[j].incN.nx;
+            listaAET[j].nMin.ny += listaAET[j].incN.ny;
+            listaAET[j].nMin.nz += listaAET[j].incN.nz;
         }
         // Move todos os dados do nível pra lista AET
         listaAET.insert(listaAET.end(),
@@ -164,38 +194,39 @@ void Phong::scan_line(ET *listaET, Cor_phong cor, float ka, float kd, float ks, 
         // Reordena a lista
         OrdenaPorX(&listaAET);
 
-        for(int j=0; j< listaAET.size(); j+=2)
+        for (int j = 0; j+1 <(int)listaAET.size(); j += 2)
         {
-            DadosET esquerda =  listaAET[j];
-            DadosET direita = listaAET[j+1];
+            DadosET_phong esquerda = listaAET[j];
+            DadosET_phong direita = listaAET[j + 1];
 
             float dx = direita.xMin - esquerda.xMin;
-            if(dx == 0) dx = 1;
+            if (dx == 0)
+                continue;
             float dz = direita.zMin - esquerda.zMin;
 
             float dnx = direita.nMin.nx - esquerda.nMin.nx;
             float dny = direita.nMin.ny - esquerda.nMin.ny;
             float dnz = direita.nMin.nz - esquerda.nMin.nz;
 
-            //incrementos horizontais
-            float stepZ = dz/dx;
+            // incrementos horizontais
+            float stepZ = dz / dx;
             float stepNx = dnx / dx;
             float stepNy = dny / dx;
             float stepNz = dnz / dx;
-            
-            //acumuladores
+
+            // acumuladores
             float acu_Z = esquerda.zMin;
             float acu_Nx = esquerda.nMin.nx;
             float acu_Ny = esquerda.nMin.ny;
             float acu_Nz = esquerda.nMin.nz;
-            
-           
-            for(int x=(int)esquerda.xMin; x<(int)direita.xMin; x++){
-                //normalizando o vetor
+
+            for (int x = (int)esquerda.xMin; x < (int)direita.xMin; x++)
+            {
+                // normalizando o vetor
                 glm::vec3 vetor_n = {acu_Nx, acu_Ny, acu_Nz};
-                glm::vec3 normalizado  = glm::normalize(vetor_n);
-                
-                //calculo da iluminacao (destino - origem)
+                glm::vec3 normalizado = glm::normalize(vetor_n);
+
+                // calculo da iluminacao (destino - origem)
                 float lx = posicao.x - x;
                 float ly = posicao.y - yNivel;
                 float lz = posicao.z - acu_Z;
@@ -203,7 +234,7 @@ void Phong::scan_line(ET *listaET, Cor_phong cor, float ka, float kd, float ks, 
                 glm::vec3 luz = {lx, ly, lz};
                 glm::vec3 luz_norm = glm::normalize(luz);
 
-                //vetor visao/cam
+                // vetor visao/cam
                 float vx = pos_cam.x - x;
                 float vy = pos_cam.y - yNivel;
                 float vz = pos_cam.z - acu_Z;
@@ -211,46 +242,55 @@ void Phong::scan_line(ET *listaET, Cor_phong cor, float ka, float kd, float ks, 
                 glm::vec3 cam = {vx, vy, vz};
                 glm::vec3 cam_norm = glm::normalize(cam);
 
-                //produto escalar
-                float  prod = glm::dot(normalizado, luz_norm);
+                // produto escalar
+                float prod = glm::dot(normalizado, luz_norm);
 
                 // Variáveis de intensidade
                 float fatorDifuso = 0.0f;
                 float fatorEspecular = 0.0f;
-                if(prod > 0){
+                if (prod > 0)
+                {
                     fatorDifuso = prod;
 
-                    //vetor reflexo
+                    // vetor reflexo
                     glm::vec3 reflexo = (2.0f * prod) * normalizado - luz_norm;
                     reflexo = glm::normalize(reflexo);
 
-                    //especular
+                    // especular
                     float RprodV = glm::dot(reflexo, cam_norm);
-                    if(RprodV > 0.0f){
-                        fatorEspecular = pow(RprodV, 10.0f);//define brilho
+                    if (RprodV > 0.0f)
+                    {
+                        fatorEspecular = pow(RprodV, 10.0f); // define brilho
                     }
                 }
-                //euqações de luz
-                //componente do ambiente
-                float rfinal =  ka *  cor_amb.r;
-                float gfinal =  ka *  cor_amb.g;
-                float bfinal =  ka *  cor_amb.b;
+                // euqações de luz
+                // componente do ambiente
+                float rfinal = ka * cor_amb.r;
+                float gfinal = ka * cor_amb.g;
+                float bfinal = ka * cor_amb.b;
 
                 //componente difusa
+                rfinal += kd * fatorDifuso * cor_difusa.r;
+                gfinal += kd * fatorDifuso * cor_difusa.g;
+                bfinal += kd * fatorDifuso * cor_difusa.b;
+                // componente especular
                 rfinal += ks * fatorEspecular * cor_espc.r;
                 gfinal += ks * fatorEspecular * cor_espc.g;
                 bfinal += ks * fatorEspecular * cor_espc.b;
 
-                //limita entre 0 e 1
-                if(rfinal > 1.0f) rfinal = 1.0f;
-                if(gfinal > 1.0f) gfinal = 1.0f;
-                if(bfinal > 1.0f) bfinal = 1.0f;
+                // limita entre 0 e 1
+                if (rfinal > 1.0f)
+                    rfinal = 1.0f;
+                if (gfinal > 1.0f)
+                    gfinal = 1.0f;
+                if (bfinal > 1.0f)
+                    bfinal = 1.0f;
 
                 // Desenha o Pixel
                 glColor3f(rfinal, gfinal, bfinal);
                 glVertex3f(x, yNivel, acu_Z);
 
-                //atualiza os valores
+                // atualiza os valores
                 acu_Z += stepZ;
                 acu_Nx += stepNx;
                 acu_Ny += stepNy;
@@ -260,3 +300,4 @@ void Phong::scan_line(ET *listaET, Cor_phong cor, float ka, float kd, float ks, 
     }
     glEnd();
 }
+

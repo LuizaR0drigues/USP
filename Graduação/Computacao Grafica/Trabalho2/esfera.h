@@ -4,7 +4,7 @@
 #include "include/glad/glad.h"
 #include <GL/freeglut.h>
 #include <vector>
-#include "phong.h"
+#include "vertices.h"
 
 using namespace std;
 

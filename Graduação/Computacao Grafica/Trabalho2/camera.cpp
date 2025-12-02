@@ -166,3 +166,81 @@ void Camera::aplica_paramtero()
               alvo.x, alvo.y, alvo.z,                         // pra onde olho
               camera_up.x, camera_up.y, camera_up.z);         // define onde é "cima"
 }
+
+Vertices Camera::transf_coord_tela(const Vertices v, int largura, int altura){
+    Vertices saida;
+
+    //Matriz View
+    glm::vec3 alvo = camera_posic + camera_front;
+    glm::mat4 view = glm::lookAt(camera_posic, alvo, camera_up);
+
+    //matriz de porjecao
+    float aspecto = (float)largura / (float)altura;
+    glm::mat4 proj;
+
+    if(modo_perspec){
+        proj = glm::perspective(glm::radians(45.0f), aspecto, 0.1f, 100.0f);
+    }
+    else{
+        float tam = 20.0f;
+        float esq, dir, baixo, cima;
+        if(largura >= altura){
+            esq = -tam * aspecto;
+            dir = tam * aspecto;
+            baixo = -tam;
+            cima = tam;
+        }
+        else{
+            esq = -tam ;
+            dir = tam ;
+            baixo = -tam/aspecto;
+            cima = tam/aspecto;
+        }
+        proj = glm::ortho(esq, dir, baixo, cima, -100.0f, 100.0f);
+    }
+
+    //modelo = I
+    glm::mat4 model(1.0f);
+    glm::vec4 p_world(v.x, v.y, v.z, 1.0f);
+    //transformação
+    glm::vec4 viewP=  view * model * p_world;
+    glm::vec4 corte = proj * viewP;
+
+    if(corte.w != 0.0f){
+        corte /= corte.w;
+    }
+
+    //tela ndc -> pixels
+    saida.x = corte.x;
+    saida.y = corte.y;
+    saida.z = corte.z;
+
+    glm::vec3 N(v.nx, v.ny, v.nz);
+
+    glm::mat3 normalMatriz = glm::transpose(glm::inverse(glm::mat3(view * model)));
+    glm::vec3 n2 = glm::normalize(normalMatriz * N);
+
+    saida.nx = n2.x;
+    saida.ny = n2.y;
+    saida.nz = n2.z;
+
+    return saida;
+
+}
+Vertices Camera::toPixel(const Vertices v, int largura, int altura){
+    Vertices s = v;
+    s.x = (v.x * 0.5f + 0.5f) * largura;
+    s.y = (v.y * 0.5f + 0.5f) * altura;
+    return s;
+}
+glm::vec3 Camera::getCameraFronte(){
+    return camera_front;
+}
+
+glm::vec3 Camera::getCameraPosicao(){
+    return camera_posic;
+}
+
+glm::vec3 Camera::getCameraUP(){
+    return camera_up;
+}

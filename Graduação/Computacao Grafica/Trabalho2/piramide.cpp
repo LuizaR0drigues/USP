@@ -68,7 +68,7 @@ void Piramide::calcNormalFace(Vertices v1, Vertices v2, Vertices v3, float& nx, 
     float len = sqrt(nx * nx + ny * ny + nz * nz);
     if (len > 0.0f) { nx /= len; ny /= len; nz /= len; }
 }
- vector<vector<Vertices>> Piramide::gera_malhas(float t, float altura){
+ vector<vector<Vertices>> Piramide::gera_malhas(){
     vector<vector<Vertices>> todas_faces;
     Vertices v0, v1, v2;
     vector<Vertices> face_atual;

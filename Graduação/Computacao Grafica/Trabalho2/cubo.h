@@ -1,7 +1,7 @@
 #ifndef CUBO_H
 #define CUBO_H
 
-#include "phong.h"
+#include "vertices.h"
 #include <vector>
 #include "include/glad/glad.h"
 #include <GL/freeglut.h>

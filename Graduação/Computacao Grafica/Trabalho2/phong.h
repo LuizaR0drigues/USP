@@ -5,13 +5,10 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include "camera.h"
+
 
 using namespace std;
-
-struct Vertices{
-    float x, y, z;
-    float nx, ny, nz;
-};
 
 struct Cor_phong{
     float r;
@@ -19,7 +16,7 @@ struct Cor_phong{
     float b;
 };
 
-struct DadosET
+struct DadosET_phong
 {
     int Ymax;
     float xMin;//x ataul
@@ -32,11 +29,13 @@ struct DadosET
     Vertices incN;
 };
 
-struct ET
+struct ET_phong
 {
     int yMin, nroNiveis;
-    vector<DadosET> *lista;
+    vector<DadosET_phong> *lista;
 };
+
+
 
 class Phong
 {
@@ -49,10 +48,11 @@ private:
 public:
     Phong();
     void init(float* pos, float* norm, float* pos_cam);
-    void OrdenaPorX(vector<DadosET> *nivel);
-    ET* CriaET(vector<Vertices> vertices);
-    void scan_line(ET *listaET, Cor_phong cor,float ka, float kd, float ks, Cor_phong cor_amb, Cor_phong cor_difusa, Cor_phong cor_espc);
+    void OrdenaPorX(vector<DadosET_phong> *nivel);
+    ET_phong* CriaET(vector<Vertices> vertices);
+    void scan_line(ET_phong *listaET, Cor_phong cor,float ka, float kd, float ks, Cor_phong cor_amb, Cor_phong cor_difusa, Cor_phong cor_espc);
     void aplicar_shading();
+    Vertices transf_coord_tela(const Vertices V,  int largura, int altura);
 
 };
 

@@ -5,7 +5,8 @@
 #include <GL/freeglut.h>
 #include <cmath>
 #include <vector>
-#include "phong.h"
+#include "vertices.h"
+
 using namespace std;
 
 class Piramide
@@ -16,7 +17,7 @@ public:
    
     void init(int tam); //inicializa
     void draw(float x, float y, float z); //desenha na tela
-    vector<vector<Vertices>> gera_malhas(float tamanho, float altura);
+    vector<vector<Vertices>> gera_malhas();
     void calcNormalFace(Vertices v1, Vertices v2, Vertices v3, float& nx, float& ny, float&nz);
 
 private:
