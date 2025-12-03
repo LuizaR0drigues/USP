@@ -42,9 +42,9 @@ int largura_atual = WINDOW_W;
 int altura_atual = WINDOW_H;
 
 // fatores de iluminação
-float ka = 0.5f;
-float kd = 0.8f;
-float ks = 1.0f;
+float ka = 0.5f; //baixo:mostra mais as sombras
+float kd = 0.8f; //a cor ressalta
+float ks = 1.0f; //mutio brilho
 // Transformações Geomtericas NO OBJETO 3D
 float tx = 0.0, ty = 0.0, tz = 0.0;
 float rxo = 0.0, ryo = 0.0, rzo = 0.0;
@@ -440,7 +440,7 @@ void configura_phong()
     // conversao de luzes
     glm::vec3 luz_mundo = glm::vec3(15.0f, 10.0f, 10.0f);
     glm::vec4 luz_view = view * glm::vec4(luz_mundo, 1.0f);
-    float luz_view_pos[3] = {20.0f, 20.0f, 20.0f}; //POSICAO DA FONTE DE LUZ - vindo da direira-cima
+    float luz_view_pos[3] = {0.0f, 0.0f, 0.0f}; //POSICAO DA FONTE DE LUZ - vindo da direira-cima
     //  Phong comeca com luz em view-space e camera na origem
     float camera_view_pos[3] = {0.0f, 0.0f, 0.0f};
 
@@ -505,7 +505,7 @@ void configura_phong()
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0.0, largura_atual, 0.0, altura_atual, -1.0, 1.0);
+    glOrtho(0.0, largura_atual, 0.0, altura_atual, -100.0, 100.0);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -513,6 +513,9 @@ void configura_phong()
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_CULL_FACE); //nao dessenha o interior
+    glCullFace(GL_BACK); //descarta costas
+    //glFrontFace(GL_CCW); //hantihorario como padrao
     auto rasteriza = [&](auto &lista)
     {
         for (auto &face : lista)
@@ -534,6 +537,7 @@ void configura_phong()
     rasteriza(nw_coords_pi);
     rasteriza(nw_coord_esf);
 
+    glDisable(GL_CULL_FACE);
     // Restaura matrizes
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);

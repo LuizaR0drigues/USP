@@ -179,7 +179,7 @@ void Phong::scan_line(ET_phong *listaET, Color cor, float ka, float kd, float ks
     glPointSize(1.0f);
 
     // inicializa o desenho
-    glPointSize(1.5f);
+    glPointSize(2.5f);
     glBegin(GL_POINTS);
     vector<DadosET_phong> listaAET;
     for (int i = 0; i < listaET->nroNiveis; i++)
@@ -291,7 +291,7 @@ void Phong::scan_line(ET_phong *listaET, Color cor, float ka, float kd, float ks
                     float RprodV = glm::dot(reflexo, cam_norm);
                     if (RprodV > 0.0f)
                     {
-                        fatorEspecular = pow(RprodV, 40.0f); // define brilho
+                        fatorEspecular = pow(RprodV, 60.0f); // define brilho
                     }
                 }
                 // euqações de luz
