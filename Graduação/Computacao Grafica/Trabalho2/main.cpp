@@ -5,28 +5,22 @@
 #include <cmath>
 #include <algorithm>
 #include <utility>
-#include <iostream>
-#include <vector>
-#include <array>
-#include <limits>
-#include <cmath>
-#include <algorithm>
-#include <utility>
 
-#include "include/glad/glad.h"
+#include "glad/glad.h"
 #include <GL/freeglut.h>
-// objetos3d
+
+#include "structs.h"
 #include "cubo.h"
 #include "esfera.h"
 #include "piramide.h"
 #include "iluminacao.h"
-#include "vertices.h"
-#include "camera.h" //camera
+#include "camera.h"
 #include "phong.h"
+
 using namespace std;
 
-#define MODO_ORTO false
-#define MODO_PERSPEC true
+//Epsilon para comparações com floats
+#define epsilon 0.0001
 
 // objetos e Camera
 Camera camera;
@@ -38,10 +32,7 @@ Phong phong_cor;
 Cubo cubo;
 Esfera esfera;
 Piramide piramide;
-vector<vector<Vertices>> malha_cubo, malha_esfera, malha_piramide;
-// variaveis de cor e linha
-float cor_R = 1.0f, cor_G = 1.0f, cor_B = 1.0f;
-float tamanho_linha = 1.0f;
+vector<vector<VerticesPhong>> malha_cubo, malha_esfera, malha_piramide;
 
 // variaves pra definir a janela
 const int WINDOW_W = 800, WINDOW_H = 400;
@@ -57,501 +48,14 @@ float ks = 1.0f;
 // Transformações Geomtericas NO OBJETO 3D
 float tx = 0.0, ty = 0.0, tz = 0.0;
 float rxo = 0.0, ryo = 0.0, rzo = 0.0;
-float scaleo = 2.0;
+float scaleo = 1.0;
 
-struct Ponto
-{
-    float x, y;
-};
-
-struct Color
-{
-    float r, g, b;
-};
-
-struct DadosET
-{
-    float yMax;
-    float xMin;
-    float incX;
-};
-
-struct ET
-{
-    int yMin, nroNiveis;
-    vector<DadosET> *lista;
-};
-struct Poligono
-{
-    vector<Ponto> vertices;
-    Color corPrenchimento;
-    Color cor_Contorno;
-    float espessura;
-};
-
-// Lista dinâmica - clique do user
+// Lista dinâmica - clique do usuário
 vector<Ponto> g_vertices;
 // cores
 Color cor_preenc = {1.0f, 1.0f, 1.0f};
 Color cor_contorno = {1.0f, 0.0f, 0.0f};
-
-void plot_pixel(int x, int y)
-{
-    glVertex2i(x, y);
-}
-
-void draw_point(int x, int y, Color color, float grossura)
-{
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_POINT_SMOOTH);
-    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-
-    // Define a cor e o tamanho
-    glColor3f(color.r, color.g, color.b);
-    glPointSize(grossura); // Substitui os loops 'for' de raio
-
-    // Manda desenhar
-    glBegin(GL_POINTS);
-    glVertex2i(x, y);
-    glEnd();
-
-    glDisable(GL_POINT_SMOOTH);
-    glDisable(GL_BLEND);
-}
-
-// O eixo X é dominante, i. e., para retas mais horizontais
-void desenha_oct1(int x1, int y1, int x2, int y2)
-{
-    int x, y, dx, dy, d, incE, incNE, incY = 1;
-
-    // variação em x e y
-    dx = x2 - x1;
-    dy = y2 - y1;
-
-    // Se a reta diminui em Y
-    if (dy < 0)
-    {
-        // Inverte a direção de crescimento
-        incY = -1;
-        // Inverte dy para não atrapalhar as contas
-        dy *= -1;
-    }
-
-    // valor inicial da variavel de decisao
-    d = 2 * dy - dx;
-    incE = 2 * dy;
-    incNE = 2 * (dy - dx);
-    x = x1;
-    y = y1;
-
-    // desenha o ponto inicial
-    plot_pixel(x, y);
-
-    while (x < x2)
-    {
-        if (d <= 0)
-        {
-            // escolhe E
-            d += incE;
-            x++; // anda 1 unidade em X
-        }
-        else
-        { // escolhe NE
-            d += incNE;
-            x++;
-            y += incY;
-        }
-
-        plot_pixel(x, y);
-    }
-}
-
-// EIxo Y é o dominante, i.e., retas mais verticiais.
-void desenha_oct2(int x1, int y1, int x2, int y2)
-{
-    int x, y, dx, dy, d, incE, incNE, incX = 1;
-
-    // variação em x e y
-    dx = x2 - x1;
-    dy = y2 - y1;
-
-    // Se a reta diminui em X
-    if (dx < 0)
-    {
-        // Inverte a direção de crescimento
-        incX = -1;
-        // Inverte dy para não atrapalhar as contas
-        dx *= -1;
-    }
-
-    // valor inicial da variavel de decisao
-    d = 2 * dx - dy;
-    incE = 2 * dx;
-    incNE = 2 * (dx - dy);
-    x = x1;
-    y = y1;
-
-    // desenha o ponto inicial
-    plot_pixel(x, y);
-
-    while (y < y2)
-    {
-        if (d <= 0)
-        {
-            // escolhe E
-            d += incE;
-            y++; // anda 1u em X
-        }
-        else
-        { // escolhe NE
-            d += incNE;
-            x += incX;
-            y++;
-        }
-
-        plot_pixel(x, y);
-    }
-}
-
-void draw_line(Ponto ponto1, Ponto ponto2, Color cor, float grossura)
-{
-    // define cor e espessura
-    glColor3f(cor.r, cor.g, cor.b);
-    glPointSize(grossura);
-
-    // inicializa
-    glBegin(GL_POINTS);
-
-    int x1 = ponto1.x;
-    int y1 = ponto1.y;
-    int x2 = ponto2.x;
-    int y2 = ponto2.y;
-
-    // variação
-    int dx = x2 - x1;
-    int dy = y2 - y1;
-
-    if (x1 == x2 && y1 == y2)
-    { // um ponto no plano
-        draw_point(x1, y1, cor, grossura);
-        return;
-    }
-
-    if (dx == 0)
-    { // reta vertical
-        if (y1 > y2)
-        {
-            std::swap(y1, y2);
-        }
-        for (int y = y1; y <= y2; y++)
-        {
-            draw_point(x1, y, cor, grossura);
-        }
-
-        return;
-    }
-
-    if (dy == 0)
-    { // reta horizontal
-        if (x1 > x2)
-        {
-            std::swap(x1, x2);
-        }
-        for (int x = x1; x <= x2; x++)
-        {
-            draw_point(x, y1, cor, grossura);
-        }
-        return;
-    }
-
-    if (abs(dy) == abs(dx))
-    { // retas de 45 e 135
-        int inc_x = 1, inc_y = 1;
-        if (x2 < x1)
-        {
-            inc_x = -1;
-        }
-        if (y2 < y1)
-        {
-            inc_y = -1;
-        }
-
-        for (int i = 0; i <= abs(dx); i++)
-        {
-            draw_point(x1, y1, cor, grossura);
-            x1 += inc_x;
-            y1 += inc_y;
-        }
-        return;
-    }
-
-    float m = (float)dy / (float)dx;
-
-    if (m <= 1 && m >= -1)
-    {
-        if (dx >= 0)
-        {
-            desenha_oct1(x1, y1, x2, y2);
-        }
-        else
-        {
-            desenha_oct1(x2, y2, x1, y1);
-        }
-    }
-    else
-    {
-        if (dy >= 0)
-        {
-            desenha_oct2(x1, y1, x2, y2);
-        }
-        else
-        {
-            desenha_oct2(x2, y2, x1, y1);
-        }
-    }
-
-    glEnd();
-}
-
-void OrdenaPorX(vector<DadosET> *nivel)
-{
-    sort(nivel->begin(), nivel->end(),
-         [](const DadosET &a, const DadosET &b)
-         {
-             return a.xMin < b.xMin;
-         });
-}
-
-ET *CriaET(vector<Ponto> vertices)
-{
-    float yMin = numeric_limits<float>::max();
-    float yMax = numeric_limits<float>::min();
-    for (auto &ver : vertices)
-    {
-        if (ver.y < yMin)
-            yMin = ver.y;
-
-        if (ver.y > yMax)
-            yMax = ver.y;
-    }
-
-    int yMinInt = static_cast<int>(ceil(yMin));
-    int yMaxInt = static_cast<int>(floor(yMax));
-    int nroNiveis = yMaxInt - yMinInt;
-
-    ET *listaET = new ET();
-    listaET->yMin = yMinInt;
-    listaET->nroNiveis = nroNiveis;
-    listaET->lista = new vector<DadosET>[nroNiveis];
-
-    size_t n = vertices.size();
-    for (size_t i = 0; i < n; i++)
-    {
-        Ponto ver1 = vertices[i];
-        Ponto ver2 = vertices[(i + 1) % n];
-        ;
-
-        if (ver1.y > ver2.y)
-        {
-            swap(ver1, ver2);
-        }
-        if ((int)ver1.y == (int)ver2.y)
-        {
-            continue;
-        }
-        int indice = ceil(ver1.y) - listaET->yMin;
-        float dy = ver2.y - ver1.y;
-        float dx = ver2.x - ver1.x;
-        float m = dy / dx;
-
-        listaET->lista[indice].push_back({ver2.y, ver1.x, m});
-    }
-
-    for (int i = 0; i < listaET->nroNiveis; i++)
-    {
-        if (!listaET->lista[i].empty())
-        {
-            OrdenaPorX(&(listaET->lista[i]));
-        }
-    }
-
-    return listaET;
-}
-
-void PreenchimentoDePoligonos(ET *listaET, Color cor)
-{
-    // define cor
-    glColor3f(cor.r, cor.g, cor.b);
-    glPointSize(1.0f);
-
-    // inicializa o desenho
-    glBegin(GL_POINTS);
-
-    vector<DadosET> listaAET;
-    for (int i = 0; i < listaET->nroNiveis; i++)
-    {
-        int yNivel = i + listaET->yMin;
-        for (int j = 0; j < (int)listaAET.size(); j++)
-        {
-            // Se a iteração está no nível ou acima do y máximo da aresta
-            if (listaAET[j].yMax <= yNivel)
-            {
-                // Remove ela
-                listaAET.erase(listaAET.begin() + j);
-                j--;
-                continue;
-            }
-
-            listaAET[j].xMin += 1 / listaAET[j].incX;
-        }
-        // Move todos os dados do nível pra lista AET
-        listaAET.insert(listaAET.end(),
-                        make_move_iterator(listaET->lista[i].begin()),
-                        make_move_iterator(listaET->lista[i].end()));
-        // Limpa o nível original
-        listaET->lista[i].clear();
-        // Reordena a lista
-        OrdenaPorX(&listaAET);
-
-        int verticesCruzados = 0;
-        for (int x = listaAET[0].xMin; x < listaAET.back().xMin; x++)
-        {
-            while (x >= listaAET[verticesCruzados].xMin)
-                verticesCruzados++;
-
-            if (verticesCruzados % 2 == 1)
-            {
-                glVertex2f(x, yNivel);
-            }
-        }
-    }
-    glEnd();
-}
-
-Ponto converte_coords(int x_mouse, int y_mouse)
-{
-    float x_w, y_w;
-    int w_janela = glutGet(GLUT_WINDOW_WIDTH);
-    int h_janela = glutGet(GLUT_WINDOW_HEIGHT);
-
-    x_w = ((float)x_mouse / w_janela) * (ORTHO_MAX_X - ORTHO_MIN_X) + ORTHO_MIN_X;
-    y_w = ((float)(h_janela - y_mouse) / h_janela) * (ORTHO_MAX_Y - ORTHO_MIN_Y) + ORTHO_MIN_Y;
-
-    return {x_w, y_w};
-}
-
-void gerenciaMouse(int button, int state, int x, int y)
-{
-    // Se clicou com botão ESQUERDO e soltou (GLUT_UP) ou apertou (GLUT_DOWN)
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-    {
-        Ponto p = converte_coords(x, y);
-        g_vertices.push_back(p); // Adiciona na lista global
-        glutPostRedisplay();     // Manda redesenhar
-    }
-}
-
-void display()
-{
-    // Define cor baseada nas variáveis globais do menu
-    Color corAtual = {cor_R, cor_G, cor_B};
-    Color corLinha = cor_contorno;
-    // sao necessarios no min 3 pontos
-    if (g_vertices.size() >= 3)
-    {
-        ET *listaET = CriaET(g_vertices);
-        PreenchimentoDePoligonos(listaET, corAtual);
-
-        delete[] listaET->lista;
-        delete listaET;
-    }
-
-    // contorno
-    if (g_vertices.size() > 0)
-    {
-        glPointSize(5.0f);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glBegin(GL_POINTS);
-
-        for (auto p : g_vertices)
-            glVertex2f(p.x, p.y);
-        glEnd();
-        // Linhas conectando
-        if (g_vertices.size() >= 3)
-        {
-            for (size_t i = 0; i < g_vertices.size() - 1; i++)
-            {
-                draw_line(g_vertices[i], g_vertices[i + 1], corLinha, tamanho_linha);
-            }
-            // mais de 2 pontos, fecha o polígono visualmente
-            if (g_vertices.size() > 2)
-            {
-                draw_line(g_vertices.back(), g_vertices[0], corLinha, tamanho_linha);
-            }
-        }
-    }
-
-    glFlush();
-}
-
-// realizando a extrusão dos poligonos
-void extrusao_poligonos()
-{
-    // definindo uma altura padrao
-    float h = 10.0f;
-
-    glBegin(GL_POLYGON);
-
-    // desenhando a base
-    glColor3f(cor_R, cor_G, cor_B);
-    for (auto base : g_vertices)
-        glVertex3f(base.x, base.y, 0.0f);
-    glEnd();
-
-    // construindo as paredes
-    glBegin(GL_QUADS);
-    for (int i = 0; i < g_vertices.size() - 1; i++)
-    {
-        auto a = g_vertices[i];
-        auto b = g_vertices[i + 1];
-        glColor3f(1.0f, 0.0f, 1.0f);
-        glVertex3f(a.x, a.y, 0);
-        glVertex3f(b.x, b.y, 0);
-        glVertex3f(b.x, b.y, h);
-        glVertex3f(a.x, a.y, h);
-    }
-    // ultimo ponto
-    auto a = g_vertices[0]; // primeiro
-    int tam = g_vertices.size() - 1;
-    auto c = g_vertices[tam]; // ultimo
-    glVertex3f(c.x, c.y, 0);
-    glVertex3f(a.x, a.y, 0);
-    glVertex3f(a.x, a.y, h);
-    glVertex3f(c.x, c.y, h);
-
-    glEnd();
-
-    // desenhando o topo
-    glBegin(GL_POLYGON);
-    glColor3f(cor_R, cor_G, cor_B);
-    for (auto topo : g_vertices)
-        glVertex3f(topo.x, topo.y, h);
-    glEnd();
-}
-
-void reshape(int w, int h)
-{
-    largura_atual = w;
-    altura_atual = h;
-    // atualiza
-    glViewport(0, 0, w, h);
-
-    // atualiza a projecao
-    camera.modo_projecao(w, h);
-}
+float tamanho_linha = 1.0f;
 
 enum menu_opcoes
 {
@@ -575,8 +79,8 @@ enum menu_opcoes
     VER_OBJT_3D,
     VER_OBJT_2D,
     VER_EXTRUSAO,
-    MD_EXTRUSAO, // extrusao
     MD_DESENHO,  // trabalho 1
+    MD_EXTRUSAO, // extrusao
     MD_OBJT,     // objetos 3d
     GOURAUD,
     FLAT,
@@ -585,37 +89,349 @@ enum menu_opcoes
     ESCURO
 };
 menu_opcoes modo_atual = MD_DESENHO;
-menu_opcoes flag = ESCURO;
-void recupera_dados(GLfloat *pos_obs, GLfloat *pos_fonte)
-{
+menu_opcoes flagLuz = ESCURO;
 
-    for (int i = 0; i < 3; i++)
+void DesenhaVertices3D(vector<Ponto> vertices, float z, Color cor, float grossura)
+{
+    glPointSize(grossura);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_POINTS);
+
+    for (auto vert : vertices)
+        glVertex3f(vert.x, vert.y, z);
+    glEnd();
+}
+
+//Função para desenhar linha simples em 3D
+void DesenhaLinha3D(Ponto ponto1, Ponto ponto2, float z, Color cor, float grossura)
+{
+    glLineWidth(tamanho_linha);
+    glColor3f(cor.r, cor.g, cor.b);
+    glBegin(GL_LINES);
+    
+    glVertex3f(ponto1.x, ponto1.y, z);
+    glVertex3f(ponto2.x, ponto2.y, z);
+
+    glEnd();
+}
+
+//Função para desenhar contorno do polígono plano 3D
+void DesenhaContorno3D(vector<Ponto> vertices, float z, Color cor, float grossura)
+{
+    glLineWidth(grossura);
+    glColor3f(cor.r, cor.g, cor.b);
+    glBegin(GL_LINE_LOOP);
+    
+    for (auto vert : vertices)
+        glVertex3f(vert.x, vert.y, z);
+
+    glEnd();
+}
+
+//Função para ordenar um nível da lista ET por ordem de X crescente
+void OrdenaPorX(vector<DadosET> *nivel)
+{
+    sort(nivel->begin(), nivel->end(),
+         [](const DadosET &a, const DadosET &b)
+         {
+             return a.xMin < b.xMin;
+         });
+}
+
+//Algoritmo de criação da tabela ET para preenchimento de polígonos 2D
+ET *CriaET(vector<Ponto> vertices)
+{
+    //Coloca o maior valor possível pra yMin e o menor possível pra yMax
+    float yMin = numeric_limits<float>::max();
+    float yMax = numeric_limits<float>::min();
+
+    //Encontra o menor e maior Y dos vértices
+    for (auto &ver : vertices)
     {
-        cout << "Digite a posicao do observador(x, y, z): " << endl;
-        cin >> pos_obs[i];
+        if (ver.y < yMin)
+            yMin = ver.y;
+
+        if (ver.y > yMax)
+            yMax = ver.y;
     }
 
-    for (int i = 0; i < 3; i++)
+    //Como pinta dentro das "linhas reais":
+    //yMin arredonda pra cima e yMax arredonda pra baixo
+    int yMinInt = static_cast<int>(ceil(yMin));
+    int yMaxInt = static_cast<int>(floor(yMax));
+    int nroNiveis = yMaxInt - yMinInt;
+
+    //Cria a ET
+    ET *listaET = new ET();
+    listaET->yMin = yMinInt;
+    listaET->nroNiveis = nroNiveis;
+    listaET->lista = new vector<DadosET>[nroNiveis];
+
+    //Para cada vértice
+    size_t n = vertices.size();
+    for (size_t i = 0; i < n; i++)
     {
-        cout << "Digite a posicao da FOnte de Luz(x, y, z): " << endl;
-        cin >> pos_fonte[i];
+        //Pega o atual
+        Ponto ver1 = vertices[i];
+        //Pega o próximo
+        //(i+1)%n -> se o atual (i) for o último, pega o primeiro
+        Ponto ver2 = vertices[(i + 1) % n];
+
+        //Deixa os vértices em Y crescente
+        if (ver1.y > ver2.y)
+        {
+            swap(ver1, ver2);
+        }
+        //Se estiverem no mesmo y, a aresta é ignorada
+        if ((int)ver1.y == (int)ver2.y)
+        {
+            continue;
+        }
+        //Qual a posição na lista da ET (qual o Y inicial)
+        int indice = ceil(ver1.y) - listaET->yMin;
+        float dy = ver2.y - ver1.y;
+        float dx = ver2.x - ver1.x;
+        float m = dy / dx;
+
+        //Adiciona os dados da aresta à lista do nível calculado
+        listaET->lista[indice].push_back({ver2.y, ver1.x, m});
+    }
+
+    //Para cada nível da ET
+    for (int i = 0; i < listaET->nroNiveis; i++)
+    {
+        //Ordena os níveis, para as arestas ficarem com X crescente
+        if (!listaET->lista[i].empty())
+        {
+            OrdenaPorX(&(listaET->lista[i]));
+        }
+    }
+
+    return listaET;
+}
+
+//Algoritmo de preenchimento de polígonos 2D
+void PreenchimentoDePoligonos(const ET *listaET, Color cor, float posicaoZ)
+{
+    // define cor
+    glColor3f(cor.r, cor.g, cor.b);
+    glPointSize(1.0f);
+
+    // inicializa o desenho
+    glBegin(GL_POINTS);
+
+    vector<DadosET> listaAET;
+    //Para cada nível na ET
+    for (int i = 0; i < listaET->nroNiveis; i++)
+    {
+        int yNivel = i + listaET->yMin;
+
+        //Para cada aresta na AET
+        for (int j = 0; j < (int)listaAET.size(); j++)
+        {
+            // Se a iteração está no nível ou acima do y máximo da aresta
+            if (listaAET[j].yMax <= yNivel)
+            {
+                // Remove ela
+                listaAET.erase(listaAET.begin() + j);
+                //Corrige o valor de j, pois listaAET perdeu 1 valor
+                j--;
+            }
+            else
+                //Recalcula a posição X do ponto da aresta
+                listaAET[j].xMin += 1 / listaAET[j].incX;
+        }
+
+        // Move todos os dados do nível pra lista AET
+        listaAET.insert(listaAET.end(),
+                        make_move_iterator(listaET->lista[i].begin()),
+                        make_move_iterator(listaET->lista[i].end()));
+        // Reordena a lista AET
+        OrdenaPorX(&listaAET);
+
+        //Para a técnica ímpar-par
+        int verticesCruzados = 0;
+        //Para cada X entre o ponto da aresta mais à esquerda e a mais á direita
+        for (int x = listaAET[0].xMin; x < listaAET.back().xMin; x++)
+        {
+            //Para toda aresta que foi cruzada entre iterações
+            while (x >= listaAET[verticesCruzados].xMin)
+                verticesCruzados++;
+
+            //Se cruzou um número ímpar
+            if (verticesCruzados % 2 == 1)
+            {
+                glVertex3f(x, yNivel, posicaoZ);
+            }
+        }
+    }
+    glEnd();
+}
+
+//Converte coordenadas do mouse para coordenadas da janela
+Ponto ConverteCoords(int x_mouse, int y_mouse)
+{
+    int w_janela = glutGet(GLUT_WINDOW_WIDTH);
+    int h_janela = glutGet(GLUT_WINDOW_HEIGHT);
+
+    //x_mouse = 0 -> esquerda da janela
+    //x_mouse / w_janela -> % da distância entre lado esquerdo e direito
+    //(...) * (...) + ... -> converte para coordenadas da janela
+    float x_w = ((float)x_mouse / w_janela) * (ORTHO_MAX_X - ORTHO_MIN_X) + ORTHO_MIN_X;
+    //y_mouse = 0 -> topo da janela
+    //(h_janela - y_mouse) / h_janela -> % da distância entre topo e base, a subtração inverte a posição
+    //(...) * (...) + ... -> converte para coordenadas da janela
+    float y_w = ((float)(h_janela - y_mouse) / h_janela) * (ORTHO_MAX_Y - ORTHO_MIN_Y) + ORTHO_MIN_Y;
+
+    return {x_w, y_w};
+}
+
+//Gerencia os inputs do mouse
+void GerenciaMouse(int button, int state, int x, int y)
+{
+    // Se clicou com botão ESQUERDO e apertou (GLUT_DOWN)
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+        //Converte de coordenadas do mouse para coordenadas da janela
+        Ponto p = ConverteCoords(x, y);
+        // Adiciona na lista de vértices global
+        g_vertices.push_back(p);
+        // Manda redesenhar
+        glutPostRedisplay();
     }
 }
 
+//Faz o display 2D
+void Display2D()
+{
+    if (g_vertices.size() > 0)
+    {
+        //Desenha todos os vértices
+        //2*tamanho_linha para destacar
+        DesenhaVertices3D(g_vertices, 0, cor_contorno, 2*tamanho_linha);
+
+        //Se tiver 2 vértices
+        if (g_vertices.size() == 2)
+        {
+            //Desenha a reta que os conecta
+            DesenhaLinha3D(g_vertices[0], g_vertices[1], 0, cor_contorno, tamanho_linha);
+        }
+        //Se tiver mais que 2 vértices, é um polígono
+        else if (g_vertices.size() > 2)
+        {
+            //Desenha as arestas do contorno
+            DesenhaContorno3D(g_vertices, 0, cor_contorno, tamanho_linha);
+
+            //Preenche o polígono
+            ET* listaET = CriaET(g_vertices);
+            PreenchimentoDePoligonos(listaET, cor_preenc, 0);
+
+            //Limpa a memória
+            delete[] listaET->lista;
+            delete listaET;
+        }
+    }
+
+    glFlush();
+}
+
+//Função para extrusão dos polígonos 2D
+void ExtrusaoPoligonos()
+{
+    //Se ainda não fez nem um polígono
+    if (g_vertices.size() < 3)
+    {
+        //Desenha no plano z = 0
+        Display2D();
+        return;
+    }
+    //Se já tem um polígono
+
+    //Define uma altura pro polígono 3D
+    float h = 10.0f;
+    
+    //z = 0 -> base
+    //z = h -> topo
+
+    //Desenha todos os vértices
+    //2*tamanho_linha para destacar
+    DesenhaVertices3D(g_vertices, 0, cor_contorno, 2*tamanho_linha);
+    DesenhaVertices3D(g_vertices, h, cor_contorno, 2*tamanho_linha);
+
+    //Desenha as arestas dos contornos
+    DesenhaContorno3D(g_vertices, 0, cor_contorno, tamanho_linha);
+    DesenhaContorno3D(g_vertices, h, cor_contorno, tamanho_linha);
+
+    //Para conectar as arestas entre a base e o topo
+    int n = g_vertices.size();
+
+    glLineWidth(tamanho_linha);
+    glColor3f(cor_contorno.r, cor_contorno.g, cor_contorno.b);
+    glBegin(GL_LINES);
+
+    for (int i = 0; i < n; i++)
+    {
+        Ponto a = g_vertices[i];
+        
+        //Desenha a reta que os conecta
+        glVertex3f(a.x, a.y, 0);
+        glVertex3f(a.x, a.y, h);
+    }
+
+    glEnd();
+
+    //Preenche os polígonos
+    ET* listaET = CriaET(g_vertices);
+    PreenchimentoDePoligonos(listaET, cor_preenc, 0);
+    PreenchimentoDePoligonos(listaET, cor_preenc, h);
+
+    //Limpa a memória
+    delete[] listaET->lista;
+    delete listaET;
+
+    //Desenha os planos entre a base e o topo
+    glColor3f(cor_preenc.r, cor_preenc.g, cor_preenc.b);
+    glBegin(GL_QUADS);
+
+    for (int i = 0; i < n; i++)
+    {
+        Ponto a = g_vertices[i];
+        Ponto b = g_vertices[(i + 1) % n];
+
+        //Cria um plano conectando os vértices na base e no topo
+        glVertex3f(a.x, a.y, 0);
+        glVertex3f(b.x, b.y, 0);
+        glVertex3f(b.x, b.y, h);
+        glVertex3f(a.x, a.y, h);
+    }
+
+    glEnd();
+}
+
+//Muda o tamanho da janela
+void Reshape(int w, int h)
+{
+    largura_atual = w;
+    altura_atual = h;
+    
+    //Atualiza a janela
+    glViewport(0, 0, w, h);
+
+    //Atualiza a projecao
+    camera.modo_projecao(w, h);
+}
+
+
 void configura_phong()
 {
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
-
-    Cor_phong cor_atual = {1.0f, 0.0f, 0.0f};
-    // Cor_phong cor_base = {1.0f, 0.0f, 0.0f};   // Objeto Vermelho
-    Cor_phong cor_amb = {0.2f, 0.2f, 0.2f};    // Luz Ambiente (Cinza escuro)
-    Cor_phong cor_difusa = {1.0f, 1.0f, 1.0f}; // Luz Difusa (Branca)
-    Cor_phong cor_espc = {1.0f, 1.0f, 1.0f};   // Luz Especular (Brilho Branco)
+    Color cor_atual = {0.0f, 0.8f, 1.0f};
+    Color cor_amb = {1.0f, 1.0f, 1.0f};    // Luz Ambiente (preto)
+    Color cor_difusa = {1.0f, 1.0f, 1.0f}; // Luz Difusa (Branca)
+    Color cor_espc = {1.0f, 1.0f, 1.0f};   // Luz Especular (Brilho Branco)
 
     // matrizes da camera
     glm::vec3 cam_posi = camera.getCameraPosicao();
-    glm::vec3 cam_front = camera.getCameraFronte();
+    glm::vec3 cam_front = camera.getCameraFront();
     glm::vec3 cam_up = camera.getCameraUP();
 
     glm::vec3 alvo = cam_posi + cam_front;
@@ -624,8 +440,7 @@ void configura_phong()
     // conversao de luzes
     glm::vec3 luz_mundo = glm::vec3(15.0f, 10.0f, 10.0f);
     glm::vec4 luz_view = view * glm::vec4(luz_mundo, 1.0f);
-    float luz_view_pos[3] = {luz_view.x, luz_view.y, luz_view.z};
-    //float luz_view_pos[3] = {0.0f, 0.0f, 0.0f}; //POSICAO DA FONTE DE LUZ
+    float luz_view_pos[3] = {20.0f, 20.0f, 20.0f}; //POSICAO DA FONTE DE LUZ - vindo da direira-cima
     //  Phong comeca com luz em view-space e camera na origem
     float camera_view_pos[3] = {0.0f, 0.0f, 0.0f};
 
@@ -639,32 +454,43 @@ void configura_phong()
     model_matrix = glm::rotate(model_matrix, glm::radians(rzo), glm::vec3(0, 0, 1));
     model_matrix = glm::scale(model_matrix, glm::vec3(scaleo , scaleo , scaleo ));
     
-    glm::mat4 m_cubo = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
-    glm::mat4 m_piramide = glm::translate(model_matrix, glm::vec3(4.0f, 0.0f, 0.0f));
-    glm::mat4 m_esf = glm::translate(model_matrix, glm::vec3(-4.0f, 0.0f, 0.0f));
+    glm::mat4 m_cubo = glm::translate(model_matrix, glm::vec3(-6.0f, 0.0f, 0.0f));
+    glm::mat4 m_piramide = glm::translate(model_matrix, glm::vec3(6.0f, 0.0f, 0.0f));
+    glm::mat4 m_esf = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
 
     // guarda as novas coords
-    vector<vector<Vertices>> nw_coord_cubo, nw_coord_esf, nw_coords_pi;
+    vector<vector<VerticesPhong>> nw_coord_cubo, nw_coord_esf, nw_coords_pi;
 
     // transforma para a atela
     auto processa = [&](auto &malha, auto &saida, glm::mat4 matriz_indi)
     {
+        glm::mat4 model_view = view * matriz_indi;
+
+        //calcula as norais levando em conta rotaçao
+        glm::mat3 matriz_nromais = glm::transpose(glm::inverse(glm::mat3(model_view)));
         for (auto &face : malha)
         {
-            vector<Vertices> aux;
+            vector<VerticesPhong> aux;
             for (auto &v : face)
             {
                 // calcula a posicao da camera
-                glm::vec4 p_view = view * matriz_indi * glm::vec4(v.x, v.y, v.z, 1.0f);
-                // ássa para a tela
-                Vertices v_ndc = (camera.transf_coord_tela(v, largura_atual, altura_atual, matriz_indi));
-                Vertices v_pixel = camera.toPixel(v_ndc, largura_atual, altura_atual);
+                glm::vec4 p_view = model_view * glm::vec4(v.x, v.y, v.z, 1.0f);
+                //calcula as normais
+                glm::vec3 n_origem = glm::vec3(v.nx,v.ny,v.nz);
+                glm::vec3 n_view = glm::normalize(matriz_nromais * n_origem);
 
-                // guarda a posicap view
+                // ássa para a tela
+                VerticesPhong v_ndc = (camera.transf_coord_tela(v, largura_atual, altura_atual, matriz_indi));
+                VerticesPhong v_pixel = camera.toPixel(v_ndc, largura_atual, altura_atual);
+
+                // guarda a posicap view e normais
                 v_pixel.vx = p_view.x;
                 v_pixel.vy = p_view.y;
                 v_pixel.vz = p_view.z;
 
+                 v_pixel.nx = n_view.x;
+                v_pixel.ny = n_view.y;
+                v_pixel.nz = n_view.z;
                 // cout << "Y tela: " << v_pixel.y << endl;
                 aux.push_back(v_pixel);
             }
@@ -714,37 +540,40 @@ void configura_phong()
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
 }
-void processa_menu(int opcao)
+
+//Função para processar o Menu de opções
+void ProcessaMenu(int opcao)
 {
     switch (opcao)
     {
-    // cores
+    //Cores de preenchimento do polígono
     case COR_VERM:
-        cor_R = 1.0f;
-        cor_G = 0.0f;
-        cor_B = 0.0f;
+        cor_preenc.r = 1.0f;
+        cor_preenc.g = 0.0f;
+        cor_preenc.b = 0.0f;
         break;
     case COR_VERD:
-        cor_R = 0.0f;
-        cor_G = 1.0f;
-        cor_B = 0.0f;
+        cor_preenc.r = 0.0f;
+        cor_preenc.g = 1.0f;
+        cor_preenc.b = 0.0f;
         break;
     case COR_AZUL:
-        cor_R = 0.0f;
-        cor_G = 0.0f;
-        cor_B = 1.0f;
+        cor_preenc.r = 0.0f;
+        cor_preenc.g = 0.0f;
+        cor_preenc.b = 1.0f;
         break;
     case COR_BRANCA:
-        cor_R = 1.0f;
-        cor_G = 1.0f;
-        cor_B = 1.0f;
+        cor_preenc.r = 1.0f;
+        cor_preenc.g = 1.0f;
+        cor_preenc.b = 1.0f;
         break;
     case COR_AMARELO:
-        cor_R = 1.0f;
-        cor_G = 1.0f;
-        cor_B = 0.0f;
+        cor_preenc.r = 1.0f;
+        cor_preenc.g = 1.0f;
+        cor_preenc.b = 0.0f;
         break;
-    // contorno
+
+    //Cores de contorno
     case CONTORNO_VERM:
         cor_contorno = {1.0f, 0.0f, 0.0f};
         break;
@@ -761,7 +590,7 @@ void processa_menu(int opcao)
         cor_contorno = {1.0f, 1.0f, 0.0f};
         break;
 
-    // opcoes de linha
+    //Grossuras de linha
     case LINHA_FINA:
         tamanho_linha = 1.0f;
         break;
@@ -771,65 +600,81 @@ void processa_menu(int opcao)
     case LINHA_GROSSA:
         tamanho_linha = 5.0f;
         break;
-    // modos de projecao
-    case Orto:
-        camera.setProejcao(MODO_ORTO);
-        camera.modo_projecao(largura_atual, altura_atual);
 
+    //Modos de projeção
+    case Orto:
+        camera.setProjecao(MODO_ORTO);
+        camera.modo_projecao(largura_atual, altura_atual);
         break;
     case Perspec:
-        camera.setProejcao(MODO_PERSPEC);
+        camera.setProjecao(MODO_PERSPEC);
         camera.modo_projecao(largura_atual, altura_atual);
         break;
 
-    case VER_EXTRUSAO:
-        modo_atual = MD_EXTRUSAO;
-        break;
+    //Qual funcionalidade está sendo usada
     case VER_OBJT_2D:
         modo_atual = MD_DESENHO;
+        flagLuz = ESCURO;
+        break;
+    case VER_EXTRUSAO:
+        modo_atual = MD_EXTRUSAO;
+        flagLuz = ESCURO;
         break;
     case VER_OBJT_3D:
         modo_atual = MD_OBJT;
+        flagLuz = ESCURO;
         break;
 
+    //Tipos de iluminação
+    case FLAT:
+        modo_atual = FLAT;
+        flagLuz = LUZES;
+        glShadeModel(GL_FLAT);
+        break;
     case GOURAUD:
         modo_atual = GOURAUD;
-        flag = LUZES;
-        glEnable(GL_LIGHTING);
+        flagLuz = LUZES;
         glShadeModel(GL_SMOOTH);
-        break;
-    case FLAT:
-        // pega a cor de um único vértice e pinta a face inteira com aquela cor sólida.
-        modo_atual = FLAT;
-        flag = LUZES;
-        glEnable(GL_LIGHTING);
-        glShadeModel(GL_FLAT);
         break;
     case PHONG:
         modo_atual = PHONG;
+        //Não ativa nenhuma função do openGL, pois não existe
         break;
+
+    //Controle das luzes
     case LUZES:
-        flag = LUZES;
+        flagLuz = LUZES;
         break;
+    case ESCURO:
+        flagLuz = ESCURO;
+        break;
+
+    //Limpa os vértices
     case LIMPAR_TELA:
         g_vertices.clear();
         break;
+
+    //Fecha o programa
     case SAIR:
         exit(0);
         break;
     }
-    // redesenha a tela
+
+    //Redesenha a tela -> DisplayPrincipal()
     glutPostRedisplay();
 }
-void controla_luzes(menu_opcoes flag)
+
+//Função de controle das luzes
+void ControlaLuzes(menu_opcoes flag)
 {
+    //Caso as luzes estejam ativas
     if (flag == LUZES)
     {
-        // liga
-        glEnable(GL_LIGHTING);
-        glEnable(GL_COLOR_MATERIAL);
-        glColorMaterial(GL_FRONT, GL_DIFFUSE);
-        // desenhando as luzes
+        //Reduz a luz ambiente
+        GLfloat luzCinza[] = {0.2f, 0.2f, 0.2f, 0.1f};
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzCinza);
+
+        //TODO
         luz0.ligar();
         luz1.ligar();
         luz2.ligar();
@@ -842,28 +687,31 @@ void controla_luzes(menu_opcoes flag)
         luz1.atualizar();
         luz2.atualizar();
     }
+    //Caso estejam desligadas
     else
     {
-        glDisable(GL_LIGHTING);
+        //Adiciona a luz branca
+        GLfloat luzBranca[] = {1.0f, 1.0f, 1.0f, 1.0f};
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzBranca);
+
+        //Desativa as luzes
         luz0.desligar();
         luz1.desligar();
         luz2.desligar();
     }
 }
-void display_principal()
+
+//Função de display principal, chama as outras conforme necessidade
+void DisplayPrincipal()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpar cor e pronfundidade
+    //Limpa a tela
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    GLfloat cor_amb[3] = {0.5, 0.5, 0.5};
-    GLfloat pos[3] = {0, 10, 0};
-    GLfloat cor_luz[3] = {1.0f, 1.0f, 1.0f};
-    GLfloat pos_spot[3] = {0, 5, 15};
-    GLfloat direcao_spot[3] = {1, -0.2, -1};
-    GLfloat cor_spot[3] = {0.5f, 0.0f, 0.5f};
+    //Modo 2D
     if (modo_atual == MD_DESENHO)
     {
-        // modo 2D
+        //Ativa a câmera 2D
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
 
@@ -872,90 +720,103 @@ void display_principal()
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
     }
+    //Modo 3D
     else
     {
-        // parametros 3d
+        //Define o modo de projeção da câmera
         camera.modo_projecao(largura_atual, altura_atual);
-        camera.aplica_paramtero();
-        // controla_luzes(flag);
+        camera.aplica_parametro();
+
+        //Acende/apaga as luzes
+        ControlaLuzes(flagLuz);
     }
 
     switch (modo_atual)
     {
+    //Modo de desenho 2D
+    case MD_DESENHO:
+        Display2D();
+        break;
+
+    //Modo de extrusão 2D->3D
+    case MD_EXTRUSAO:
+        glTranslatef(tx, ty, 0);
+        glRotatef(rxo, 1, 0, 0);
+        glRotatef(ryo, 0, 1, 0);
+        glRotatef(rzo, 0, 0, 1);
+        //Diminui muito a escala, pois as coordenadas ficam muito grandes na projeção 3D
+        glScalef(scaleo * 0.05f, scaleo * 0.05f, scaleo * 0.05f);
+
+        ExtrusaoPoligonos();
+        break;
+
+    //Modo de objetos 3D
+    //Sem iluminação específica
     case MD_OBJT:
-        // TG nos objtos
-        glPushMatrix();
+        //Aplica as transformações
         glTranslatef(tx, ty, 0);
         glRotatef(rxo, 1, 0, 0);
         glRotatef(ryo, 0, 1, 0);
         glRotatef(rzo, 0, 0, 1);
         glScalef(scaleo, scaleo, scaleo);
 
-        // desenho dos objtos
+        //Desenha os objetos 3D pré-definidos
         cubo.draw(0, 0, 0);
         esfera.draw(-4.0f, 0.0f, 0.0f);
         piramide.draw(4, 4, 0);
 
-        // objeto pr=e-definifo
+        //Desenha um cilindro
         glTranslatef(7, 1, 0);
         glutSolidCylinder(2, 2, 20, 20);
-        glPopMatrix();
-        break;
-    case MD_EXTRUSAO:
 
-        if (g_vertices.size() >= 3)
-        {
-            glPushMatrix();
-            float scale_objt = scaleo * 0.005f;
-            // TG nos objtos
-            glTranslatef(tx, ty, 0);
-            glRotatef(rxo, 1, 0, 0);
-            glRotatef(ryo, 0, 1, 0);
-            glRotatef(rzo, 0, 0, 1);
-            glScalef(scale_objt, scale_objt, scale_objt);
-
-            extrusao_poligonos();
-            glPopMatrix();
-        }
         break;
+        
+    //Ilunimação flat ou GOURARD
+    //Elas foram ativadas no ProcessaMenu()
+    //Aqui configura os objetos
     case FLAT:
     case GOURAUD:
-        controla_luzes(flag); // liga luzes normais
-        glPushMatrix();
+        //Liga as luzes normais
+        ControlaLuzes(flagLuz);
+        
         glTranslatef(tx, ty, 0);
         glRotatef(rxo, 1, 0, 0);
         glRotatef(ryo, 0, 1, 0);
         glRotatef(rzo, 0, 0, 1);
         glScalef(scaleo, scaleo, scaleo);
 
+        //Desenha os objetos 3D pré-definidos
         cubo.draw(0, 0, 0);
-        esfera.draw(-4.0f, 0, 0);
-        piramide.draw(6, 0, 0);
-        glPopMatrix();
+        esfera.draw(-4.0f, 0.0f, 0.0f);
+        piramide.draw(4, 4, 0);
+
+        //Desenha um cilindro
+        glTranslatef(7, 1, 0);
+        glutSolidCylinder(2, 2, 20, 20);
+        
         break;
 
+    //Iluminação Phong
     case PHONG:
         configura_phong();
 
-        glPopMatrix();
-        break;
-    case MD_DESENHO:
-        display();
         break;
     }
 
     glutSwapBuffers();
 }
 
+//Quando uma tecla "não-texto" (setas, etc) for pressionada
 void callback_teclasespeciais(int key, int x, int y)
 {
-
+    //Informa a câmera
     camera.teclas_especiais(key, x, y);
 }
 
+//Quando uma tecla "text" (wasd, +, -, etc) for pressionada
 void callback_teclado(unsigned char key, int x, int y)
 {
-    // teclas que controlam a camera
+    //Teclas que controlam a camera
     if (key == 'w' || key == 'W' ||
         key == 's' || key == 'S' ||
         key == 'a' || key == 'A' ||
@@ -964,69 +825,91 @@ void callback_teclado(unsigned char key, int x, int y)
     {
         camera.teclado(key, x, y);
     }
+
     // teclas que controlam os objetos
+
     float step = 0.1;
-    // Rotação zxcvrf
+
     switch (key)
     {
+    //Rotação dos objetos
+
+    //Anti-horário ao redor de X
     case 'z':
     case 'Z':
         rxo += 5;
         break;
+    //Horário ao redor de X
     case 'x':
     case 'X':
         rxo -= 5;
         break;
+    //Anti-horário ao redor de Y
     case 'c':
     case 'C':
         ryo += 5;
         break;
+    //Horário ao redor de Y
     case 'v':
     case 'V':
         ryo -= 5;
         break;
+    //Anti-horário ao redor de Z
     case 'f':
     case 'F':
         rzo += 5;
         break;
+    //Horário ao redor de Z
     case 'r':
     case 'R':
         rzo -= 5;
         break;
 
-    // translação
+    //Translação dos objetos
+
+    //Move para y positivo
     case 'g':
     case 'G':
         ty += step;
         break;
+    //Move para y negativo
     case 'h':
     case 'H':
         ty -= step;
         break;
+    //Move para x negativo
     case 'j':
     case 'J':
         tx -= step;
         break;
+    //Move para x positivo
     case 'k':
     case 'K':
         tx += step;
         break;
-    // zoom bn
+    
+    //Escala dos objetos
+
+    //Aumenta a escala
     case 'b':
     case 'B':
         scaleo += 0.1f;
         break;
+    //Diminui a escala, até um limite
     case 'n':
     case 'N':
-        if (scaleo > 0.2f)
+        if (scaleo >= 0.2f - epsilon)
             scaleo -= 0.1f;
+
         break;
     }
+
+    //Redesenha a tela -> DisplayPrincipal()
     glutPostRedisplay();
 }
+
 int main(int argc, char **argv)
 {
-
     glutInit(&argc, argv);
     glutInitWindowSize(WINDOW_W, WINDOW_H);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -1037,107 +920,114 @@ int main(int argc, char **argv)
         cout << "Erro ao carregar GLAD" << endl;
         return -1;
     }
+
     // habilitações globais
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_NORMALIZE); // lida com a normalização apesar do tamanho do objetos
+    //Normaliza automaticamente os vetores normais para a iluminação
+    glEnable(GL_NORMALIZE);
+    //Ativa as configurações das luzes
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
 
     // Configuração inicial da camera
-    camera.init(WINDOW_W, WINDOW_H, Perspec);
+    camera.init(WINDOW_W, WINDOW_H, MODO_PERSPEC);
+
     luz0.init(GL_LIGHT0, DIRECIONAL); // sol
-    luz0.set_posicao(15.0f, 10.0f, 10.0f);
+    luz0.set_posicao(0.0f, 6.0f, -4.0f);
     luz0.set_cor(1.0f, 0.95f, 0.8f);
+    luz0.set_direcao(-1.0f, -1.0f, 1.0f);
     luz0.set_intensidade(0.8f);
 
     luz1.init(GL_LIGHT1, PONTUAL); // luz azul
-    luz1.set_posicao(-10.0f, 10.0f, 0.0f);
+    luz1.set_posicao(0.0f, -6.0f, 0.0f);
     luz1.set_cor(0.2f, 0.2f, 1.0f);
     luz1.set_intensidade(0.6f);
 
     luz2.init(GL_LIGHT2, SPOT); // luz magenta
-    luz2.set_posicao(1.0f, 7.0f, 0.0f);
+    luz2.set_posicao(10.0f, 0.0f, 0.0f);
     luz2.set_cor(1.0f, 0.0f, 1.0f);
-    luz2.set_direcao(0.0f, -1.0f, 0.0f);
+    luz2.set_direcao(-1.0f, 0.0f, 0.0f);
     luz2.set_Spot_configuracao(25.0f, 2.0f);
     luz2.set_intensidade(1.0f);
 
-    // inicializo os objtos
+    //Inicializa os objetos
     cubo.init(5);           // tamanho
-    esfera.init(2, 40, 40); // raio
+    esfera.init(2, 20, 20); // raio
     piramide.init(2);       // tamanho
 
-    // gerando as malhas
+    //Gera as malhas
     malha_cubo = cubo.gera_malhas(5.0f);
-    malha_esfera = esfera.gera_malhas(2.0f, 40, 40);
+    malha_esfera = esfera.gera_malhas(2.0f, 20, 20);
     malha_piramide = piramide.gera_malhas();
 
-    // leitura do teclado e setas
+    //Configura as funções de leitura do teclado
     glutKeyboardFunc(callback_teclado);
     glutSpecialFunc(callback_teclasespeciais);
 
-    // menu de desenho
-    // cores
-    int subCor = glutCreateMenu(processa_menu);
+    //Menu de opções (botão direito)
+    //Cores de preenchimento
+    int subCor = glutCreateMenu(ProcessaMenu);
     glutAddMenuEntry("Vermelho", COR_VERM);
     glutAddMenuEntry("Verde", COR_VERD);
     glutAddMenuEntry("Azul", COR_AZUL);
-    glutAddMenuEntry("Amatelo", COR_AMARELO);
+    glutAddMenuEntry("Amarelo", COR_AMARELO);
     glutAddMenuEntry("Branco", COR_BRANCA);
-    // contorno
-    int subContorno = glutCreateMenu(processa_menu);
+    //Cores de contorno
+    int subContorno = glutCreateMenu(ProcessaMenu);
     glutAddMenuEntry("Vermelho", CONTORNO_VERM);
     glutAddMenuEntry("Verde", CONTORNO_VERD);
     glutAddMenuEntry("Azul", CONTORNO_AZUL);
-    glutAddMenuEntry("Amatelo", CONTORNO_AMARELO);
+    glutAddMenuEntry("Amarelo", CONTORNO_AMARELO);
     glutAddMenuEntry("Branco", CONTORNO_BRANCA);
-    // linhas
-    int subLinha = glutCreateMenu(processa_menu);
+    //Grossuras da linha
+    int subLinha = glutCreateMenu(ProcessaMenu);
     glutAddMenuEntry("Fina", LINHA_FINA);
     glutAddMenuEntry("Media", LINHA_MED);
     glutAddMenuEntry("Grossa", LINHA_GROSSA);
-
-    // Menu que lida com as porjeções
-    int subProjec = glutCreateMenu(processa_menu);
+    //Tipos de projeção
+    int subProjec = glutCreateMenu(ProcessaMenu);
     glutAddMenuEntry("Orto", Orto);
     glutAddMenuEntry("Perspec", Perspec);
-
-    int subLuz = glutCreateMenu(processa_menu);
-    glutAddMenuEntry("Gouraud", GOURAUD);
+    //Tipos de iluminação
+    int subLuz = glutCreateMenu(ProcessaMenu);
     glutAddMenuEntry("Flat", FLAT);
+    glutAddMenuEntry("Gouraud", GOURAUD);
     glutAddMenuEntry("Phong", PHONG);
-
-    int addLuz = glutCreateMenu(processa_menu);
-    glutAddMenuEntry("Luzes de Phong", LUZES);
-    glutAddMenuEntry("Apagar Luzes ", ESCURO);
-
-    // Menus
-    int subModos = glutCreateMenu(processa_menu);
+    //Controlador das luzes
+    int addLuz = glutCreateMenu(ProcessaMenu);
+    glutAddMenuEntry("Acender Luzes", LUZES);
+    glutAddMenuEntry("Apagar Luzes", ESCURO);
+    //Modos
+    int subModos = glutCreateMenu(ProcessaMenu);
     glutAddMenuEntry("Modo Desenho", VER_OBJT_2D);
     glutAddMenuEntry("Modo Extrusao", VER_EXTRUSAO);
     glutAddMenuEntry("Modo OBJETOS 3D", VER_OBJT_3D);
-
-    // tronco
-    // menu de desenho
-    glutCreateMenu(processa_menu);
-
+    //Estrutura
+    glutCreateMenu(ProcessaMenu);
+    //Opções de rendering
     glutAddSubMenu("Modos", subModos);
     glutAddSubMenu("Projecao", subProjec);
-    glutAddSubMenu("Met Iluminacao", subLuz);
-    glutAddSubMenu("Add Luzes de PHONG", addLuz);
-
+    glutAddSubMenu("Forma de Iluminacao", subLuz);
+    glutAddSubMenu("Configuracao das luzes", addLuz);
+    //Separador
     glutAddMenuEntry("*** Estilos ***", -1);
+    //Configurador 2D (e extrusão)
     glutAddSubMenu("Cor de Preenchimento", subCor);
     glutAddSubMenu("Cor de Contorno", subContorno);
     glutAddSubMenu("Espessura de linha", subLinha);
-
-    glutAddMenuEntry("LIMPAR TELA", LIMPAR_TELA); //
+    //Ações
+    glutAddMenuEntry("Limpar Tela", LIMPAR_TELA);
     glutAddMenuEntry("Sair", SAIR);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
-    // mouse
-    glutMouseFunc(gerenciaMouse);
-    glutReshapeFunc(reshape);
-    // seleciona os modos
-    glutDisplayFunc(display_principal);
+    //Configura a função de leitura do mouse
+    glutMouseFunc(GerenciaMouse);
+    //Configura a função de redimensionamento da janela
+    glutReshapeFunc(Reshape);
+
+    //Define a função de renderização principal
+    glutDisplayFunc(DisplayPrincipal);
+    //Loop principal
     glutMainLoop();
     return 0;
 }
