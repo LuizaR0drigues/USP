@@ -12,9 +12,9 @@ void Piramide::init(int tam)
         {tam, -tam, -tam}};
 
     int f[4][3] = {
-        {0, 1, 2},
+        {0, 2, 1},
         {0, 1, 3},
-        {0, 2, 3},
+        {0, 3, 2},
         {1, 2, 3}};
 
     float c[4][3] = {
@@ -68,7 +68,9 @@ void Piramide::calcNormalFace(VerticesPhong v1, VerticesPhong v2, VerticesPhong 
     float len = sqrt(nx * nx + ny * ny + nz * nz);
     if (len > 0.0f) { nx /= len; ny /= len; nz /= len; }
 }
- vector<vector<VerticesPhong>> Piramide::gera_malhas(){
+
+vector<vector<VerticesPhong>> Piramide::gera_malhas()
+{
     vector<vector<VerticesPhong>> todas_faces;
     VerticesPhong v0, v1, v2;
     vector<VerticesPhong> face_atual;
@@ -97,11 +99,10 @@ void Piramide::calcNormalFace(VerticesPhong v1, VerticesPhong v2, VerticesPhong 
         face_atual.push_back({v1.x, v1.y, v1.z, nx, ny, nz});
         face_atual.push_back({v2.x, v2.y, v2.z, nx, ny, nz});
         todas_faces.push_back(face_atual);
-        
+        face_atual.clear();
     }
     return todas_faces;
-
- }
+}
 
 void Piramide::draw(float x, float y, float z)
 {
@@ -112,8 +113,6 @@ void Piramide::draw(float x, float y, float z)
     // percorre as faces
     for (int i = 0; i < 4; i++)
     {
-        
-
         //3 vertices
         int Idx0 = faces[i][0];
         int Idx1 = faces[i][1];

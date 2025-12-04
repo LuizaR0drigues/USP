@@ -1,10 +1,12 @@
 #ifndef PHONG_H
 #define PHONG_H
-#include "glad/glad.h"
-#include <GL/freeglut.h>
+
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include <algorithm>
+
+#include "glad/glad.h"
 #include "camera.h"
 #include "structs.h"
 

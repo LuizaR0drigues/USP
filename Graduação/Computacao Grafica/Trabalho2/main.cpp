@@ -1,3 +1,6 @@
+//Luís Filipe Silva Forti 14592348
+//Luiza Rodrigues Cardoso 14593332
+
 #include <iostream>
 #include <vector>
 #include <array>
@@ -7,7 +10,6 @@
 #include <utility>
 
 #include "glad/glad.h"
-#include <GL/freeglut.h>
 
 #include "structs.h"
 #include "cubo.h"
@@ -48,7 +50,7 @@ float ks = 1.0f; //mutio brilho
 // Transformações Geomtericas NO OBJETO 3D
 float tx = 0.0, ty = 0.0, tz = 0.0;
 float rxo = 0.0, ryo = 0.0, rzo = 0.0;
-float scaleo = 1.0;
+float scaleo = 0.1;
 
 // Lista dinâmica - clique do usuário
 vector<Ponto> g_vertices;
@@ -187,6 +189,7 @@ ET *CriaET(vector<Ponto> vertices)
         {
             continue;
         }
+
         //Qual a posição na lista da ET (qual o Y inicial)
         int indice = ceil(ver1.y) - listaET->yMin;
         float dy = ver2.y - ver1.y;
@@ -421,32 +424,72 @@ void Reshape(int w, int h)
     camera.modo_projecao(w, h);
 }
 
+//Função de controle das luzes
+void ControlaLuzes(menu_opcoes flag)
+{
+    //Caso as luzes estejam ativas
+    if (flag == LUZES)
+    {
+        //Reduz a luz ambiente
+        GLfloat luzCinza[] = {0.2f, 0.2f, 0.2f, 1.0f};
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzCinza);
 
+        //TODO
+        luz0.ligar();
+        luz1.ligar();
+        luz2.ligar();
+
+        luz0.desenha();
+        luz1.desenha();
+        luz2.desenha();
+
+        luz0.atualizar();
+        luz1.atualizar();
+        luz2.atualizar();
+    }
+    //Caso estejam desligadas
+    else
+    {
+        //Adiciona a luz branca
+        GLfloat luzBranca[] = {1.0f, 1.0f, 1.0f, 1.0f};
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzBranca);
+
+        //Desativa as luzes
+        luz0.desligar();
+        luz1.desligar();
+        luz2.desligar();
+    }
+}
+
+//Função para configurar a tela para usar o phong
 void configura_phong()
 {
-    Color cor_atual = {0.0f, 0.8f, 1.0f};
-    Color cor_amb = {1.0f, 1.0f, 1.0f};    // Luz Ambiente (preto)
+    Color cor_atual = {0.0f, 0.0f, 1.0f};  // Objeto azul
+    Color cor_amb = {0.5f, 0.5f, 0.5f};    // Luz Ambiente (cinza)
     Color cor_difusa = {1.0f, 1.0f, 1.0f}; // Luz Difusa (Branca)
     Color cor_espc = {1.0f, 1.0f, 1.0f};   // Luz Especular (Brilho Branco)
 
-    // matrizes da camera
+    //Propriedades da câmera
     glm::vec3 cam_posi = camera.getCameraPosicao();
     glm::vec3 cam_front = camera.getCameraFront();
     glm::vec3 cam_up = camera.getCameraUP();
-
     glm::vec3 alvo = cam_posi + cam_front;
+
+    //Cria a matriz de transformação de coordenadas para coordenadas da câmera
     glm::mat4 view = glm::lookAt(cam_posi, alvo, cam_up);
 
-    // conversao de luzes
+    //Cria a luz global e converte sua direção para coordenadas da câmera
     glm::vec3 luz_mundo = glm::vec3(15.0f, 10.0f, 10.0f);
     glm::vec4 luz_view = view * glm::vec4(luz_mundo, 1.0f);
-    float luz_view_pos[3] = {0.0f, 0.0f, 0.0f}; //POSICAO DA FONTE DE LUZ - vindo da direira-cima
-    //  Phong comeca com luz em view-space e camera na origem
+
+    //Define a posição da luz
+    float luz_view_pos[3] = {0.0f, 0.0f, 0.0f};
+    //Phong comeca com luz em view-space e camera na origem
     float camera_view_pos[3] = {0.0f, 0.0f, 0.0f};
 
     phong_cor.init(luz_view_pos, nullptr, camera_view_pos);
 
-    // trasnformacoes do objeto
+    //Cria a matriz de transformação dos objetos
     glm::mat4 model_matrix = glm::mat4(1.0f);
     model_matrix = glm::translate(model_matrix, glm::vec3(tx, ty, tz));
     model_matrix = glm::rotate(model_matrix, glm::radians(rxo), glm::vec3(1, 0, 0));
@@ -454,90 +497,107 @@ void configura_phong()
     model_matrix = glm::rotate(model_matrix, glm::radians(rzo), glm::vec3(0, 0, 1));
     model_matrix = glm::scale(model_matrix, glm::vec3(scaleo , scaleo , scaleo ));
     
+    //Cria as matrizes de translações globais dos objetos, para ficarem nas posições desejadas
     glm::mat4 m_cubo = glm::translate(model_matrix, glm::vec3(-6.0f, 0.0f, 0.0f));
     glm::mat4 m_piramide = glm::translate(model_matrix, glm::vec3(6.0f, 0.0f, 0.0f));
     glm::mat4 m_esf = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
 
-    // guarda as novas coords
+    //Para guardar as novas coordendas
     vector<vector<VerticesPhong>> nw_coord_cubo, nw_coord_esf, nw_coords_pi;
 
-    // transforma para a atela
+    //Função para transformar as coordenadas
     auto processa = [&](auto &malha, auto &saida, glm::mat4 matriz_indi)
     {
+        //Adiciona a translação do objeto as transformações globais
         glm::mat4 model_view = view * matriz_indi;
 
-        //calcula as norais levando em conta rotaçao
-        glm::mat3 matriz_nromais = glm::transpose(glm::inverse(glm::mat3(model_view)));
+        //Calcula as normais, levando em conta a rotação e a escala
+        //glm::mat3(model_view) -> descarta a translação
+        //glm::transpose(glm::inverse(...)) -> técnica para lidar com escalas não-uniformes para as normais
+        glm::mat3 matriz_normais = glm::transpose(glm::inverse(glm::mat3(model_view)));
+
         for (auto &face : malha)
         {
             vector<VerticesPhong> aux;
+
+            //Para cada vértice da face
             for (auto &v : face)
             {
-                // calcula a posicao da camera
+                //Calcula a posição nas coordenadas da câmera
                 glm::vec4 p_view = model_view * glm::vec4(v.x, v.y, v.z, 1.0f);
-                //calcula as normais
+                //Calcula as normais
                 glm::vec3 n_origem = glm::vec3(v.nx,v.ny,v.nz);
-                glm::vec3 n_view = glm::normalize(matriz_nromais * n_origem);
+                glm::vec3 n_view = glm::normalize(matriz_normais * n_origem);
 
-                // ássa para a tela
+                //Passa para a tela
                 VerticesPhong v_ndc = (camera.transf_coord_tela(v, largura_atual, altura_atual, matriz_indi));
                 VerticesPhong v_pixel = camera.toPixel(v_ndc, largura_atual, altura_atual);
+                v_pixel.z = p_view.z;
 
-                // guarda a posicap view e normais
+                //Guarda a posição na view e as normais
                 v_pixel.vx = p_view.x;
                 v_pixel.vy = p_view.y;
                 v_pixel.vz = p_view.z;
 
-                 v_pixel.nx = n_view.x;
+                v_pixel.nx = n_view.x;
                 v_pixel.ny = n_view.y;
                 v_pixel.nz = n_view.z;
-                // cout << "Y tela: " << v_pixel.y << endl;
+                
                 aux.push_back(v_pixel);
             }
             saida.push_back(move(aux));
         }
     };
+    
+    //Converte todas as malhas
     processa(malha_cubo, nw_coord_cubo, m_cubo);
     processa(malha_piramide, nw_coords_pi, m_piramide);
     processa(malha_esfera, nw_coord_esf, m_esf);
 
-    // loop de desenhp em 2D
+    //Loop de desenho em 2D
     glMatrixMode(GL_PROJECTION);
+    //Congela os outros objetos
     glPushMatrix();
     glLoadIdentity();
+    //Cria uma matriz de projeção paralela
+    //xMin, xMax, yMin, yMax, zPerto, zLonge
     glOrtho(0.0, largura_atual, 0.0, altura_atual, -100.0, 100.0);
-
     glMatrixMode(GL_MODELVIEW);
+
     glPushMatrix();
     glLoadIdentity();
-
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glEnable(GL_CULL_FACE); //nao dessenha o interior
-    glCullFace(GL_BACK); //descarta costas
-    //glFrontFace(GL_CCW); //hantihorario como padrao
+    //glEnable(GL_CULL_FACE); //Não desenha o interior
+    //glCullFace(GL_BACK); //Descarta costas
+
+    //Função para desenhar os vetores
     auto rasteriza = [&](auto &lista)
     {
         for (auto &face : lista)
         {
             ET_phong *et = phong_cor.CriaET(face);
-            if (!et || et->nroNiveis <= 0)
-                std::cout << "Face ignorada: ET vazio\n";
 
+            //Se et != null
             if (et)
             {
+                //Desenha a face
                 phong_cor.scan_line(et, cor_atual, ka, kd, ks, cor_amb, cor_difusa, cor_espc);
+
+                //Limpa a memória
                 delete[] et->lista;
                 delete et;
             }
         }
     };
 
+    //Desenha os objetos
     rasteriza(nw_coord_cubo);
     rasteriza(nw_coords_pi);
     rasteriza(nw_coord_esf);
 
     glDisable(GL_CULL_FACE);
+
     // Restaura matrizes
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
@@ -668,43 +728,6 @@ void ProcessaMenu(int opcao)
     glutPostRedisplay();
 }
 
-//Função de controle das luzes
-void ControlaLuzes(menu_opcoes flag)
-{
-    //Caso as luzes estejam ativas
-    if (flag == LUZES)
-    {
-        //Reduz a luz ambiente
-        GLfloat luzCinza[] = {0.2f, 0.2f, 0.2f, 0.1f};
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzCinza);
-
-        //TODO
-        luz0.ligar();
-        luz1.ligar();
-        luz2.ligar();
-
-        luz0.desenha();
-        luz1.desenha();
-        luz2.desenha();
-
-        luz0.atualizar();
-        luz1.atualizar();
-        luz2.atualizar();
-    }
-    //Caso estejam desligadas
-    else
-    {
-        //Adiciona a luz branca
-        GLfloat luzBranca[] = {1.0f, 1.0f, 1.0f, 1.0f};
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzBranca);
-
-        //Desativa as luzes
-        luz0.desligar();
-        luz1.desligar();
-        luz2.desligar();
-    }
-}
-
 //Função de display principal, chama as outras conforme necessidade
 void DisplayPrincipal()
 {
@@ -723,6 +746,9 @@ void DisplayPrincipal()
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+
+        //Acende/apaga as luzes
+        ControlaLuzes(flagLuz);
     }
     //Modo 3D
     else

@@ -121,6 +121,7 @@ vector<vector<VerticesPhong>> Cubo::gera_malhas(float tamanho){
     return todasFaces;
 
 }
+
 void Cubo::draw(float x, float y, float z)
 {
     glPushMatrix();

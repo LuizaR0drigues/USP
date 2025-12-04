@@ -1,34 +1,36 @@
-📔 MANUAL DE TECLAS DO POL²IGONOS 3D 
-*******************************************************************
-COMANDOS DE COMPILAÇÃO(via terminal )
-*******************************************************************
-g++ main.cpp piramide.cpp esfera.cpp cubo.cpp camera.cpp iluminacao.cpp glad.c -o app -I include -lGL -lglut -lGLU -ldl
+Todo o projeto foi desenvolvido em Ubuntu. Recomenda-se o uso do mesmo sistema
+operacional para rodar a aplicação. Não foram feitos testes em outras SOs
 
-OU
+*******************************************************************
+COMANDO DE COMPILAÇÃO (via terminal)
+*******************************************************************
 
-g++ *.cpp glad.c -o app -I include -lGL -lglut -lGLU -ldl
-g++ main.cpp src/*.cpp src/glad.c -o build/app2 -I include -lGL -lglut -lGLU -ldl
+g++ main.cpp src/*.cpp src/glad.c -o build/app -I include -lGL -lglut -lGLU -ldl
 
 Execução:
-./app
+./build/app
 
 *******************************************************************
- VARIÁVEIS DO TECLADO
+MANUAL DE TECLAS
 *******************************************************************
-Movimentação da CAMERA:
+
+Desenho 2D:
+Botão esquerdo do mouse -> Cria o vértice
+
+
+Menu de opções:
+Botão direito do mouse -> abre o menu
+
+
+Movimentação da CÂMERA:
 
 WASD -> para rotação
-
 Setas -> para translação
-
 +- -> para aplicar zoom - não funciona para a visão ortografica
+
 
 Movimentação dos objetos 3D:
 
-ZXCVRF -> para rotação(todos os eixos)
-
+ZXCVRF -> para rotação (todos os eixos)
 BN -> para aplicar escala
-
 GHJK -> para aplicar translação
-
-

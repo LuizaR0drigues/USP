@@ -220,6 +220,7 @@ VerticesPhong Camera::transf_coord_tela(const VerticesPhong v, int largura, int 
 
 }
 
+//Converte de coordenadas da câmera para coordenadas da janela
 VerticesPhong Camera::toPixel(const VerticesPhong v, int largura, int altura){
     VerticesPhong s = v;
     s.x = (v.x * 0.5f + 0.5f) * largura;
