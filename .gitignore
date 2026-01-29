@@ -180,3 +180,7 @@ Graduação/lib64
 *.idx
 Graduação/CG/Trabalho1Qt/build
 
+/python/ML-DATAICMC/A01-Perceptron/vizualização/__pycache__
+/python/venv_geral
+/python/ML-DATAICMC/A01-Perceptron/data/__pycache__
+/python/ML-DATAICMC/A01-Perceptron/vizualização/__pycache__
