@@ -23,7 +23,7 @@ def Gen_Data():
 
     return Data
 
-def Data_3D():
+def Data_3D(selecao):
     #lendo a tabela inicial;
     iris = pd.read_csv('data/arquivos/Iris.csv')
 
