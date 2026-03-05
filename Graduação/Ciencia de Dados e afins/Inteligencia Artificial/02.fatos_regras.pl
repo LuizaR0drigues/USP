@@ -20,6 +20,12 @@ genitor(bob, pat) .
 genitor(pat, jim) .
 
 % Regras
+/*
+:- equivale ao (SE) - implicação
+, equivale ao (E) - conjunção
+; equivale ao (OU) - disjunção
+*/
+
 irmao(X, Y) :- genitor(P, X), genitor(P, Y), X \= Y.
 avo(X, Y)    :- genitor(X, P), genitor(P, Y).
 bisavo(X, Y) :- avo(X, P), genitor(P, Y).
