@@ -1,0 +1,75 @@
+p {
+    color: blueviolet;
+    font-size: 12px;
+}
+
+h2 {
+    color: goldenrod;
+}
+#mundo {
+    color: cornflowerblue;
+
+}
+
+#div1 p{
+    color: black;
+    font-size: 16px;
+}
+
+
+#div1 > p {
+    background-color: blueviolet;
+}
+
+#div1 ~ p {
+    font-size: 20px;
+    color: crimson;
+}
+
+#div1 + p {
+    background-color: bisque;
+}
+
+a:hover {
+    background-color: rgb(175, 139, 193);
+    color:rgb(235, 235, 235)
+}
+
+a:visited {
+    color: deeppink;
+}
+
+a::before {
+    content: "🔗";
+}
+
+#link {
+    text-decoration:none;
+}
+
+div p{
+    color: rgb(38, 209, 43);
+    font-size: 16px;
+}
+
+#ola {
+    color: goldenrod;
+}
+
+#div2 p {
+    color: brown;
+    font-size: 1.5rem;
+    background-color: rgb(250, 169, 70);
+}
+
+#div2 > p {
+    background-color: rgb(54, 205, 205);
+    padding: 20px;
+}
+
+h1 {
+    margin: 25px 50px 25px 50px;
+    background-color: azure;
+    padding: 20px;
+
+}
