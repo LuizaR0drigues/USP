@@ -1,5 +1,5 @@
 		.data #diretiva pro incio do segmento de dados
-vlr_inteiro: 	.word 157
+		.align 0 #alinha a memoria pro char
 string:		.asciz "Hello Assembly's World!"
 
 		.text #diretiva pro incio do segmento de  textp
