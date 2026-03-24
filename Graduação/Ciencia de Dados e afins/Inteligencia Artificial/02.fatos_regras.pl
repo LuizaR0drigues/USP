@@ -1,23 +1,23 @@
 % Exemplo com arvore genealogica
 
 % fatos
-mulher(pam) .
-mulher(liz) .
-mulher(ann) .
-mulher(pat) .
+mulher(pam).
+mulher(liz).
+mulher(ann).
+mulher(pat).
 
-homem(tom) .
-homem(bob) .
-homem(jim) .
+homem(tom).
+homem(bob).
+homem(jim).
 
-genitor(pam, bob) .
-genitor(tom, bob) .
-genitor(tom, liz) .
+genitor(pam, bob).
+genitor(tom, bob).
+genitor(tom, liz).
 
-genitor(bob, ann) .
-genitor(bob, pat) .
+genitor(bob, ann).
+genitor(bob, pat).
 
-genitor(pat, jim) .
+genitor(pat, jim).
 
 % Regras
 /*
