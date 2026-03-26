@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Aula 2 - HTML</title>
+</head>
+<body>
+
+    <header>
+        <h1>Aula sobre HTML5</h1>
+        <nav>
+            <a href="#anatomia">Anatomia da página</a>
+            <a href="#listas">Listas</a>
+            <a href="#links">Links</a>
+            <a href="#imagens">Imagens</a>
+            <a href="#containers">Containers</a>
+            <a href="#cabecalhos">Cabeçalhos</a>
+            <a href="#tags">Tags</a>
+            <a href="#atributos">Atributos</a>
+            <a href="#paragrafos">Parágrafos</a>
+            <a href="#linhas">Pular Linhas</a>
+        </nav>
+    </header>
+    
+    <section id="anatomia">
+        <h2>Anatomia de uma página HTML</h2>
+        <h3>Elementos básicos da estrutura de uma página.</h3>
+        <ul>
+            <li>Páginas HTML5 devem apresentar a seguinte estrutura:</li>
+            <li>!DOCTYPE html: indica que nosso documento trata-se de uma página HTML</li>
+            <li>html: define o início e o fim da minha página</li>
+            <li>head: contém título, encoding, arquivos externos da página (e.g., JS, CSS, fontes, etc)</li>
+            <li>body: contém conteúdo da página.</li>
+            <li>div, section, nav etc: são containers para organizar nosso conteúdo</li>
+            <li>Lembrem-se de sempre abrir e fechar tags, como na figura abaixo:</li>
+        </ul>
+        <img src="./imgs/img1.JPG" alt="Estrutura de tags HTML.">
+    </section>
+
+    <section id="listas">
+        <h2>Listas</h2>
+        <h3>Organizando nosso texto em listas</h3>
+        <p>As tagas utilizadas para criar listas são:</p>
+        <ul>
+            <li>ul: tag utilizada para definir uma lista não ordenada (unordered list)</li>
+            <li>li: tag utilizada para definir itens de listas (list item)</li>
+        </ul>
+        <ol>
+            <li>ol: tag utilizada para definir uma lista ordenada (ordered list)</li>
+            <li>li: tag utilizada para definir itens de listas (list item)</li>
+            <li>muito simples, não é?</li>
+        </ol>
+        <img src="./imgs/img4.JPG" alt="Código de listas em HTML.">
+    </section>
+
+    <section id="links">
+        <h2>Links</h2>
+        <h3>Ligações que permitem a navegação entre recursos na Web</h3>
+        <p>Links são identificados pela tag "a" e seu atributo "href". Além de URLs, o elemento a suporta:</p>
+        <ul>
+            <li>protocolos Web: http://, https://, ftp://</li>
+            <li>#id: # acompanhada do id do elemento é chamada de âncora</li>
+            <li>local de recursos: (./aula_html.html , ./aula_css.html)</li>
+            <li>contatos: mailto:, tel:</li>
+        </ul>
+        <p>A tag "a" pode conter um atributo "target", o qual define onde o recuro irá abrir.</p>
+        <ol>
+            <li>_self: na mesma janela</li>
+            <li>_blank: em uma nova janela</li>
+        </ol>
+        <a href="https://www.w3schools.com/html/html_links.asp" target="_blank">Link para site do w3schools</a>
+    </section>
+
+
+    <section id="imagens">
+        <h2>Imagens</h2>
+        <h3>E seus atributos</h3>
+        <p>A tag "img" é utilizada para incluir imagens em páginas HTML. 
+            O atributo "src" é utilizado para indicar a localização da imagem.
+            O atributo "alt" é utilizado para indicar o texto alternativo.</p>
+        <img src="https://cdn130.picsart.com/251120307000212.png?r1024x1024" alt="Dinossauro">
+
+        <a href="https://www.w3schools.com/tags/tag_img.asp" target="_blank">
+            <img src="./imgs/img2.jpg" alt="O gato da professora (Mochi)">
+        </a>
+    </section>
+
+    <section id="containers">
+        <h2>Organizando a página em containers semânticos</h2>
+        <h3>Boas práticas em HTML5</h3>
+        <p>No dev Web moderno as páginas são organizadas em containers. Exemplo:</p>
+        <ol>
+            <li>header: container dedicado ao cabeçalho da página</li>
+            <li>nav: container dedicado à navegação da página</li>
+            <li>footer: container dedicado ao rodapé da página</li>
+            <li>aside: container dedicado a conteúdos ao lado da página (e.g., propagandas, links externos, feeds, etc)</li>
+            <li>section: container dedicado a seções da página</li>
+            <li>article: container dedicado a conteúdos idependentes da página</li>
+            <li>div: container genérico</li>
+            <img src="./imgs/img3.gif" alt="Seções de uma página">
+        </ol>
+    </section>
+
+    <section id="cabecalhos">
+        <h1>Cabeçalho h1</h1>
+        <h2>Cabeçalho h2</h2>
+        <h3>Cabeçalho h3</h3>
+        <h4>Cabeçalho h4</h4>
+        <h5>Cabeçalho h5</h5>
+        <h6>Cabeçalho h6</h6>
+        <p>Temos 6 níveus de cabeçalho em ordem de importância. 
+            Sua formatação pode ser modificada, porém é importante manter a semântica.</p>
+    </section>
+
+    <section id="tags">
+        <h2>Tags HTML</h2>
+        <h3>Representam os elementos da página</h3>
+        <p>Vimos as principais tags, você pode conferir todas
+            <a href="https://www.w3schools.com/tags/" target="_blank">neste link</a>.</p>
+    </section>
+
+
+    <section id="atributos">
+        <h2>Principais atributos utilizados em tags</h2>
+        <h3>Com explicações</h3>
+        <ul>
+            <li>id: identificador único do elemento</li>
+            <li>href: indica a localização de um recurso em links</li>
+            <li>src: especifica a localização de um recurso de mídia</li>
+            <li>alt: texto alternativo</li>
+            <li>class: especificar a classe de formatação CSS a ser aplicada</li>
+            <li>style: formatação CSS diretamente no elemento</li>
+            <li>title: tooltip</li>
+            <li>disable: desabilita elementos (muito utilizado em formulários)</li>
+        </ul>
+        <a href="https://www.w3schools.com/tags/ref_attributes.asp" target="_blank">Veja Mais...</a>
+    </section>
+
+    <section id="paragrafos">
+        <h2>Parágrafos</h2>
+        <h3>E a diferença entre p e span</h3>
+        <p>Temos usando o elemento p para definir parágrafos. Porém também podemos utilizar o elemento span.
+            No entanto, o span não cria uma nova linha e é geralmente utilizado para
+            <span style="color: red">formatar trechos</span> dentro de um parágrafo.</p>
+        <p>O elemento p pula linhas porque sua visualização por padrão é "block", enquanto o span é "inline".
+            Observe que alguns elementos HTML pulam linha automaticamente (e.g., imagens, listas), enquanto outros
+            não. Vamos entender melhor o que "block" e "inline" fazem ao utilizar CSS.
+        </p>
+        </p>
+    </section>
+
+    <section id="linhas">
+        <h2>Como devo pular linhas?</h2>
+        <h3>O bom e o ruim</h3>
+        <p>Se você já viu alguns exemplos de código HTML já deve ter visto um elemento chamado "br". Ele serve para pular
+            linhas, desta forma. &lt;br&gt br aqui: <br> No entanto seu uso deve ser evitado: devemos usar parágrafos e CSS para
+            determinar
+            quebras de linhas.
+        </p>
+    </section>
+
+    <section id="video">
+        <h2>Videos</h2>
+        <h3>Player integrado HTML5</h3>
+        <p>É bastante à tag img e contém os atributos:</p>
+        <ul>
+            <li>src: localização do vídeo</li>
+            <li>controls: exibe os controles</li>
+            <li>autoplay: toca automaticamente</li>
+            <li>height: altura do vídeo</li>
+            <li>width: largura do vídeo</li>
+        </ul>
+
+        <video src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" controls height="200"></video>
+
+    </section>
+
+    <section id="formularios">
+        <h2>Formulários</h2>
+        <h3>E alguns dos seus principais elementos</h3>
+        <p>A tag form define um formulário. Os elementos dentro da tag form são enviados
+            usando GET ou POST. Seus principais atributos são:</p>
+        <ul>
+            <li>action: define o gerenciador do formulário. É o endereço de uma página ou serviço.</li>
+            <li>method: define a forma de envio de dados. Pode ser GET ou POST.</li>
+        </ul>
+        <p>Os principais elementos de um form são:</p>
+        <ul>
+            <li>input: define vários tipos de entrada no formulário. Exemplos:</li>
+            <ul>
+                <li>text: entrada de texto curto.</li>
+                <li>email: entrada do tipo e-mail.</li>
+                <li>radio: entrada de seleção única de valores.</li>
+                <li>color, date, number, file, etc</li>
+                <li>Lista completa de tipos de input no
+                    <a href="https://www.w3schools.com/html/html_form_input_types.asp" target="_blank">site da
+                        w3schools</a></li>
+            </ul>
+            <li>textarea: área de texto. É bem maior que o input de texto. Sua principal utilização é em comentários.</li>
+            <li>select: é uma lista de opções com itens (option). Muitas vezes representada por uma combo box.</li>
+            <li>button: botão de submissão. É uma tag mais atual e mais fácil de customizar que o input do tipo submit.</li>
+        </ul>
+        <p>Exemplo de formulário:</p>
+        <form action="https://my-json-server.typicode.com/brunaru/fake_rest_service/posts" method="POST">
+            Nome: <input type="text" name="nome_completo" id="nome_completo"> <br> <br>
+            E-mail: <input type="email" name="email_usuario"> <br> <br>
+            Carro: 
+            <input type="radio" name="option" id="ka" value="Ford Ka" checked> <label for="ka">Ka</label>
+            <input type="radio" name="option" id="cam" value="Chevrolet Camaro"> <label for="cam">Camaro</label>
+            <input type="radio" name="option" id="dib" value="Lamborguini Diablo"> <label for="dib">Diablo</label>
+            <!-- br>
+            <select name="combo_carro" id="combo_carro">
+                <option value="Ford Ka">Ka</option>
+                <option value="Chevrolet Camaro">Camaro</option>
+                <option value="Lamborguini Diablo">Diablo</option>
+            </select -->
+            <br><br>
+            Escreva uma mensagem: <br> <textarea name="messagem" cols="30" rows="10"></textarea>
+            <br><br>
+            <input type="submit" value="Enviar">
+        </form>
+    </section>
+
+    <footer>
+        <p>Feito por: <a href="mailto:bruna.rodrigues@ifsp.edu.br">Prof. Bruna Rodrigues</a> </p>
+    </footer>
+    
+</body>
+</html>
