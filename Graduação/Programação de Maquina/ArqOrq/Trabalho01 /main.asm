@@ -22,12 +22,13 @@ str_ad1: .asciz "\nO vagão foi adicionado ao inicio "
 str_ad2: .asciz "\nO vagão foi adicionado ao final " 
 str_rmv: .asciz "\nO vagão foi removido"
 str_out: .asciz "Jogo encerrado!"
-#mensagens de erro
+
+#mensagens de  teste
 str_all: .asciz "Erro na alocação de memoria"
 str_tst1: .asciz "\nA locomotiva( head) foi criada"
 str_tst2: .asciz "\nAndando na locomotiva"
 str_tst3: .asciz "\nLigando os vagoes"
-	.align 2 #linhando a palavra
+	.align 2 #linhando à palavra
 #ponteiro que vai guardar a head da lista encadeada
 ptr_init: .word 0
 
@@ -64,7 +65,12 @@ main: #Codigo principal
 	beq s0, a6, finaliza
 	
 	
-cases:	#Adiciona  No - inicio
+	
+cases:	
+	#criando um id inicialmente 1
+	addi t6, zero, 1
+	
+	#Adiciona  No - inicio
 	beq s0, a1, add_inicio
 	
 	#Adiciona No - final
@@ -190,6 +196,8 @@ cria_locomotiva:
 	
 	#voltar pro estado anterio
 	jr ra
+#Função pra visualizar o trem
+imprime_trem:
 	
 #Finalização do codigo
 #Em caso de má alocação de memoria
