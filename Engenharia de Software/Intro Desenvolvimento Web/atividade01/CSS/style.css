@@ -1,0 +1,98 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.layout {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    margin: 10px;
+    
+}
+
+
+
+header, footer {
+    background:rgb(14, 0, 139);
+    height: 50px;
+    padding: 10px;
+
+    /*Alinhando o conteudo interno*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+header h2, footer h3  {
+    color: white;
+}
+
+
+.estrutura {
+    width: 50%;
+    height: 800px;
+    
+    background-color: rgb(206, 0, 0);
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-around;
+    
+}
+
+.visor_refri {
+    background-color: rgb(224, 224, 224);
+    width: 70%;
+    height: 300px;
+    margin-top: 10px;
+    border-radius: 10px;
+    
+    display: flex;
+    flex-flow: row wrap;
+    justify-content:space-around;
+    align-items: center;
+    
+}
+
+.card_refri {
+    background-color: azure;
+    border-radius: 10px; 
+    height: 80px;
+}
+
+.menu_moedas {
+    margin-top: 20px;
+}
+
+.tipos_moedas .op_moedas{
+    background-color: darkorange;
+    border: 2px solid black;
+    padding: 10px;
+    margin-bottom: 5px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+}
+
+.menu {
+    background-color: bisque;
+    width: 30%;
+    padding: 20px;
+    border-radius: 10px;
+    height: 500px;
+
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: start;
+    text-align:left;
+}
+
+.tipos_refri {
+    font-size: 20px;
+}
