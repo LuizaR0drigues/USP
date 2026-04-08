@@ -27,6 +27,7 @@ batatinha
 rno
 makefile
 Makefile
+*requirements.txt
 
 ### --- Dados e Arquivos Temporários ---
 *.csv
