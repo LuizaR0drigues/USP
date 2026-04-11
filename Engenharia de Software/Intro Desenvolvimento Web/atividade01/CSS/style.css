@@ -61,7 +61,7 @@ main {
 
 .container { /* toda a estrutura - visores, refri, receptor de moeada e refri*/
     width: 30%;
-    height: 700px;
+    min-height: 700px;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -72,7 +72,8 @@ main {
 }
 
 .estrutura {
-    height: 90%;
+    height: auto;
+    min-height: 600px;
     width: 100%;
     background-color: #ff1f1f;
     border-radius: 20px;
@@ -81,11 +82,11 @@ main {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding-top: 20px;
+    padding: 20px 0;
     gap: 20px;
     
 }
-
+/*
 .visor_refri {
     background-color: rgb(224, 224, 224);
     width: 80%;
@@ -98,6 +99,24 @@ main {
     justify-content: space-around;
     align-items: center;
     
+}*/
+
+.visor_refri {
+    background-color: rgb(224, 224, 224);
+    width: 80%;
+    height: auto; 
+    min-height: 50%; 
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;        
+    padding: 20px ;
+    margin-top: 10px;
+    border-radius: 10px;
+    justify-items: center; 
+    align-items: center;  
+    
+    
 }
 
 .card_refri {
@@ -106,8 +125,7 @@ main {
     border-radius: 10px; 
     height: 120px;
     width: 100px;
-    padding: 10px;
-    margin: 10px;
+    padding: 20px;
     display: flex;
     flex-flow: column;
     align-items: center;
@@ -118,9 +136,6 @@ main {
     height: 60px;
 }
 
-.tipos_refri {
-    font-size: 20px;
-}
 
 .recep {
     width: 80%;
@@ -155,8 +170,8 @@ main {
     justify-content: center;
 }
 .refri {
-    width: 20%;
-    height: 80px;
+    width: 30%;
+    height: 100px;
     border-radius: 20px;
     background-color: rgb(255, 255, 255);
     
@@ -193,20 +208,15 @@ main {
 /* Metade da tela e tablet */
 @media (max-width: 1021px) {
     .container {
-        width: 50%; 
+        width: 60%; 
         height: auto;
-        min-height: 650px;
+        
     }
     .estrutura {
         height: auto;
-        padding-bottom: 30px;
+        padding-bottom: 40px;
     }
-    .visor_refri {
-        width: 85%;
-        height: auto;
-        min-height: 350px;
-        padding: 20px 10px;
-    }
+    
     .card_refri {
         width: 85px;
         height: auto; 
@@ -232,13 +242,7 @@ main {
     }
 
     .visor_refri {
-        height: auto;
-        min-height: 300px;
-        padding: 20px 10px;
-        flex-direction: row; 
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
+        grid-template-columns: repeat(2, 1fr); 
     }
 
     .card_refri {
