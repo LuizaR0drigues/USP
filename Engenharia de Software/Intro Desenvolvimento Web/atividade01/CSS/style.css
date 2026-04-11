@@ -3,21 +3,11 @@
     padding: 0;
 }
 
-.layout {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-around;
-    margin: 10px;
-    
-}
-
-
-
 header, footer {
     background: #ff8409;
-    height: 50px;
+    height: 70px;
     padding: 10px;
-
+    margin: 0;
     /*Alinhando o conteudo interno*/
     display: flex;
     justify-content: center;
@@ -28,21 +18,78 @@ header h2, footer h3  {
 }
 
 
-.estrutura {
-    width: 50%;
-    height: 800px;
-    
-    background-color: #ff1f1f;
-    border-radius: 5px;
+main {
     display: flex;
-    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.menu {
+    padding: 10px;
+    border-radius: 10px;
+
+    /*alinhado lado a lado*/
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.menu ul{
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 10px;
+}
+.op_moedas{
+    background-color:darkorange;
+    color: white;
+    border: 2px solid black;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.container { /* toda a estrutura - visores, refri, receptor de moeada e refri*/
+    width: 30%;
+    height: 700px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-top: 0;
+    
+    
+}
+
+.estrutura {
+    height: 90%;
+    width: 100%;
+    background-color: #ff1f1f;
+    border-radius: 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 20px;
+    gap: 20px;
     
 }
 
 .visor_refri {
     background-color: rgb(224, 224, 224);
-    width: 70%;
-    height: 60%;
+    width: 80%;
+    height: 50%;
     margin-top: 10px;
     border-radius: 10px;
     
@@ -56,8 +103,8 @@ header h2, footer h3  {
 .card_refri {
     background-color: #FFFF;
     border-radius: 10px; 
-    height: 120px;
-    width: 120px;
+    height: 100px;
+    width: 90px;
     padding: 10px;
     margin: 10px;
     display: flex;
@@ -66,51 +113,46 @@ header h2, footer h3  {
     
 }
 .img-refri {
-    max-width: 90px;
-    height: 90px;
-}
-.menu_moedas {
-    margin-top: 20px;
-}
-
-.tipos_moedas .op_moedas{
-    background-color: #FF8811;
-    border: 2px solid black;
-    padding: 10px;
-    margin-bottom: 5px;
-    width: 60px;
+    max-width: 60px;
     height: 60px;
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-
-}
-
-.menu {
-    background-color: #E9E3B4;
-    width: 30%;
-    padding: 20px;
-    border-radius: 10px;
-    height: 500px;
-
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
-    justify-content: start;
-    text-align:left;
 }
 
 .tipos_refri {
     font-size: 20px;
 }
 
-.coletor-moeadas {
-    width: 50px;
-    height:50px;
-    border-radius: 20px;
-    background-color: gray;
+.recep {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
 }
+
+.coletor-moeadas {
+    width:  30%;
+    height: 80px;
+    border-radius: 20px;
+    background-color: rgb(136, 136, 136);
+}
+.recebe-refri {
+    width:  60%;
+    height: 100px;
+    border-radius: 20px;
+    background-color: rgb(136, 136, 136);
+}
+
+.pedal {
+    padding: 0px 10px 0px 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.pe1, .pe2{
+    width:  30px;
+    height: 20px;
+    border-radius: 20px;
+    background-color: rgb(32, 32, 32);
+}
+
 

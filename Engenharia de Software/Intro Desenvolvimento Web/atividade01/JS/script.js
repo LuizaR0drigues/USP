@@ -6,7 +6,8 @@ class Refri{
     }
 
 }
-
+//Recebe os itens da api 
+//Transforma em objetos e mostra na tela
 fetch(
     'https://api.jsonbin.io/v3/b/69d64173aaba882197d7779a')
     .then(response => {
@@ -35,15 +36,13 @@ fetch(
             console.log(`Sabor: ${refri.sabor}, Preço: ${refri.preco}`);
         })
 
-         const menu  =  document.querySelector('.tipos_refri');
+         
          const visor  =  document.querySelector('.visor_refri');
 
          listaRefris.forEach(refri => {
             //card do visor
             const card = document.createElement('div')
             card.classList.add('card_refri')
-
-            const opcao = document.createElement('li');
 
             const img = document.createElement('img')
             img.src = refri.imagem;
@@ -56,16 +55,11 @@ fetch(
             const preco = document.createElement('p');
             preco.innerText = `R$ ${refri.preco.toFixed(2)}`;
 
-            
-            //cardapio
-            opcao.innerText = `${refri.sabor} -> R$ ${refri.preco}`;
-            
             //montando o card
             card.appendChild(titulo);
             card.appendChild(img);
             card.appendChild(preco)
             //add na estrutura
-            menu.appendChild(opcao);
             visor.appendChild(card);
            
     })
@@ -75,5 +69,7 @@ fetch(
         console.log(err);
     
     });
+
+    //Drag e drop
 
    
