@@ -37,7 +37,7 @@ main {
     gap: 20px;
 }
 
-.menu ul{
+.moedas{
     display: flex;
     flex-direction: row;
     list-style: none;
@@ -95,16 +95,17 @@ main {
     
     display: flex;
     flex-flow: row wrap;
-    justify-content:space-around;
+    justify-content: space-around;
     align-items: center;
     
 }
 
 .card_refri {
     background-color: #FFFF;
+    border-color: white;
     border-radius: 10px; 
-    height: 100px;
-    width: 90px;
+    height: 120px;
+    width: 100px;
     padding: 10px;
     margin: 10px;
     display: flex;
@@ -123,25 +124,51 @@ main {
 
 .recep {
     width: 80%;
+    height: 80px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     gap: 10px;
 }
 
-.coletor-moeadas {
-    width:  30%;
+.coletor-moedas {
+    width:  25%;
     height: 80px;
-    border-radius: 20px;
-    background-color: rgb(136, 136, 136);
-}
-.recebe-refri {
-    width:  60%;
-    height: 100px;
+    padding: 10px;
     border-radius: 20px;
     background-color: rgb(136, 136, 136);
 }
 
+
+.visor-total {
+    width: 50%;
+    height: auto; 
+    min-height: 80px;
+    padding: 10px;
+    border-radius: 20px;
+    background-color: rgb(255, 255, 255);
+    
+    
+    font-size: 14px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.refri {
+    width: 20%;
+    height: 80px;
+    border-radius: 20px;
+    background-color: rgb(255, 255, 255);
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.refri img {
+    max-width: 60px;
+    height: 60px;
+    border-radius: 20px;
+}
 .pedal {
     padding: 0px 10px 0px 10px;
     display: flex;
@@ -155,4 +182,67 @@ main {
     background-color: rgb(32, 32, 32);
 }
 
+.botao-refri-card { 
+    cursor: pointer;
+    transition: transform 0.2s;
+}
 
+.botao-refri-card:hover {
+    transform: scale(1.05); 
+}
+/* Metade da tela e tablet */
+@media (max-width: 1021px) {
+    .container {
+        width: 50%; 
+        height: auto;
+        min-height: 650px;
+    }
+    .estrutura {
+        height: auto;
+        padding-bottom: 30px;
+    }
+    .visor_refri {
+        width: 85%;
+        height: auto;
+        min-height: 350px;
+        padding: 20px 10px;
+    }
+    .card_refri {
+        width: 85px;
+        height: auto; 
+        min-height: 110px;
+    }
+    .menu {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+    .container {
+        width: 90%;
+        height: auto;
+        min-height: 600px;
+    }
+
+    .estrutura {
+        height: auto; 
+        padding-bottom: 30px;
+    }
+
+    .visor_refri {
+        height: auto;
+        min-height: 300px;
+        padding: 20px 10px;
+        flex-direction: row; 
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .card_refri {
+        width: 100px; 
+        height: auto;
+    }
+}
