@@ -1,3 +1,4 @@
+
 class Refri {
     constructor(sabor, preco, imagem) {
         this.sabor = sabor

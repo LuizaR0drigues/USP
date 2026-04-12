@@ -21,32 +21,37 @@ long long pot_simples(long long base, int expo){
     return res;
 }
 
-long long eleva(long long valor, int b){
+long long eleva_dez(long long valor, int dig_dir){
     long long res = valor;
-    for(int i=0; i< b; i++)
+    //para cada digito da direita, eleva o acumulador à 10æ potencia
+    for(int i=0; i< dig_dir; i++)
     {
         res = pot_simples(res, 10);
     }
-
     return res;
     
 }
 
-double divide(double base, double vetor[], int inicio, int final){
-    //case base
+double potencia(double base, double vetor[], int inicio, int final){
+    //case base:vetor unitari - unico digitoo
     if(inicio == final){
+        //chamado a potencia de base^digito
         return pot_simples(base, vetor[inicio]);
     }
+
     //calculando o meio
     int meio = (inicio)+(final-inicio)/2;
 
-    //divide o vetor em duas partes de forma recursiva
-    long long esquerda = divide(base,vetor, inicio, meio); //primeira metade
-    long long direita = divide(base,vetor, meio+1, final);
+    //DIVIDE o vetor em duas partes de forma recursiva
+    long long esquerda = potencia(base,vetor, inicio, meio); //primeira metade
+    long long direita = potencia(base,vetor, meio+1, final); //segunda parte
 
+    //expoente da pot de 10
     int tamDir = final - meio;
-    long long fator = eleva(esquerda, tamDir) % MOD;
-    
+    //CONQUISTA
+    //fazemos (base^esquerda)(10^Tamanho da direita)*(base^direita)
+    long long fator = eleva_dez(esquerda, tamDir) % MOD;
+
     return(fator * direita ) % MOD;
 }
 
@@ -69,11 +74,11 @@ int main(){
         {
             break;
         }
-        
+        //usa um vetor temporario para alocar a memoria 
         double *temp = (double*)realloc(vetor, (cont + 1) * sizeof(double));
         if(temp != NULL){
             vetor = temp;
-            
+            //subtrai '0' para achar o valor numerico
             vetor[cont] = (int)carac - '0';
             cont++;
         }
@@ -82,7 +87,7 @@ int main(){
         } 
     }
 
-    pot = divide(base, vetor, 0, cont-1);
+    pot = potencia(base, vetor, 0, cont-1);
     printf("%lld\n", pot);
     free(vetor);
     }  
