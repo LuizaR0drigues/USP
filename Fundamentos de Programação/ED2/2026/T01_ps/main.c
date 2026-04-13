@@ -3,11 +3,7 @@ Luiza Rodrigues Cardoso - 14593332
 Trabalho 01 - Processo Seletivo // Estrutura de Dados 2
 Alg Utilizado -> MergeSort cuja complexidade é O(n log n) 
 *********************************************************************************/
-
-#include <stdio.h>
-#include <stdlib.h>
-
-
+ 
 //Merge -> ordena os subvetores e mesclas os vetores ja ordenados
 void merge(float vetor[], int init, int meio, int final){
     //definindo os limites dos intervalos dxe observacao
