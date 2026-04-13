@@ -3,16 +3,18 @@ Luiza Rodrigues Cardoso - 14593332
 Trabalho 01 - Processo Seletivo // Estrutura de Dados 2
 Alg Utilizado -> MergeSort cuja complexidade é O(n log n) 
 *********************************************************************************/
- 
+ #include <stdio.h>
+#include <stdlib.h>
+
 //Merge -> ordena os subvetores e mesclas os vetores ja ordenados
-void merge(float vetor[], int init, int meio, int final){
+void merge(double vetor[], int init, int meio, int final){
     //definindo os limites dos intervalos dxe observacao
     int firs_met = meio - init + 1; 
     int sec_met = final - meio; 
     int i, j, k;
 
     //criando vetores auxiliares
-    float esquerda[firs_met], direita[sec_met];
+    double esquerda[firs_met], direita[sec_met];
 
     //fazendo copias do vetor para cada metade - vetor/2 por iteração
     //divide
@@ -58,7 +60,7 @@ void merge(float vetor[], int init, int meio, int final){
 }
 //MergeSort
 //dividivide recursivamente o vetor e os encaminha para ordenação e mesclagem(merge)
-void merge_sort(float vetor[], int init, int tam)
+void merge_sort(double vetor[], int init, int tam)
 {   
     //para cada chamada que cumpra a condição
     if( init < tam ){
@@ -97,19 +99,19 @@ int main(){
 
         //vetor notas[c]
         //aloca a memoria necessaria
-        float *notas = malloc((qtd_cand) * sizeof(float));
+        double *notas = (double*)malloc((qtd_cand) * sizeof(double));
 
         //leitura das c notas que serao avaliadas
         for(int j =0; j < qtd_cand; j++)
         {
             //leitura da c notas
-            scanf(" %f", &notas[j]);
+            scanf(" %lf", &notas[j]);
         } 
         //retorna um vetor descrecentemente ordenado
         merge_sort(notas, 0, qtd_cand -1);
 
         //imprime o K-ésimo maior elemento
-        printf("%.2f\n", notas[qtd_second-1]);
+        printf("%.2lf\n", notas[qtd_second-1]);
         
         //libera a memoria
         free(notas);

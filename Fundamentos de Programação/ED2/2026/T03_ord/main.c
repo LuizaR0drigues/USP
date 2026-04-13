@@ -6,14 +6,13 @@ Ordenação de objetos
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
 // def Brinquedo e seus atributos
 typedef struct
 {
     /* data */
-    int id;
+    double id;
     char cor[20];
     float comprimento;
     float nota;
@@ -28,7 +27,8 @@ void merge(Brinquedo vetor[], int inicio, int meio, int final)
     int i, j, k;
 
     // criando vetores auxiliares
-    Brinquedo esquerda[firs_met], direita[sec_met];
+    Brinquedo *esquerda = (Brinquedo *)malloc(firs_met*sizeof(Brinquedo));
+    Brinquedo *direita = (Brinquedo *)malloc(sec_met*sizeof(Brinquedo));
 
     // fazendo copias do vetor para cada metade - vetor/2 por iteração
     // divide
@@ -94,6 +94,8 @@ void merge(Brinquedo vetor[], int inicio, int meio, int final)
         j++;
         k++;
     }
+    free(esquerda);
+    free(direita);
 }
 
 void mergesort(Brinquedo vetor[], int inicio, int final)
@@ -123,7 +125,7 @@ int main()
     if (qtd_brinq > 0 && qtd_brinq <= 1e6)
     {
         // criando um vetor de struct
-        Brinquedo *brinquedos;
+        Brinquedo *brinquedos, *temp;
         brinquedos = (Brinquedo *)malloc(qtd_brinq * sizeof(Brinquedo));
 
         int i = 0;
@@ -132,7 +134,7 @@ int main()
             // leitura dos dados e tranfere para a estrutura
             scanf("%s %f %f", brinquedos[i].cor, &brinquedos[i].comprimento, &brinquedos[i].nota);
             brinquedos[i].id = i;
-            
+
             // leitura de char
             scanf("%c", &c);
             i++;
@@ -146,7 +148,7 @@ int main()
 
         for (int i = 0; i < qtd_brinq; i++)
         {
-            printf("%d;", brinquedos[i].id);
+            printf("%1.lf;", brinquedos[i].id);
             // printf("%d %s %.2f %.2f\n", brinquedos[i].id, brinquedos[i].cor, brinquedos[i].comprimento, brinquedos[i].nota);
         }
         free(brinquedos);
