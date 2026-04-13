@@ -7,63 +7,71 @@ class Refri {
     }
 
 }
-let saldoRef = 0;
-let saldoMoed = 0;
-let troco = 0;
-let refriSelect = null;
-
-//contabiliza os valores ao selecionar
-function selecionarRefri(objRefri) {
+class Maquina {
     
-    refriSelect = objRefri;
-    saldoRef = objRefri.preco;
-
-  
-    const p_total = document.querySelector('.total');
-    if (p_total) { //atualiza o valor do visor
-        p_total.innerText = `Total Refri: R$ ${saldoRef.toFixed(2)}`;
-        Pagamento();
-    }
-
-}
-
-
-function somaMoeda(valorButton) {
-    const valor_num = parseFloat(valorButton);
-    saldoMoed += valor_num;
-    console.log(saldoMoed);
-
-    const p_moeda =  document.querySelector('.total_moeda');
-    if (p_moeda) { //atualiza o valor do visor
-        p_moeda.innerText = `Inserido: R$ ${saldoMoed.toFixed(2)}`;
-    }
-
-}
-function Pagamento() {
-   const p_status = document.querySelector('.total-refri'); 
-    const div_entrega = document.querySelector('.refri');   
+        static saldoRef = 0;
+        static saldoMoed = 0;
+        static troco = 0;
+        static refriSelect = null;
     
-    if (!p_status || !div_entrega || !refriSelect) return;
+    //contabiliza os valores ao selecionar
+    static selecionarRefri(objRefri) {
 
-    if (saldoMoed < saldoRef) {
-        p_status.innerText = 'Aguardando Moedas...';
-        div_entrega.innerHTML = 'vazio'; // clear
-    } 
-    else {
-        //calcula o troco
-        troco = saldoMoed - saldoRef;
+        this.refriSelect = objRefri;
+        this.saldoRef = objRefri.preco;
 
-        //Msg de aprovação
-        p_status.innerHTML = `PAGAMENTO APROVADO! <br> ${troco > 0 ? `Troco: R$ ${troco.toFixed(2)}` : ''}`;
 
-        //mostra a imagem do refri
-        div_entrega.innerHTML = `<img src="${refriSelect.imagem}" alt="${refriSelect.sabor}" style="width: 50px; animation: slideDown 0.5s;">`;
-        
-        // Zera os saldos 
-        saldoMoed = 0;
-         saldoRef = 0;
+        const p_total = document.querySelector('.total');
+        if (p_total) { //atualiza o valor do visor
+            p_total.innerText = `Total Refri: R$ ${this.saldoRef.toFixed(2)}`;
+            this.Pagamento();
+        }
+
+    }
+
+
+    static somaMoeda(valorButton) {
+        const valor_num = parseFloat(valorButton);
+        this.saldoMoed += valor_num;
+        console.log(this.saldoMoed);
+
+        const p_moeda = document.querySelector('.total_moeda');
+        if (p_moeda) { //atualiza o valor do visor
+            p_moeda.innerText = `Inserido: R$ ${this.saldoMoed.toFixed(2)}`;
+        }
+
+    }
+    static Pagamento() {
+        const p_status = document.querySelector('.total-refri');
+        const div_entrega = document.querySelector('.refri');
+
+        if (!p_status || !div_entrega || !this.refriSelect) return;
+
+        if (this.saldoMoed < this.saldoRef) {
+            p_status.innerText = 'Aguardando Moedas...';
+            div_entrega.innerHTML = 'vazio'; // clear
+        }
+        else {
+            //calcula o troco
+            this.troco = this.saldoMoed - this.saldoRef;
+
+            //Msg de aprovação
+            p_status.innerHTML = `PAGAMENTO APROVADO! <br> ${this.troco > 0 ? `Troco: R$ ${this.troco.toFixed(2)}` : ''}`;
+
+            //mostra a imagem do refri
+            div_entrega.innerHTML = `<img src="${this.refriSelect.imagem}" alt="${this.refriSelect.sabor}" style="width: 50px; animation: slideDown 0.5s;">`;
+
+            // Zera os saldos para a proxima compra
+            this.saldoMoed = 0;
+            this.saldoRef = 0;
+            this.troco = 0;
+            this.refriSelect = null;
+        }
     }
 }
+
+
+
 
 //Recebe os itens da api 
 //Transforma em objetos e mostra na tela
@@ -103,7 +111,7 @@ fetch(
             const card = document.createElement('button');
             card.classList.add('botao-refri-card');
             card.addEventListener('click', () => {
-                selecionarRefri(refri); //calculando os valor e mostra o valor
+                Maquina.selecionarRefri(refri); //calculando os valor e mostra o valor
             });
 
 
@@ -132,29 +140,29 @@ fetch(
             item.draggable = true;
             item.addEventListener('dragstart', function (e) {
                 e.dataTransfer.setData('valor', e.target.id);
-                
+
             });
         }
 
         for (let zone of visor_moedas) {
             zone.addEventListener('dragover', function (e) {
-                    e.preventDefault();
-                });
+                e.preventDefault();
+            });
 
             zone.addEventListener('drop', function (e) {
                 e.preventDefault();
 
                 const valorMoeda = e.dataTransfer.getData('valor');
                 //const itemArrastado = document.getElementById(id);
-            if(valorMoeda){
-                somaMoeda(parseFloat(valorMoeda));
-                Pagamento();
-                console.log("Moeda inserida: R$ ", valorMoeda)
-            }
-                })
-                
-            }
+                if (valorMoeda) {
+                    Maquina.somaMoeda(parseFloat(valorMoeda));
+                    Maquina.Pagamento();
+                    console.log("Moeda inserida: R$ ", valorMoeda)
+                }
+            })
+
         }
+    }
     )
     .catch(err => {
         console.error("Algo deu errado: ", err.message);
