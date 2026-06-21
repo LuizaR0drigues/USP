@@ -1,0 +1,89 @@
+@font-face {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    src: url('../assets/gill-sans/Gill/Gill Sans.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    outline: none;
+    border: none;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+/* Propriedades estritamente compartilhadas */
+.header, .footer {
+    background-color: #cc5221;
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 3rem;
+    padding: 30px 50px;
+    height: 90px;
+    color: antiquewhite;
+}
+
+/* Regras exclusivas do Header */
+.header {
+    top: 0; /* Removido do bloco compartilhado e trazido para cá */
+    transition: top 0.3s ease-in-out;
+}
+
+/* Regras exclusivas do Footer */
+.footer {
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* --- BOTÕES DO NAVBAR --- */
+.header nav button {
+    background-color: antiquewhite;
+    border-radius: 12px;
+    transition: 0.2s linear;/* Suaviza o efeito do hover */
+    height: 40px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.header nav .nav-item button {
+    color: #eb781b;
+    font-weight: bold;
+}
+
+/* Hovers */
+.header nav .nav-item button:hover {
+    letter-spacing: 0.05rem;
+    background-color: #eb781b;
+    color: antiquewhite;
+}
+
+.logo img {
+    height: 60px;
+    border-radius: 20px;
+}
+
+
+/* Estilização da tag estrutural main (sem o ponto) */
+main {
+    padding: 110px 30px ;
+    min-height: 100vh; 
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+
+}
+
+main section {
+    padding-bottom: 10px;
+}
