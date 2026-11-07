@@ -1,0 +1,7 @@
+
+DROP TABLE IF EXISTS Entrega_Pedido;
+DROP TABLE IF EXISTS Pedidos;
+DROP TABLE IF EXISTS Entregadores;
+DROP TABLE IF EXISTS Restaurantes;
+DROP TABLE IF EXISTS Clientes;
+
